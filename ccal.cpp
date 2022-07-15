@@ -758,6 +758,8 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
                 posy -= 7;
                 printf("%d %d moveto gsave ptc", posx, posy);
             }
+
+			//	lc220715 -	below print jieqi
 			if (!sameday && (termcnt >= int(vterms.size()) || jdcnt != vterms[termcnt]) && (moncnt >= int(vmoons.size()) || jdcnt != vmoons[moncnt]))
             {
                 if (pmode == PMODE_ASCII)
@@ -886,7 +888,10 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
                         printf(" %s", cmonname);
                     else
                         printf(" ");
-                    printf("%s", (*CHjieqi)[termcnt++]);
+					int hr, min, sec;
+					j2hms(vtermhours[termcnt], hr, min, sec);
+					//	lc180710 -	enhance format
+                    printf("%s %02d:%02d", (nEncoding == 'a' ? jieqi[termcnt++] : (*CHjieqi)[termcnt++]), hr, min);
                     if (i == 0 || i == 6)
                         printf("</font>");
                     if (!sameday)
@@ -1091,7 +1096,7 @@ bool ProcessArg(int argc, char** argv, short int& year, short int& month,
     if (pmode != PMODE_ASCII && pmode != PMODE_JIEQI)
     {
         if (nEncoding == 'a')
-            nEncoding = 'g';
+            nEncoding = 'u';
     }
     return true;
 }
