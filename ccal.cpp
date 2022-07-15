@@ -171,7 +171,7 @@ const int PMODE_ASCII	= 0;
 const int PMODE_HTML	= 1;
 const int PMODE_PS		= 2;
 const int PMODE_XML		= 3;
-const int PMODE_JIEXI	= 4;
+const int PMODE_JIEQI	= 4;
 
 void PrintMonth(short int year, short int month, vdouble& vterms,
                 double lastnew, double lastmon, vdouble& vmoons,
@@ -1050,7 +1050,7 @@ bool ProcessArg(int argc, char** argv, short int& year, short int& month,
             }
         }
         else if (argv[i][1] == 'j')
-            pmode = PMODE_JIEXI;
+            pmode = PMODE_JIEQI;
         else if (argv[i][1] == 'x')
             pmode = PMODE_XML;
         else if (argv[i][1] == 'p')
@@ -1078,7 +1078,7 @@ bool ProcessArg(int argc, char** argv, short int& year, short int& month,
             nEncoding = 'u';
         }
     }
-    if (pmode != PMODE_ASCII)
+    if (pmode != PMODE_ASCII && pmode != PMODE_JIEQI)
     {
         if (nEncoding == 'a')
             nEncoding = 'g';
@@ -1127,7 +1127,7 @@ int main(int argc, char** argv)
     bool bIsSim = (nEncoding == 'g');
     char titlestr[20];
 
-    if (pmode == PMODE_JIEXI)
+    if (pmode == PMODE_JIEQI)
     {
 		//	lc220715 -	enhanced to print the name, year, month, day
 		pc10_4 CHtiangan = &GBtiangan;
@@ -1172,7 +1172,7 @@ int main(int argc, char** argv)
 			short int year, month, day;
 			double hour;
 			cal_date(frac, &year, &month, &day, &hour);
-			printf("%2d\t%s\t%.6f\t%04d-%02d-%02d\t%02d:%02d\n", t+1, (*CHjieqi)[t], year, month, day, vtermhours[t], hr, min);
+			printf("%2d\t%.6f\t%s\t%04d-%02d-%02d\t%02d:%02d\n", t+1, vtermhours[t], nEncoding == 'a' ? jieqi[t] : (*CHjieqi)[t], year, month, day, hr, min);
 		}
 		return 0;
 	}
