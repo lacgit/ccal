@@ -1129,12 +1129,50 @@ int main(int argc, char** argv)
 
     if (pmode == PMODE_JIEXI)
     {
+		//	lc220715 -	enhanced to print the name, year, month, day
+		pc10_4 CHtiangan = &GBtiangan;
+		pc12_4 CHdizhi = &GBdizhi;
+		pc22_4 CHmiscchar = &GBmiscchar;
+		pc24_7 CHjieqi = &GBjieqi;
+		pc7_10 daynamesCH = &daynames;
+		bool bIsSim = (nEncoding == 'g');
+		if (nEncoding == 'u')
+		{
+			CHtiangan = &U8tiangan;
+			CHdizhi = &U8dizhi;
+			CHmiscchar = &U8miscchar;
+   			CHjieqi = &U8jieqi;
+			daynamesCH = &daynamesU8;
+		}
+		else if (nEncoding == 'g')
+		{
+			CHtiangan = &GBtiangan;
+			CHdizhi = &GBdizhi;
+			CHmiscchar = &GBmiscchar;
+			CHjieqi = &GBjieqi;
+			daynamesCH = &daynamesGB;
+		}
+		else if (nEncoding == 'b')
+		{
+			CHtiangan = &B5tiangan;
+			CHdizhi = &B5dizhi;
+			CHmiscchar = &B5miscchar;
+			CHjieqi = &B5jieqi;
+			daynamesCH = &daynamesB5;
+		}
+		int nCHchars = (int)strlen((*CHmiscchar)[14]);
+		char space1[] = "&#160;";
+		char space2[] = " ";
+		char *sp;
 		printf("year %04d no of terms %d:\n", year, int(vterms.size()));
 		for (int t=0; t<int(vtermhours.size()); t++) {
 			double frac	= vtermhours[t];
 			int hr, min, sec;
 			j2hms(frac, hr, min, sec);
-			printf("%2d\t%.6f\t%02d:%02d\n", t+1, vtermhours[t], hr, min);
+			short int year, month, day;
+			double hour;
+			cal_date(frac, &year, &month, &day, &hour);
+			printf("%2d\t%s\t%.6f\t%04d-%02d-%02d\t%02d:%02d\n", t+1, (*CHjieqi)[t], year, month, day, vtermhours[t], hr, min);
 		}
 		return 0;
 	}
