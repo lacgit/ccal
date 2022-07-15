@@ -173,24 +173,13 @@ const int PMODE_PS		= 2;
 const int PMODE_XML		= 3;
 const int PMODE_JIEQI	= 4;
 
-void PrintMonth(short int year, short int month, vdouble& vterms,
-                double lastnew, double lastmon, vdouble& vmoons,
-                vdouble& vmonth, double nextnew, int pmode,
-                bool bSingle, int nEncoding, bool bNeedsRun,
-				vdouble& vtermhours)
+void SetChinese(int nEncoding, pc10_4& CHtiangan, pc12_4& CHdizhi, pc22_4& CHmiscchar, pc24_7& CHjieqi, pc7_10& daynamesCH)
 {
-#ifdef HILIGHTTODAY
-#define ANSI_REV "\x1b[7m"
-#define ANSI_NORMAL "\x1b[0m"
-    time_t now = time(NULL);
-    struct tm *today = localtime(&now);
-#endif
-    pc10_4 CHtiangan = &GBtiangan;
-    pc12_4 CHdizhi = &GBdizhi;
-    pc22_4 CHmiscchar = &GBmiscchar;
-    pc24_7 CHjieqi = &GBjieqi;
-    pc7_10 daynamesCH = &daynames;
-    bool bIsSim = (nEncoding == 'g');
+    CHtiangan	= &GBtiangan;
+    CHdizhi		= &GBdizhi;
+    CHmiscchar	= &GBmiscchar;
+    CHjieqi		= &GBjieqi;
+    daynamesCH	= &daynames;
     if (nEncoding == 'u')
     {
         CHtiangan = &U8tiangan;
@@ -215,6 +204,27 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
         CHjieqi = &B5jieqi;
         daynamesCH = &daynamesB5;
     }
+}
+
+void PrintMonth(short int year, short int month, vdouble& vterms,
+                double lastnew, double lastmon, vdouble& vmoons,
+                vdouble& vmonth, double nextnew, int pmode,
+                bool bSingle, int nEncoding, bool bNeedsRun,
+				vdouble& vtermhours)
+{
+#ifdef HILIGHTTODAY
+#define ANSI_REV "\x1b[7m"
+#define ANSI_NORMAL "\x1b[0m"
+    time_t now = time(NULL);
+    struct tm *today = localtime(&now);
+#endif
+    pc10_4 CHtiangan;
+    pc12_4 CHdizhi;
+    pc22_4 CHmiscchar;
+    pc24_7 CHjieqi;
+    pc7_10 daynamesCH;
+	SetChinese(nEncoding, CHtiangan, CHdizhi, CHmiscchar, CHjieqi, daynamesCH);
+    bool bIsSim = (nEncoding == 'g');
     int nCHchars = (int)strlen((*CHmiscchar)[14]);
     char space1[] = "&#160;";
     char space2[] = " ";
@@ -1130,40 +1140,12 @@ int main(int argc, char** argv)
     if (pmode == PMODE_JIEQI)
     {
 		//	lc220715 -	enhanced to print the name, year, month, day
-		pc10_4 CHtiangan = &GBtiangan;
-		pc12_4 CHdizhi = &GBdizhi;
-		pc22_4 CHmiscchar = &GBmiscchar;
-		pc24_7 CHjieqi = &GBjieqi;
-		pc7_10 daynamesCH = &daynames;
-		bool bIsSim = (nEncoding == 'g');
-		if (nEncoding == 'u')
-		{
-			CHtiangan = &U8tiangan;
-			CHdizhi = &U8dizhi;
-			CHmiscchar = &U8miscchar;
-   			CHjieqi = &U8jieqi;
-			daynamesCH = &daynamesU8;
-		}
-		else if (nEncoding == 'g')
-		{
-			CHtiangan = &GBtiangan;
-			CHdizhi = &GBdizhi;
-			CHmiscchar = &GBmiscchar;
-			CHjieqi = &GBjieqi;
-			daynamesCH = &daynamesGB;
-		}
-		else if (nEncoding == 'b')
-		{
-			CHtiangan = &B5tiangan;
-			CHdizhi = &B5dizhi;
-			CHmiscchar = &B5miscchar;
-			CHjieqi = &B5jieqi;
-			daynamesCH = &daynamesB5;
-		}
-		int nCHchars = (int)strlen((*CHmiscchar)[14]);
-		char space1[] = "&#160;";
-		char space2[] = " ";
-		char *sp;
+	    pc10_4 CHtiangan;
+		pc12_4 CHdizhi;
+		pc22_4 CHmiscchar;
+        pc24_7 CHjieqi;
+        pc7_10 daynamesCH;
+	    SetChinese(nEncoding, CHtiangan, CHdizhi, CHmiscchar, CHjieqi, daynamesCH);
 		printf("year %04d no of terms %d:\n", year, int(vterms.size()));
 		for (int t=0; t<int(vtermhours.size()); t++) {
 			double frac	= vtermhours[t];
