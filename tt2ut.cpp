@@ -23,6 +23,7 @@
    Algorithm is from NASA website
    http://eclipse.gsfc.nasa.gov/SEcat5/deltatpoly.html
 */
+//	Terrestial Time to Universal Time
 double tt2ut(double jd)
 {
     short int year, month, day;

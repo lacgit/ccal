@@ -105,7 +105,7 @@ void TrimHour(vdouble& vjds)
 */
 double lunaryear(short int year, vdouble& vterms, double& lastnew,
                  double& lastmon, vdouble& vmoons, vdouble& vmonth,
-                 double& nextnew)
+                 double& nextnew, vdouble& vtermhours)
 {
 #ifdef USE_YEARCACHE
     /* Use cache if in range */
@@ -200,7 +200,6 @@ double lunaryear(short int year, vdouble& vterms, double& lastnew,
         nextnew = vnextnew.back();
         /* Convert to whole day numbers */
         TrimHour(vmoons);
-        TrimHour(vterms);
         /* Apply correction from DE405 */
     	if (year == 1774)
     		vterms[2]++;
@@ -208,7 +207,18 @@ double lunaryear(short int year, vdouble& vterms, double& lastnew,
     		vterms[8]++;
     	if (year == 1951)
     		vterms[23]++;
+
+		/*
+		vtermhours.resize(vterms.size());
+		for (int v=0; v<int(vterms.size()); v++) {
+			printf("%02d\t%.6f\n", v, vterms[v]);
+			vtermhours[v] = vterms[v];
+		}
+		*/
+		vtermhours = vterms;
+        TrimHour(vterms);
     }
+
     /* Scan for leap month and return the calendar month */
     if (int(lastmon + 0.9) != int(lastmon)) /* lastmon is a leap month */
     {

@@ -43,6 +43,6 @@ typedef vector<double> vdouble;
 */
 double lunaryear(short int year, vdouble& vterms, double& lastnew,
                  double& lastmon, vdouble& vmoons, vdouble& vmonth,
-                 double& nextnew);
+                 double& nextnew, vdouble& vtermhours);
 
 #endif /* LUNARYEAR_H */

@@ -87,6 +87,18 @@ typedef c12_4 *pc12_4;
 typedef char c7_10[7][10];
 typedef c7_10 *pc7_10;
 
+void j2hms(double d, int& hr, int& min, int& sec)
+{
+	double frac = d	- (int) d;
+	double tsec	= frac * 86400;
+	double fhr	= tsec/3600;
+	hr	= (int) fhr;
+	double fmin	= (fhr - hr)*60;
+	min	= (int) fmin;
+	double fsec = (fmin - min)*60;
+	sec = (int) fsec;
+}
+
 /* Input:
    year: year number in AD
    Return:
@@ -133,7 +145,8 @@ void PrintMonthNumber(double mnumber)
     short int month;
     char leap[2] = {0x00, 0x00};
     GetMonthNumber(mnumber, month, leap);
-    printf(" [%2d]Y%1s ", month, leap);
+	//	lc180710 -	enhance format
+    printf(" [%2d]Y%1s    ", month, leap);
 }
 
 /* Inputs:
@@ -150,10 +163,17 @@ void PrintMonthNumber(double mnumber)
    nEncoding: 'a' for ASCII, 'g' for GB, 'b' for BIG5, 'u' for UTF-8
    bNeedsRun: true if character Run is needed, false otherwise
 */
+const int PMODE_ASCII	= 0;
+const int PMODE_HTML	= 1;
+const int PMODE_PS		= 2;
+const int PMODE_XML		= 3;
+const int PMODE_JIEXI	= 4;
+
 void PrintMonth(short int year, short int month, vdouble& vterms,
                 double lastnew, double lastmon, vdouble& vmoons,
                 vdouble& vmonth, double nextnew, int pmode,
-                bool bSingle, int nEncoding, bool bNeedsRun)
+                bool bSingle, int nEncoding, bool bNeedsRun,
+				vdouble& vtermhours)
 {
 #ifdef HILIGHTTODAY
 #define ANSI_REV "\x1b[7m"
@@ -195,7 +215,7 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
     char space1[] = "&#160;";
     char space2[] = " ";
     char *sp;
-    if (pmode == 1)
+    if (pmode == PMODE_HTML)
         sp = space1;
     else
         sp = space2;
@@ -246,9 +266,9 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
     else
         ndayslm = int(nextnew - vmoons.back());
     GetMonthNumber(vmonth[moncnt], cmonth, leap);
-    if ((pmode == 0 && nEncoding != 'a') || pmode == 1 || pmode == 3)
+    if ((pmode == PMODE_ASCII && nEncoding != 'a') || pmode == PMODE_HTML || pmode == PMODE_XML)
         Number2MonthCH(vmonth[moncnt], nstartlm, ndayslm, nEncoding, cmonname);
-    else if (pmode == 2)
+    else if (pmode == PMODE_PS)
         Number2MonthPS(vmonth[moncnt], nstartlm, ndayslm, !bSingle, cmonname);
     /* January is special if lunar New Year is in February */
     if (month == 1 && cmonth != 1)
@@ -266,7 +286,7 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
                 ndayslm1 = int(vmoons[moncnt + 2] - vmoons[moncnt + 1]);
             else
                 ndayslm1 = int(nextnew - vmoons.back());
-            if (pmode == 0 && nEncoding == 'a')
+            if (pmode == PMODE_ASCII && nEncoding == 'a')
             {
                 GetMonthNumber(vmonth[moncnt + 1], cmonth1, leap1);
                 sprintf(monthhead,
@@ -276,7 +296,7 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
                     tiangan[tiancnt], dizhi[dicnt],
                     leap1, cmonth1, (ndayslm1 == 30) ? 'D' : 'X', nstartlm1);
             }
-            else if ((pmode == 0 && nEncoding != 'a') || pmode == 1)
+            else if ((pmode == PMODE_ASCII && nEncoding != 'a') || pmode == PMODE_HTML)
             {
                 Number2MonthCH(vmonth[moncnt + 1], nstartlm1, ndayslm1, nEncoding, cmonname1);
                 sprintf(monthhead,
@@ -285,7 +305,7 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
                     (*CHmiscchar)[16], cmonname, (*CHmiscchar)[19], (*CHtiangan)[tiancnt],
                     (*CHdizhi)[dicnt], (*CHmiscchar)[16], cmonname1);
             }
-            else if (pmode == 3)
+            else if (pmode == PMODE_XML)
             {
                 Number2MonthCH(vmonth[moncnt + 1], nstartlm1, ndayslm1, nEncoding, cmonname1);
                 sprintf(monthhead,
@@ -307,20 +327,20 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
         }
         else
         {
-            if (pmode == 0 && nEncoding == 'a')
+            if (pmode == PMODE_ASCII && nEncoding == 'a')
             {
                 sprintf(monthhead, "%s %d (Year %s%s, Month %s%d%c S%d)",
                     monnames[month - 1], year, tiangan[tiancnt0], dizhi[dicnt0],
                     leap, cmonth, (ndayslm == 30) ? 'D' : 'X', nstartlm);
             }
-            else if ((pmode == 0 && nEncoding != 'a') || pmode == 1)
+            else if ((pmode == PMODE_ASCII && nEncoding != 'a') || pmode == PMODE_HTML)
             {
                 sprintf(monthhead,
                     "%s %d%s%s%s%s%s%s",
                     monnames[month - 1], year, sp, sp, (*CHtiangan)[tiancnt0],
                     (*CHdizhi)[dicnt0], (*CHmiscchar)[16], cmonname);
             }
-            else if (pmode == 3)
+            else if (pmode == PMODE_XML)
             {
                 sprintf(monthhead,
                     "%s%s%s%s",
@@ -351,7 +371,7 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
                 ndayslm1 = int(vmoons[moncnt + 2] - vmoons[moncnt + 1]);
             else
                 ndayslm1 = int(nextnew - vmoons.back());
-            if (pmode == 0 && nEncoding == 'a')
+            if (pmode == PMODE_ASCII && nEncoding == 'a')
             {
                 GetMonthNumber(vmonth[moncnt + 1], cmonth1, leap1);
                 sprintf(monthhead,
@@ -360,7 +380,7 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
                     leap, cmonth, (ndayslm == 30) ? 'D' : 'X', nstartlm,
                     leap1, cmonth1, (ndayslm1 == 30) ? 'D' : 'X', nstartlm1);
             }
-            else if ((pmode == 0 && nEncoding != 'a') || pmode == 1)
+            else if ((pmode == PMODE_ASCII && nEncoding != 'a') || pmode == PMODE_HTML)
             {
                 Number2MonthCH(vmonth[moncnt + 1], nstartlm1, ndayslm1, nEncoding, cmonname1);
                 sprintf(monthhead,
@@ -368,7 +388,7 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
                     (*CHtiangan)[tiancnt], (*CHdizhi)[dicnt],
                     (*CHmiscchar)[16], cmonname, (*CHmiscchar)[19], cmonname1);
             }
-            else if (pmode == 3)
+            else if (pmode == PMODE_XML)
             {
                 Number2MonthCH(vmonth[moncnt + 1], nstartlm1, ndayslm1, nEncoding, cmonname1);
                 sprintf(monthhead,
@@ -391,14 +411,14 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
         /* No new moon in February */
         {
             ndayslm = int(vmoons[moncnt] - vmoons[moncnt - 1]);
-            if (pmode == 0 && nEncoding == 'a')
+            if (pmode == PMODE_ASCII && nEncoding == 'a')
             {
                 GetMonthNumber(vmonth[moncnt - 1], cmonth, leap);
                 sprintf(monthhead, "%s %d (Year %s%s, Month %s%d%c)",
                     monnames[month - 1], year, tiangan[tiancnt], dizhi[dicnt],
                     leap, cmonth, (ndayslm == 30) ? 'D' : 'X');
             }
-            else if ((pmode == 0 && nEncoding != 'a') || pmode == 1)
+            else if ((pmode == PMODE_ASCII && nEncoding != 'a') || pmode == PMODE_HTML)
             {
                 Number2MonthCH(vmonth[moncnt - 1], nstartlm, ndayslm, nEncoding, cmonname);
                 char *p = strstr(cmonname, (*CHmiscchar)[14]) + 2 * nCHchars;
@@ -408,7 +428,7 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
                     (*CHtiangan)[tiancnt], (*CHdizhi)[dicnt],
                     (*CHmiscchar)[16], cmonname);
             }
-            else if (pmode == 3)
+            else if (pmode == PMODE_XML)
             {
                 Number2MonthCH(vmonth[moncnt - 1], nstartlm, ndayslm, nEncoding, cmonname);
                 char *p = strstr(cmonname, (*CHmiscchar)[14]) + 2 * nCHchars;
@@ -481,12 +501,12 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
             printf(" ");
         printf("%s\n", monthhead);
     }
-    else if (pmode == 1)
+    else if (pmode == PMODE_HTML)
     {
         printf("<tr>\n<th colspan=\"7\" width=\"100%%\">");
         printf("%s</th>\n</tr>\n", monthhead);
     }
-    else if (pmode == 3)
+    else if (pmode == PMODE_XML)
     {
         printf("<ccal:month value=\"%d\" name=\"%s\" cname=\"%s\">\n",
             month, monnames[month - 1], monthhead);
@@ -522,18 +542,20 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
     }
     /* Day of week */
     char dayshort[4];
-    if (pmode == 0)
+    if (pmode == PMODE_ASCII)
     {
         for (i = 0; i < 7; i++)
         {
             if (nEncoding != 'u')
-                printf("%-10s", (*daynamesCH)[i]);
+			//	lc180710 -	enhance format
+                printf("%-10s   ", (*daynamesCH)[i]);
             else
-                printf("%s   ", (*daynamesCH)[i]);
+			//	lc180710 -	enhance format
+                printf("%s      ", (*daynamesCH)[i]);
         }
         printf("\n");
     }
-    else if (pmode == 1)
+    else if (pmode == PMODE_HTML)
     {
         printf("<tr align=\"center\">\n");
         for (i = 0; i < 7; i++)
@@ -552,7 +574,7 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
         }
         printf("</tr>\n");
     }
-    else if (pmode == 2)
+    else if (pmode == PMODE_PS)
     {
         if (bSingle)
         {
@@ -588,17 +610,17 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
     char cdayname[21];
     for (w = 0; w < nWeeks; w++)
     {
-        if (pmode == 1)
+        if (pmode == PMODE_HTML)
         {
             printf("<tr align=\"right\">\n");
         }
-        if (pmode == 3)
+        if (pmode == PMODE_XML)
         {
             printf("<ccal:week>\n");
         }
         for (i = 0; i < 7; i++)
         {
-            if (pmode == 1)
+            if (pmode == PMODE_HTML)
             {
                 if (i == 0)
                     printf("<td width=\"15%%\"><font color=\"#FF0000\">");
@@ -607,13 +629,13 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
                 else
                     printf("<td width=\"14%%\">");
             }
-            if (pmode == 3)
+            if (pmode == PMODE_XML)
             {
                 printf("<ccal:day ");
             }
             if (dcnt > daysinmonth[month - 1])
             {
-                if (pmode == 1)
+                if (pmode == PMODE_HTML)
                 {
                     if (i == 0 || i == 6)
                         printf("&#160;</font></td>\n");
@@ -621,7 +643,7 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
                         printf("&#160;</td>\n");
                     continue;
                 }
-                if (pmode == 3)
+                if (pmode == PMODE_XML)
                 {
                     printf("/>\n");
                     continue;
@@ -632,16 +654,17 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
             {
                 if (i < dofw)
                 {
-                    if (pmode == 0)
-                        printf("%10s", " ");
-                    else if (pmode == 1)
+                    if (pmode == PMODE_ASCII)
+					//	lc180710 -	enhance format
+                        printf("%10s   ", " ");
+                    else if (pmode == PMODE_HTML)
                     {
                         if (i == 0 || i == 6)
                             printf("&#160;</font></td>\n");
                         else
                             printf("&#160;</td>\n");
                     }
-                    else if (pmode == 3)
+                    else if (pmode == PMODE_XML)
                     {
                         printf("/>\n");
                     }
@@ -670,13 +693,13 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
 #ifdef HILIGHTTODAY
             if (today->tm_year + 1900 == (int)year && today->tm_mon + 1 == (int)month && today->tm_mday == (int)dcnt)
             {
-            	if (pmode == 0)
+            	if (pmode == PMODE_ASCII)
                     printf(ANSI_REV);
             }
 #endif
-            if (pmode == 0 || pmode == 1)
+            if (pmode == PMODE_ASCII || pmode == PMODE_HTML)
                 printf("%2d", dcnt);
-            else if (pmode == 3)
+            else if (pmode == PMODE_XML)
             {
                 printf("value=\"%d\" cmonth=\"%d\" leap=\"%s\" cdate=\"%d\" ", dcnt, cmonth, leap, ldcnt);
                 Number2DayCH(ldcnt, nEncoding, cdayname);
@@ -723,17 +746,19 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
             }
 			if (!sameday && (termcnt >= int(vterms.size()) || jdcnt != vterms[termcnt]) && (moncnt >= int(vmoons.size()) || jdcnt != vmoons[moncnt]))
             {
-                if (pmode == 0)
+                if (pmode == PMODE_ASCII)
                 {
                     if (nEncoding == 'a')
-                        printf(" [%2d]   ", ldcnt);
+						//	lc180710 -	enhance format
+                        printf(" [%2d]      ", ldcnt);
                     else
                     {
                         Number2DayCH(ldcnt, nEncoding, cdayname);
-                        printf(" %s   ", cdayname);
+						//	lc180710 -	enhance format
+                        printf(" %s      ", cdayname);
                     }
                 }
-                else if (pmode == 1)
+                else if (pmode == PMODE_HTML)
                 {
                     if (dcnt == 1)
                         printf(" %s", cmonname);
@@ -749,7 +774,7 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
                     else
                         printf("</td>\n");
                 }
-                else if (pmode == 2 && bSingle)
+                else if (pmode == PMODE_PS && bSingle)
                 {
                     if (dcnt == 1)
                     {
@@ -767,7 +792,7 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
                         printf("grestore\n");
                     printf("grestore\n");
                 }
-                else if (pmode == 2)
+                else if (pmode == PMODE_XML)
                 {
                     Number2DayPS(ldcnt, cdayname);
                     int nlen = (int)strlen(cdayname);
@@ -782,7 +807,7 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
             }
             else if (sameday)
             {
-                if (pmode == 0)
+                if (pmode == PMODE_ASCII)
                 {
                     if (nEncoding == 'a')
                         PrintMonthNumber(vmonth[moncnt++]);
@@ -801,7 +826,7 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
                             printf(" ");
                     }
                 }
-                else if (pmode == 1)
+                else if (pmode == PMODE_HTML)
                 {
                     Number2DayCH(ldcnt, nEncoding, cdayname);
                     int nlen = (int)strlen(cdayname);
@@ -813,7 +838,7 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
                     else
                         printf("</td>\n");
                 }
-                else if (pmode == 2)
+                else if (pmode == PMODE_PS)
                 {
                     Number2DayPS(ldcnt, cdayname);
                     printf(" %s\n", cdayname);
@@ -827,16 +852,21 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
             {
                 if (moncnt < int(vmoons.size()) && jdcnt == vmoons[moncnt])
                     sameday = true;
-                if (pmode == 0)
+                if (pmode == PMODE_ASCII)
                 {
-                    if (nEncoding == 'a')
-                        printf(" [%s]   ", jieqi[termcnt++]);
+					int hr, min, sec;
+					j2hms(vtermhours[termcnt], hr, min, sec);
+                    if (nEncoding == 'a') {
+					//	lc180710 -	enhance format
+                        printf("  %s %02d:%02d ", jieqi[termcnt++], hr, min);
+					}
                     else
                     {
-                        printf(" %s   ", (*CHjieqi)[termcnt++]);
+					//	lc180710 -	enhance format
+                        printf(" %s%02d:%02d ", (*CHjieqi)[termcnt++], hr, min);
                     }
                 }
-                else if (pmode == 1)
+                else if (pmode == PMODE_HTML)
                 {
                     if (sameday)
                         printf(" %s", cmonname);
@@ -850,11 +880,11 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
                     else
                         printf("</td>\n");
                 }
-                else if (pmode == 3)
+                else if (pmode == PMODE_XML)
                 {
                     strcpy(cdayname, (*CHjieqi)[termcnt++]);
                 }
-                else if (pmode == 2)
+                else if (pmode == PMODE_PS)
                 {
                     if (sameday)
                     {
@@ -882,7 +912,7 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
             }
             else
             {
-                if (pmode == 0)
+                if (pmode == PMODE_ASCII)
                 {
                     if (nEncoding == 'a')
                         PrintMonthNumber(vmonth[moncnt++]);
@@ -894,19 +924,20 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
                         int nlen = (int)strlen(cmonname);
                         if (nlen <= 3 * nCHchars)
                             printf(" ");
-                        printf("%s", cmonname);
+						//	lc180710 -	enhance format
+                        printf("%s   ", cmonname);
                         if (nlen == 2 * nCHchars)
                             printf("   ");
                         if (nlen == 3 * nCHchars)
                             printf(" ");
                     }
                 }
-                else if (pmode == 1 || pmode == 3)
+                else if (pmode == PMODE_HTML || pmode == PMODE_XML)
                 {
                     Number2MonthCH(vmonth[moncnt++], 1, 30, nEncoding, cmonname);
                     char *p = strstr(cmonname, (*CHmiscchar)[14]) + nCHchars;
                     *p = 0;
-                    if (pmode == 1)
+                    if (pmode == PMODE_HTML)
                     {
                         int nlen = (int)strlen(cmonname);
                         printf(" %s", cmonname);
@@ -918,7 +949,7 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
                             printf("</td>\n");
                     }
                 }
-                else if (pmode == 2 && bSingle)
+                else if (pmode == PMODE_PS && bSingle)
                 {
                     Number2MonthPS(vmonth[moncnt++], 1, 30, true, cmonname);
                     printf(" %s\n", cmonname);
@@ -926,7 +957,7 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
                         printf("grestore\n");
                     printf("grestore\n");
                 }
-                else if (pmode == 2)
+                else if (pmode == PMODE_PS)
                 {
                     Number2MonthPS(vmonth[moncnt++], 1, 30, true, cmonname);
                     int nlen = (int)strlen(cmonname);
@@ -939,12 +970,12 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
                     printf("grestore\n");
                 }
             }
-            if (pmode == 3)
+            if (pmode == PMODE_XML)
                 printf("cmonthname=\"%s\" cdatename=\"%s\" />\n", cmonname, cdayname);
 #ifdef HILIGHTTODAY
             if (today->tm_year + 1900 == (int)year && today->tm_mon + 1 == (int)month && today->tm_mday == (int)dcnt)
             {
-            	if (pmode == 0)
+            	if (pmode == PMODE_ASCII)
                     printf(ANSI_NORMAL);
             }
 #endif
@@ -955,24 +986,24 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
             else
                 ldcnt++;
         }
-        if (pmode == 0)
+        if (pmode == PMODE_ASCII)
         {
             printf("\n");
         }
-        else if (pmode == 1)
+        else if (pmode == PMODE_HTML)
         {
             printf("</tr>\n");
         }
-        else if (pmode == 3)
+        else if (pmode == PMODE_XML)
         {
             printf("</ccal:week>\n");
         }
     }
-    if (pmode == 2 && !bSingle)
+    if (pmode == PMODE_PS && !bSingle)
     {
         printf("grestore\n");
     }
-    else if (pmode == 3)
+    else if (pmode == PMODE_XML)
     {
         printf("</ccal:month>\n");
     }
@@ -983,7 +1014,7 @@ bool ProcessArg(int argc, char** argv, short int& year, short int& month,
 {
     if (argc > 6)
         return false;
-    pmode = 0;
+    pmode = PMODE_ASCII;
     bSingle = true;
     nEncoding = 'a';
     bool bIsUTF8 = false;
@@ -1014,12 +1045,14 @@ bool ProcessArg(int argc, char** argv, short int& year, short int& month,
                 return false;
             }
         }
+        else if (argv[i][1] == 'j')
+            pmode = PMODE_JIEXI;
         else if (argv[i][1] == 'x')
-            pmode = 3;
+            pmode = PMODE_XML;
         else if (argv[i][1] == 'p')
-            pmode = 2;
+            pmode = PMODE_PS;
         else if (argv[i][1] == 't')
-            pmode = 1;
+            pmode = PMODE_HTML;
         else if (argv[i][1] == 'g')
             nEncoding = 'g';
         else if (argv[i][1] == 'b')
@@ -1032,16 +1065,16 @@ bool ProcessArg(int argc, char** argv, short int& year, short int& month,
             return false;
         }
     }
-    if (pmode != 2)
+    if (pmode != PMODE_PS)
     {
-        if (bIsUTF8 || pmode == 3)
+        if (bIsUTF8 || pmode == PMODE_XML)
         {
             if (nEncoding == 'b')
                 SetU8Characters(false);
             nEncoding = 'u';
         }
     }
-    if (pmode != 0)
+    if (pmode != PMODE_ASCII)
     {
         if (nEncoding == 'a')
             nEncoding = 'g';
@@ -1062,10 +1095,11 @@ int main(int argc, char** argv)
     if (!ProcessArg(argc, argv, year, month, pmode, bSingle, nEncoding))
     {
         printf("ccal version %s: Displays Chinese calendar (Gregorian with Chinese dates).\n", versionstr);
-        printf("Usage: ccal [-t|-p|-x] [-g|-b] [-u] [[<month>] <year>].\n");
+        printf("Usage: ccal [-t|-p|-x|-j] [-g|-b] [-u] [[<month>] <year>].\n");
         printf("\t-t:\tGenerates HTML table output.\n");
         printf("\t-p:\tGenerates encapsulated PostScript output.\n");
         printf("\t-x:\tGenerates XML output.\n");
+        printf("\t-j:\tGenerates list of JieQis.\n");
         printf("\t-g:\tGenerates simplified Chinese output.\n");
         printf("\t-b:\tGenerates traditional Chinese output.\n");
         printf("\t-u:\tUses UTF-8 rather than GB or Big5 for Chinese output.\n");
@@ -1083,12 +1117,25 @@ int main(int argc, char** argv)
     }
     if (IsLeapYear(year))
         daysinmonth[1] = 29;
-    vdouble vterms, vmoons, vmonth;
+    vdouble vterms, vmoons, vmonth, vtermhours;
     double lastnew, lastmon, nextnew;
-    double lmon = lunaryear(year, vterms, lastnew, lastmon, vmoons, vmonth, nextnew);
+    double lmon = lunaryear(year, vterms, lastnew, lastmon, vmoons, vmonth, nextnew, vtermhours);
     bool bIsSim = (nEncoding == 'g');
     char titlestr[20];
-    if (pmode == 3)
+
+    if (pmode == PMODE_JIEXI)
+    {
+		printf("year %04d no of terms %d:\n", year, int(vterms.size()));
+		for (int t=0; t<int(vtermhours.size()); t++) {
+			double frac	= vtermhours[t];
+			int hr, min, sec;
+			j2hms(frac, hr, min, sec);
+			printf("%2d\t%.6f\t%02d:%02d\n", t+1, vtermhours[t], hr, min);
+		}
+		return 0;
+	}
+
+    if (pmode == PMODE_XML)
     {
         printf("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
         printf("<ccal:year value=\"%d\" xmlns:ccal=\"http://ccal.chinesebay.com/ccal/\">\n", year);
@@ -1096,29 +1143,29 @@ int main(int argc, char** argv)
     if (bSingle)
     {
         sprintf(titlestr, "%s %d", monnames[month - 1], year);
-        if (pmode == 1)
+        if (pmode == PMODE_HTML)
             PrintHeaderHTML(titlestr, month, year, nEncoding);
-        else if (pmode == 2)
+        else if (pmode == PMODE_PS)
             PrintHeaderPS(titlestr, bIsSim, false);
         PrintMonth(year, month, vterms, lastnew, lastmon, vmoons, vmonth, nextnew, pmode, bSingle, nEncoding,
-                   ((short int)(lmon) == month || (short int)(lmon + 0.9) == month));
+                   ((short int)(lmon) == month || (short int)(lmon + 0.9) == month), vtermhours);
     }
     else
     {
         sprintf(titlestr, "Year %d", year);
-        if (pmode == 1)
+        if (pmode == PMODE_HTML)
             PrintHeaderHTML(titlestr, 0, year, nEncoding);
-        else if (pmode == 2)
+        else if (pmode == PMODE_PS)
             PrintHeaderPS(titlestr, bIsSim, (lmon != 0.0));
         short int i;
         for (i = 1; i <= 12; i++)
-            PrintMonth(year, i, vterms, lastnew, lastmon, vmoons, vmonth, nextnew, pmode, bSingle, nEncoding, false);
+            PrintMonth(year, i, vterms, lastnew, lastmon, vmoons, vmonth, nextnew, pmode, bSingle, nEncoding, false, vtermhours);
     }
-    if (pmode == 1)
+    if (pmode == PMODE_HTML)
         PrintClosingHTML();
-    else if (pmode == 2)
+    else if (pmode == PMODE_PS)
         PrintClosingPS();
-    else if (pmode == 3)
+    else if (pmode == PMODE_XML)
         printf("</ccal:year>\n");
     return 0;
 }
