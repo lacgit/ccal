@@ -19,8 +19,12 @@
 
 #include "solarterm.h"
 #include "tt2ut.h"
-#include "novas.h"
 #include <stdio.h>
+
+extern "C" {
+#include "novas.h"
+#include "novascon.h"
+}
 
 #ifndef NO_NAMESPACE
 using namespace std;

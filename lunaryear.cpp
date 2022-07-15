@@ -23,8 +23,11 @@
 #ifdef USE_YEARCACHE
 #include "yearcache.h"
 #endif
-#include "novas.h"
 #include <assert.h>
+
+extern "C" {
+#include "novas.h"
+}
 
 #ifndef NO_NAMESPACE
 using namespace std;

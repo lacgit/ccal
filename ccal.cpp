@@ -25,7 +25,11 @@
 #include "htmlmonth.h"
 #include "psmonth.h"
 #include "verstr.h"
+
+extern "C" {
 #include "novas.h"
+}
+
 
 #ifndef NO_NAMESPACE
 using namespace std;
@@ -452,20 +456,20 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
         }
         else
         {
-            if (pmode == 0 && nEncoding == 'a')
+            if (pmode == PMODE_ASCII && nEncoding == 'a')
             {
                 sprintf(monthhead, "%s %d (Year %s%s, Month %s%d%c S%d)",
                     monnames[month - 1], year, tiangan[tiancnt], dizhi[dicnt],
                     leap, cmonth, (ndayslm == 30) ? 'D' : 'X', nstartlm);
             }
-            else if ((pmode == 0 && nEncoding != 'a') || pmode == 1)
+            else if ((pmode == PMODE_ASCII && nEncoding != 'a') || pmode == PMODE_HTML)
             {
                 sprintf(monthhead,
                     "%s %d%s%s%s%s%s%s", monnames[month - 1], year, sp, sp,
                     (*CHtiangan)[tiancnt], (*CHdizhi)[dicnt],
                     (*CHmiscchar)[16], cmonname);
             }
-            else if (pmode == 3)
+            else if (pmode == PMODE_XML)
             {
                 sprintf(monthhead,
                     "%s%s%s%s",
@@ -483,7 +487,7 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
         }
     }
     int nmove, i;
-    if (pmode == 0)
+    if (pmode == PMODE_ASCII)
     {
         int nHeadLen = strlen(monthhead);
         if (nEncoding == 'u')

@@ -17,7 +17,10 @@
 */
 /* Converts TT to UT */
 #include "tt2ut.h"
+
+extern "C" {
 #include "novas.h"
+}
 
 /* Give TT in julian day, computes UT in julian day
    Algorithm is from NASA website

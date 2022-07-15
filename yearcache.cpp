@@ -1152,7 +1152,12 @@ static double allmonth[] = {
 };
 
 #include "yearcache.h"
+
+
+extern "C" {
 #include "novas.h"
+}
+
 
 bool
 YearCache::IsInRange(short int year)

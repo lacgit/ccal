@@ -1,10 +1,11 @@
 # Makefile for ccal
 
 # If a different C++ compiler is to be used, specify it below
-CXX=g++
+CXX=gcc
 
 # If you don't want to use the year cache, comment the following line
-CXXFLAGS += -DUSE_YEARCACHE
+#CXXFLAGS += -DUSE_YEARCACHE -I../novas3
+CXXFLAGS += -I../novas3
 
 # If the compiler doesn't use namespace, uncomment the following line
 #CXXFLAGS += -DNO_NAMESPACE
@@ -27,10 +28,11 @@ COMPONENTS= \
 	misc \
 	solarterm \
 	tt2ut \
-	novas \
-	novascon \
-	nutation \
-	solsys3 \
+	../novas3/novas \
+	../novas3/novascon \
+	../novas3/nutation \
+	../novas3/solsys3 \
+	../novas3/readeph0 \
 	yearcache
 # If you don't want to use the year cache, comment the previous line
 # End of list
@@ -43,7 +45,7 @@ CFLAGS += -O2
 CXXFLAGS += -O2
 
 ccal:	ccal.o $(OBJS)
-	$(CXX) $(CXXFLAGS) -o $@ $^ -lm
+	$(CXX) $(CXXFLAGS) -o $@ $^ -lm -lstdc++
 
 install:	ccal
 	./mkinstalldirs $(BINDIR)
@@ -56,4 +58,4 @@ install-man:
 	$(INSTALL) -m 0644 ccalpdf.1 $(MANDIR)/man1
 
 clean:
-	$(RM) *.o core ccal
+	$(RM) *.o core
