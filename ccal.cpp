@@ -171,7 +171,11 @@ const int PMODE_ASCII	= 0;
 const int PMODE_HTML	= 1;
 const int PMODE_PS		= 2;
 const int PMODE_XML		= 3;
-const int PMODE_JIEQI	= 4;
+
+const int FUNC_CAL		= 4;
+const int FUNC_JIEQI	= 5;
+const int FUNC_LIST		= 6;
+const int FUNC_ICAL		= 7;
 
 void SetChinese(int nEncoding, pc10_4& CHtiangan, pc12_4& CHdizhi, pc22_4& CHmiscchar, pc24_7& CHjieqi, pc7_10& daynamesCH)
 {
@@ -1028,12 +1032,835 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
     }
 }
 
+void PrintMonthList(short int year, short int month, vdouble& vterms,
+                double lastnew, double lastmon, vdouble& vmoons,
+                vdouble& vmonth, double nextnew, int pmode,
+                bool bSingle, int nEncoding, bool bNeedsRun,
+				vdouble& vtermhours)
+{
+#ifdef HILIGHTTODAY
+#define ANSI_REV "\x1b[7m"
+#define ANSI_NORMAL "\x1b[0m"
+    time_t now = time(NULL);
+    struct tm *today = localtime(&now);
+#endif
+    pc10_4 CHtiangan;
+    pc12_4 CHdizhi;
+    pc22_4 CHmiscchar;
+    pc24_7 CHjieqi;
+    pc7_10 daynamesCH;
+	SetChinese(nEncoding, CHtiangan, CHdizhi, CHmiscchar, CHjieqi, daynamesCH);
+    bool bIsSim = (nEncoding == 'g');
+    int nCHchars = (int)strlen((*CHmiscchar)[14]);
+    char space1[] = "&#160;";
+    char space2[] = " ";
+    char *sp;
+    if (pmode == PMODE_HTML)
+        sp = space1;
+    else
+        sp = space2;
+    /* Set julian day counter to 1st of the month */
+    double jdcnt = julian_date(year, month, 1, 12.0);
+    /* Find julian day of the start of the next month */
+    double jdnext;
+    if (month < 12)
+        jdnext = julian_date(year, month + 1, 1, 12.0);
+    else
+        jdnext = julian_date(year + 1, 1, 1, 12.0);
+    /* Set solarterm counter to day of 1st term of the calendar month */
+    int termcnt = (month - 1) * 2;
+    if (vterms[termcnt] < jdcnt)
+    	termcnt ++;
+    /* Set lunar month counter to the 1st lunar month of the calendar month */
+    int moncnt = 0;
+    while (moncnt < int(vmoons.size()) && vmoons[moncnt] < jdcnt)
+        moncnt++;
+    /* In case solarterm and 1st of lunar month falls on the same day */
+    bool sameday = false;
+    /* Initialize counters for lunar days and days of month */
+    int ldcnt, dcnt = 1;
+    if (month != 1)
+        ldcnt = int(jdcnt - vmoons[moncnt - 1] + 1);
+    else
+        ldcnt = int(jdcnt - lastnew + 1);
+    if (jdcnt == vmoons[moncnt])
+        ldcnt = 1;
+    /* Day of week of the 1st of month */
+    int dofw = (int(jdcnt) + 1) % 7;
+    int nWeeks = 5;
+    if ((dofw > 4 && daysinmonth[month - 1] == 31) || (dofw > 5 && daysinmonth[month - 1] == 30))
+    	nWeeks = 6;
+    /* Header of the month */
+    short int cyear = (year - 1984) % 60;
+    if (cyear < 0)
+        cyear += 60;
+    int tiancnt = cyear % 10;
+    int dicnt = cyear % 12;
+    short int cmonth;
+    char leap[2] = {0x00, 0x00};
+    char monthhead[200], cmonname[100];
+    int nstartlm = int(vmoons[moncnt] - jdcnt + 1);
+    int ndayslm;
+    if (moncnt < int(vmoons.size()) - 1)
+        ndayslm = int(vmoons[moncnt + 1] - vmoons[moncnt]);
+    else
+        ndayslm = int(nextnew - vmoons.back());
+    GetMonthNumber(vmonth[moncnt], cmonth, leap);
+    if ((pmode == PMODE_ASCII && nEncoding != 'a') || pmode == PMODE_HTML || pmode == PMODE_XML)
+        Number2MonthCH(vmonth[moncnt], nstartlm, ndayslm, nEncoding, cmonname);
+    else if (pmode == PMODE_PS)
+        Number2MonthPS(vmonth[moncnt], nstartlm, ndayslm, !bSingle, cmonname);
+    /* January is special if lunar New Year is in February */
+    if (month == 1 && cmonth != 1)
+    {
+        int tiancnt0 = (cyear + 59) % 10;
+        int dicnt0 = (cyear + 59) % 12;
+        if (vmoons[moncnt + 1] < jdnext) /* Two lunar months in one month */
+        {
+            short int cmonth1;
+            char leap1[2] = {0x00, 0x00};
+            int nstartlm1 = int(vmoons[moncnt + 1] - jdcnt + 1);
+            int ndayslm1;
+            char cmonname1[100];
+            if (moncnt < int(vmoons.size()) - 2)
+                ndayslm1 = int(vmoons[moncnt + 2] - vmoons[moncnt + 1]);
+            else
+                ndayslm1 = int(nextnew - vmoons.back());
+            if (pmode == PMODE_ASCII && nEncoding == 'a')
+            {
+                GetMonthNumber(vmonth[moncnt + 1], cmonth1, leap1);
+                sprintf(monthhead,
+                    "%s %d (Year %s%s, Month %s%d%c S%d, Year %s%s, Month %s%d%c S%d)",
+                    monnames[month - 1], year, tiangan[tiancnt0], dizhi[dicnt0],
+                    leap, cmonth, (ndayslm == 30) ? 'D' : 'X', nstartlm,
+                    tiangan[tiancnt], dizhi[dicnt],
+                    leap1, cmonth1, (ndayslm1 == 30) ? 'D' : 'X', nstartlm1);
+            }
+            else if ((pmode == PMODE_ASCII && nEncoding != 'a') || pmode == PMODE_HTML)
+            {
+                Number2MonthCH(vmonth[moncnt + 1], nstartlm1, ndayslm1, nEncoding, cmonname1);
+                sprintf(monthhead,
+                    "%s %d%s%s%s%s%s%s%s%s%s%s%s",
+                    monnames[month - 1], year, sp, sp, (*CHtiangan)[tiancnt0], (*CHdizhi)[dicnt0],
+                    (*CHmiscchar)[16], cmonname, (*CHmiscchar)[19], (*CHtiangan)[tiancnt],
+                    (*CHdizhi)[dicnt], (*CHmiscchar)[16], cmonname1);
+            }
+            else if (pmode == PMODE_XML)
+            {
+                Number2MonthCH(vmonth[moncnt + 1], nstartlm1, ndayslm1, nEncoding, cmonname1);
+                sprintf(monthhead,
+                    "%s%s%s%s%s%s%s%s%s",
+                    (*CHtiangan)[tiancnt0], (*CHdizhi)[dicnt0],
+                    (*CHmiscchar)[16], cmonname, (*CHmiscchar)[19], (*CHtiangan)[tiancnt],
+                    (*CHdizhi)[dicnt], (*CHmiscchar)[16], cmonname1);
+            }
+            else if (bSingle)
+            {
+                Number2MonthPS(vmonth[moncnt + 1], nstartlm1, ndayslm1, !bSingle, cmonname1);
+                sprintf(monthhead,
+                    "20 1 SF (%s %d) S\n/fsc 21 def gsave ptc\n"
+                    "%s%s%s%s%s\n%s%s%s%s%sgrestore",
+                    monnames[month - 1], year, PSbigmchar[20], PStiangan[tiancnt0],
+                    PSdizhi[dicnt0], PSbigmchar[16], cmonname, PSbigmchar[19],
+                    PStiangan[tiancnt], PSdizhi[dicnt], PSbigmchar[16], cmonname1);
+            }
+        }
+        else
+        {
+            if (pmode == PMODE_ASCII && nEncoding == 'a')
+            {
+                sprintf(monthhead, "%s %d (Year %s%s, Month %s%d%c S%d)",
+                    monnames[month - 1], year, tiangan[tiancnt0], dizhi[dicnt0],
+                    leap, cmonth, (ndayslm == 30) ? 'D' : 'X', nstartlm);
+            }
+            else if ((pmode == PMODE_ASCII && nEncoding != 'a') || pmode == PMODE_HTML)
+            {
+                sprintf(monthhead,
+                    "%s %d%s%s%s%s%s%s",
+                    monnames[month - 1], year, sp, sp, (*CHtiangan)[tiancnt0],
+                    (*CHdizhi)[dicnt0], (*CHmiscchar)[16], cmonname);
+            }
+            else if (pmode == PMODE_XML)
+            {
+                sprintf(monthhead,
+                    "%s%s%s%s",
+                    (*CHtiangan)[tiancnt0],
+                    (*CHdizhi)[dicnt0], (*CHmiscchar)[16], cmonname);
+            }
+            else if (bSingle)
+            {
+                sprintf(monthhead,
+                    "20 1 SF (%s %d) S\n/fsc 21 def gsave ptc\n"
+                    "%s%s%s%s%sgrestore",
+                    monnames[month - 1], year, PSbigmchar[20], PStiangan[tiancnt0],
+                    PSdizhi[dicnt0], PSbigmchar[16], cmonname);
+            }
+        }
+    }
+    else
+    {
+        if (moncnt < int(vmoons.size()) - 1 && vmoons[moncnt + 1] < jdnext)
+        /* Two lunar months in one month */
+        {
+            short int cmonth1;
+            char leap1[2] = {0x00, 0x00};
+            int nstartlm1 = int(vmoons[moncnt + 1] - jdcnt + 1);
+            int ndayslm1;
+            char cmonname1[100];
+            if (moncnt < int(vmoons.size()) - 2)
+                ndayslm1 = int(vmoons[moncnt + 2] - vmoons[moncnt + 1]);
+            else
+                ndayslm1 = int(nextnew - vmoons.back());
+            if (pmode == PMODE_ASCII && nEncoding == 'a')
+            {
+                GetMonthNumber(vmonth[moncnt + 1], cmonth1, leap1);
+                sprintf(monthhead,
+                    "%s %d (Year %s%s, Month %s%d%c S%d, %s%d%c S%d)",
+                    monnames[month - 1], year, tiangan[tiancnt], dizhi[dicnt],
+                    leap, cmonth, (ndayslm == 30) ? 'D' : 'X', nstartlm,
+                    leap1, cmonth1, (ndayslm1 == 30) ? 'D' : 'X', nstartlm1);
+            }
+            else if ((pmode == PMODE_ASCII && nEncoding != 'a') || pmode == PMODE_HTML)
+            {
+                Number2MonthCH(vmonth[moncnt + 1], nstartlm1, ndayslm1, nEncoding, cmonname1);
+                sprintf(monthhead,
+                    "%s %d%s%s%s%s%s%s%s%s", monnames[month - 1], year, sp, sp,
+                    (*CHtiangan)[tiancnt], (*CHdizhi)[dicnt],
+                    (*CHmiscchar)[16], cmonname, (*CHmiscchar)[19], cmonname1);
+            }
+            else if (pmode == PMODE_XML)
+            {
+                Number2MonthCH(vmonth[moncnt + 1], nstartlm1, ndayslm1, nEncoding, cmonname1);
+                sprintf(monthhead,
+                    "%s%s%s%s%s%s",
+                    (*CHtiangan)[tiancnt], (*CHdizhi)[dicnt],
+                    (*CHmiscchar)[16], cmonname, (*CHmiscchar)[19], cmonname1);
+            }
+            else if (bSingle)
+            {
+                Number2MonthPS(vmonth[moncnt + 1], nstartlm1, ndayslm1, !bSingle, cmonname1);
+                sprintf(monthhead,
+                    "20 1 SF (%s %d) S\n/fsc 21 def gsave ptc\n"
+                    "%s%s%s%s%s%s%sgrestore",
+                    monnames[month - 1], year, PSbigmchar[20], PStiangan[tiancnt],
+                    PSdizhi[dicnt], PSbigmchar[16], cmonname, PSbigmchar[19],
+                    cmonname1);
+            }
+        }
+        else if (month == 2 && vmoons[moncnt] >= jdnext)
+        /* No new moon in February */
+        {
+            ndayslm = int(vmoons[moncnt] - vmoons[moncnt - 1]);
+            if (pmode == PMODE_ASCII && nEncoding == 'a')
+            {
+                GetMonthNumber(vmonth[moncnt - 1], cmonth, leap);
+                sprintf(monthhead, "%s %d (Year %s%s, Month %s%d%c)",
+                    monnames[month - 1], year, tiangan[tiancnt], dizhi[dicnt],
+                    leap, cmonth, (ndayslm == 30) ? 'D' : 'X');
+            }
+            else if ((pmode == PMODE_ASCII && nEncoding != 'a') || pmode == PMODE_HTML)
+            {
+                Number2MonthCH(vmonth[moncnt - 1], nstartlm, ndayslm, nEncoding, cmonname);
+                char *p = strstr(cmonname, (*CHmiscchar)[14]) + 2 * nCHchars;
+                *p = 0;
+                sprintf(monthhead,
+                    "%s %d%s%s%s%s%s%s", monnames[month - 1], year, sp, sp,
+                    (*CHtiangan)[tiancnt], (*CHdizhi)[dicnt],
+                    (*CHmiscchar)[16], cmonname);
+            }
+            else if (pmode == PMODE_XML)
+            {
+                Number2MonthCH(vmonth[moncnt - 1], nstartlm, ndayslm, nEncoding, cmonname);
+                char *p = strstr(cmonname, (*CHmiscchar)[14]) + 2 * nCHchars;
+                *p = 0;
+                sprintf(monthhead,
+                    "%s%s%s%s",
+                    (*CHtiangan)[tiancnt], (*CHdizhi)[dicnt],
+                    (*CHmiscchar)[16], cmonname);
+            }
+            else if (bSingle)
+            {
+                Number2MonthPS(vmonth[moncnt - 1], nstartlm, ndayslm, !bSingle, cmonname);
+                char *p = strstr(cmonname, PSbigmchar[14]) + 8;
+                *p = 0;
+                sprintf(monthhead,
+                    "20 1 SF (%s %d) S\n/fsc 21 def gsave ptc\n"
+                    "%s%s%s%s%sgrestore",
+                    monnames[month - 1], year, PSbigmchar[20], PStiangan[tiancnt],
+                    PSdizhi[dicnt], PSbigmchar[16], cmonname);
+            }
+        }
+        else
+        {
+            if (pmode == PMODE_ASCII && nEncoding == 'a')
+            {
+                sprintf(monthhead, "%s %d (Year %s%s, Month %s%d%c S%d)",
+                    monnames[month - 1], year, tiangan[tiancnt], dizhi[dicnt],
+                    leap, cmonth, (ndayslm == 30) ? 'D' : 'X', nstartlm);
+            }
+            else if ((pmode == PMODE_ASCII && nEncoding != 'a') || pmode == PMODE_HTML)
+            {
+                sprintf(monthhead,
+                    "%s %d%s%s%s%s%s%s", monnames[month - 1], year, sp, sp,
+                    (*CHtiangan)[tiancnt], (*CHdizhi)[dicnt],
+                    (*CHmiscchar)[16], cmonname);
+            }
+            else if (pmode == PMODE_XML)
+            {
+                sprintf(monthhead,
+                    "%s%s%s%s",
+                    (*CHtiangan)[tiancnt], (*CHdizhi)[dicnt],
+                    (*CHmiscchar)[16], cmonname);
+            }
+            else if (bSingle)
+            {
+                sprintf(monthhead,
+                    "20 1 SF (%s %d) S\n/fsc 21 def gsave ptc\n"
+                    "%s%s%s%s%sgrestore",
+                    monnames[month - 1], year, PSbigmchar[20], PStiangan[tiancnt],
+                    PSdizhi[dicnt], PSbigmchar[16], cmonname);
+            }
+        }
+    }
+    int nmove, i;
+    if (pmode == PMODE_ASCII)
+    {
+        int nHeadLen = strlen(monthhead);
+        if (nEncoding == 'u')
+        {
+            int nasc = 0;
+            for (i = 0; i < nHeadLen; i++)
+                if ((unsigned char)(monthhead[i]) < 0x80)
+                    nasc++;
+            nHeadLen = (nHeadLen - nasc) * 2 / 3 + nasc;
+        }
+        nmove = (68 - nHeadLen) / 2;
+        if (nmove < 0)
+            nmove = 0;
+        for (i = 0; i < nmove; i++)
+            printf(" ");
+        printf("%s\n", monthhead);
+    }
+    else if (pmode == PMODE_HTML)
+    {
+        printf("<tr>\n<th colspan=\"7\" width=\"100%%\">");
+        printf("%s</th>\n</tr>\n", monthhead);
+    }
+    else if (pmode == PMODE_XML)
+    {
+        printf("<ccal:month value=\"%d\" name=\"%s\" cname=\"%s\">\n",
+            month, monnames[month - 1], monthhead);
+    }
+    else if (bSingle)
+    {
+        PrintHeaderMonthPS(monthhead, month, true, bIsSim, bNeedsRun, nWeeks);
+        char *p1 = strstr(monthhead, "(");
+        char *p2 = strstr(monthhead, ")");
+        int nlen = int(p2 - p1) - 1;
+        int nheadlen = (int)strlen(monthhead);
+        if (nheadlen - nlen - 66 > 56)
+            nmove = (4200 - 78 * (nlen + (nheadlen - nlen - 86) / 2 + 3)) / 2;
+        else if (nheadlen - nlen - 66 > 30)
+            nmove = (4200 - 78 * (nlen + (nheadlen - nlen - 66) / 2 + 3)) / 2;
+        else
+            nmove = (4200 - 78 * (nlen + (nheadlen - nlen - 46) / 2 + 2)) / 2;
+        if (nmove < 0)
+            nmove = 0;
+        printf("%d 2475 m\n", nmove);
+        printf("%s\n", monthhead);
+    }
+    else
+    {
+        printf("%% %s %d\n", monnames[month - 1], year);
+        int posx = (month - 1) % 4 * 140;
+        int posy = 3450 - (month - 1) / 4 * 1150 - 173;
+        printf("%d lpts %d m gsave ct\n",
+               posx, posy);
+        printf("%% Month number\n%d lpts %d m gsave\n100 1 SF 1 0.9 1 K",
+               ((month < 10) ? 35 : 10), -750);
+        printf(" (%d) S grestore\n", month);
+    }
+    /* Day of week */
+    char dayshort[4];
+    if (pmode == PMODE_ASCII)
+    {
+        for (i = 0; i < 7; i++)
+        {
+            if (nEncoding != 'u')
+			//	lc180710 -	enhance format
+                printf("%-10s   ", (*daynamesCH)[i]);
+            else
+			//	lc180710 -	enhance format
+                printf("%s      ", (*daynamesCH)[i]);
+        }
+        printf("\n");
+    }
+    else if (pmode == PMODE_HTML)
+    {
+        printf("<tr align=\"center\">\n");
+        for (i = 0; i < 7; i++)
+        {
+            strncpy(dayshort, daynames[i], 3);
+            dayshort[3] = 0;
+            if (i == 0)
+                printf("<td width=\"15%%\"><font color=\"#FF0000\">"
+                       "%s %s</font></td>\n", dayshort, (*CHmiscchar)[15]);
+            else if (i == 6)
+                printf("<td width=\"15%%\"><font color=\"#00E600\">"
+                       "%s %s</font></td>\n", dayshort, (*CHmiscchar)[i]);
+            else
+                printf("<td width=\"14%%\">%s %s</td>\n",
+                       dayshort, (*CHmiscchar)[i]);
+        }
+        printf("</tr>\n");
+    }
+    else if (pmode == PMODE_PS)
+    {
+        if (bSingle)
+        {
+            printf("%% Day names\n14 1 SF\n/fsc 15 def\n");
+            for (i = 0; i < 7; i++)
+            {
+                strncpy(dayshort, daynames[i], 3);
+                dayshort[3] = 0;
+                if (i == 0)
+                    printf("gsave 1 0 0 K\n100 2270 m (%s) S\n400 2270 m "
+                           "gsave ptc %s grestore\ngrestore\n", dayshort, PSbigmchar[15]);
+                else if (i == 6)
+                    printf("gsave 0 0.8 0 K\n3700 2270 m (%s) S\n4000 2270 m "
+                           "gsave ptc %s grestore\ngrestore\n", dayshort, PSbigmchar[i]);
+                else
+                {
+                    int posx = i * 600 + 100;
+                    printf("%d 2270 m (%s) S\n%d 2270 m gsave ptc "
+                           "%s grestore\n", posx, dayshort,
+                           (posx + 300), PSbigmchar[i]);
+                }
+            }
+            printf("%% Days\n17 1 SF\n/fsc 7.5 def\n");
+        }
+        else
+        {
+            printf("%% Week heading\n0 0 m Ymh\n");
+            printf("%% Days\n9 0 SF\n");
+        }
+    }
+    /* At most can be six weeks */
+    int w;
+    char cdayname[21];
+    for (w = 0; w < nWeeks; w++)
+    {
+        if (pmode == PMODE_HTML)
+        {
+            printf("<tr align=\"right\">\n");
+        }
+        if (pmode == PMODE_XML)
+        {
+            printf("<ccal:week>\n");
+        }
+        for (i = 0; i < 7; i++)
+        {
+            if (pmode == PMODE_HTML)
+            {
+                if (i == 0)
+                    printf("<td width=\"15%%\"><font color=\"#FF0000\">");
+                else if (i == 6)
+                    printf("<td width=\"15%%\"><font color=\"#00E600\">");
+                else
+                    printf("<td width=\"14%%\">");
+            }
+            if (pmode == PMODE_XML)
+            {
+                printf("<ccal:day ");
+            }
+            if (dcnt > daysinmonth[month - 1])
+            {
+                if (pmode == PMODE_HTML)
+                {
+                    if (i == 0 || i == 6)
+                        printf("&#160;</font></td>\n");
+                    else
+                        printf("&#160;</td>\n");
+                    continue;
+                }
+                if (pmode == PMODE_XML)
+                {
+                    printf("/>\n");
+                    continue;
+                }
+                break;
+            }
+            if (w == 0)
+            {
+                if (i < dofw)
+                {
+                    if (pmode == PMODE_ASCII)
+					//	lc180710 -	enhance format
+                        printf("%10s   ", " ");
+                    else if (pmode == PMODE_HTML)
+                    {
+                        if (i == 0 || i == 6)
+                            printf("&#160;</font></td>\n");
+                        else
+                            printf("&#160;</td>\n");
+                    }
+                    else if (pmode == PMODE_XML)
+                    {
+                        printf("/>\n");
+                    }
+                    continue;
+                }
+            }
+            if (dcnt == 1 || ldcnt == 1)
+            {
+                int mcnt = moncnt;
+                if (ldcnt != 1)
+                    mcnt --;
+                if (mcnt >= 0)
+                    GetMonthNumber(vmonth[mcnt], cmonth, leap);
+                else
+                    GetMonthNumber(lastmon, cmonth, leap);
+                if (nEncoding != 'a')
+                {
+                    if (mcnt >= 0)
+                        Number2MonthCH(vmonth[mcnt], 1, 30, nEncoding, cmonname);
+                    else
+                        Number2MonthCH(lastmon, 1, 30, nEncoding, cmonname);
+                    char *p = strstr(cmonname, (*CHmiscchar)[14]) + nCHchars;
+                    *p = 0;
+                }
+            }
+#ifdef HILIGHTTODAY
+            if (today->tm_year + 1900 == (int)year && today->tm_mon + 1 == (int)month && today->tm_mday == (int)dcnt)
+            {
+            	if (pmode == PMODE_ASCII)
+                    printf(ANSI_REV);
+            }
+#endif
+            if (pmode == PMODE_ASCII || pmode == PMODE_HTML)
+                printf("%2d", dcnt);
+            else if (pmode == PMODE_XML)
+            {
+                printf("value=\"%d\" cmonth=\"%d\" leap=\"%s\" cdate=\"%d\" ", dcnt, cmonth, leap, ldcnt);
+                Number2DayCH(ldcnt, nEncoding, cdayname);
+            }
+            else if (bSingle)
+            {
+                int posx = i * 600 + 50;
+                int posy = 1875 - w * 375 + 220;
+                if (nWeeks == 5)
+                	posy = 1800 - w * 450 + 295;
+                if (i == 0)
+                    printf("gsave 1 0 0 K\n");
+                else if (i == 6)
+                    printf("gsave 0 0.8 0 K\n");
+                printf("%d %d m (%2d) S\ngsave 8 0 SF ", posx, posy, dcnt);
+                posx += 170;
+                if (dcnt == 1 || ldcnt == 1)
+                {
+                    if (*leap == 'R')
+                        printf("%d %d m (%dR.%d) S grestore\n%d %d m",
+                            (posx + 5), (posy + 56), cmonth, ldcnt, posx,
+                            (posy - 2));
+                    else
+                        printf("%d %d m (%d.%d) S grestore\n%d %d m",
+                            (posx + 5), (posy + 56), cmonth, ldcnt, posx,
+                            (posy - 2));
+                }
+                else
+                    printf("%d %d m (%2d) S grestore\n%d %d m",
+                        (posx + 5), (posy + 56), ldcnt, posx, (posy - 2));
+                printf(" gsave ptc");
+            }
+            else
+            {
+                int posx = i * 19;
+                int posy = -w * 19 - 14;
+                if (i == 0)
+                    printf("gsave 1 0 0 K\n");
+                else if (i == 6)
+                    printf("gsave 0 0.8 0 K\n");
+                printf("%d %d moveto (%2d) S\n", posx, posy, dcnt);
+                posy -= 7;
+                printf("%d %d moveto gsave ptc", posx, posy);
+            }
+
+			//	lc220715 -	below print jieqi
+			if (!sameday && (termcnt >= int(vterms.size()) || jdcnt != vterms[termcnt]) && (moncnt >= int(vmoons.size()) || jdcnt != vmoons[moncnt]))
+            {
+                if (pmode == PMODE_ASCII)
+                {
+                    if (nEncoding == 'a')
+						//	lc180710 -	enhance format
+                        printf(" [%2d]      ", ldcnt);
+                    else
+                    {
+                        Number2DayCH(ldcnt, nEncoding, cdayname);
+						//	lc180710 -	enhance format
+                        printf(" %s      ", cdayname);
+                    }
+                }
+                else if (pmode == PMODE_HTML)
+                {
+                    if (dcnt == 1)
+                        printf(" %s", cmonname);
+                    else
+                        printf(" ");
+                    Number2DayCH(ldcnt, nEncoding, cdayname);
+                    int nlen = (int)strlen(cdayname);
+                    printf("%s", cdayname);
+                    if (i == 0 || i == 6)
+                        printf("</font>");
+                    if (nlen == 2 * nCHchars && dcnt != 1)
+                        printf("&#160;&#160;</td>\n");
+                    else
+                        printf("</td>\n");
+                }
+                else if (pmode == PMODE_PS && bSingle)
+                {
+                    if (dcnt == 1)
+                    {
+                        if (moncnt > 0)
+                            Number2MonthPS(vmonth[moncnt - 1], 1, 30, true, cmonname);
+                        else
+                            Number2MonthPS(lastmon, 1, 30, true, cmonname);
+                        printf(" %s", cmonname);
+                    }
+                    else
+                        printf(" ");
+                    Number2DayPS(ldcnt, cdayname);
+                    printf("%s\n", cdayname);
+                    if (i == 0 || i == 6)
+                        printf("grestore\n");
+                    printf("grestore\n");
+                }
+                else if (pmode == PMODE_XML)
+                {
+                    Number2DayPS(ldcnt, cdayname);
+                    int nlen = (int)strlen(cdayname);
+                    if (nlen > 8)
+                        printf(" grestore -%d 0 rmoveto gsave ptc",
+                               ((nlen - 8) / 4 * 3));
+                    printf(" %s\n", cdayname);
+                    if (i == 0 || i == 6)
+                        printf("grestore\n");
+                    printf("grestore\n");
+                }
+            }
+            else if (sameday)
+            {
+                if (pmode == PMODE_ASCII)
+                {
+                    if (nEncoding == 'a')
+                        PrintMonthNumber(vmonth[moncnt++]);
+                    else
+                    {
+                        Number2MonthCH(vmonth[moncnt++], 1, 30, nEncoding, cmonname);
+                        char *p = strstr(cmonname, (*CHmiscchar)[14]) + nCHchars;
+                        *p = 0;
+                        int nlen = (int)strlen(cmonname);
+                        if (nlen <= 3 * nCHchars)
+                            printf(" ");
+                        printf("%s", cmonname);
+                        if (nlen == 2 * nCHchars)
+                            printf("   ");
+                        if (nlen == 3 * nCHchars)
+                            printf(" ");
+                    }
+                }
+                else if (pmode == PMODE_HTML)
+                {
+                    Number2DayCH(ldcnt, nEncoding, cdayname);
+                    int nlen = (int)strlen(cdayname);
+                    printf(" %s", cdayname);
+                    if (i == 0 || i == 6)
+                        printf("</font>");
+                    if (nlen == 2 * nCHchars)
+                        printf("&#160;&#160;</td>\n");
+                    else
+                        printf("</td>\n");
+                }
+                else if (pmode == PMODE_PS)
+                {
+                    Number2DayPS(ldcnt, cdayname);
+                    printf(" %s\n", cdayname);
+                    if (i == 0 || i == 6)
+                        printf("grestore\n");
+                    printf("grestore\n");
+                }
+                sameday = false;
+            }
+            else if (termcnt < int(vterms.size()) && jdcnt == vterms[termcnt])
+            {
+                if (moncnt < int(vmoons.size()) && jdcnt == vmoons[moncnt])
+                    sameday = true;
+                if (pmode == PMODE_ASCII)
+                {
+					int hr, min, sec;
+					j2hms(vtermhours[termcnt], hr, min, sec);
+                    if (nEncoding == 'a') {
+					//	lc180710 -	enhance format
+                        printf("  %s %02d:%02d ", jieqi[termcnt++], hr, min);
+					}
+                    else
+                    {
+					//	lc180710 -	enhance format
+                        printf(" %s%02d:%02d ", (*CHjieqi)[termcnt++], hr, min);
+                    }
+                }
+                else if (pmode == PMODE_HTML)
+                {
+                    if (sameday)
+                        printf(" %s", cmonname);
+                    else
+                        printf(" ");
+					int hr, min, sec;
+					j2hms(vtermhours[termcnt], hr, min, sec);
+					//	lc180710 -	enhance format
+                    printf("%s %02d:%02d", (nEncoding == 'a' ? jieqi[termcnt++] : (*CHjieqi)[termcnt++]), hr, min);
+                    if (i == 0 || i == 6)
+                        printf("</font>");
+                    if (!sameday)
+                        printf("&#160;&#160;</td>\n");
+                    else
+                        printf("</td>\n");
+                }
+                else if (pmode == PMODE_XML)
+                {
+                    strcpy(cdayname, (*CHjieqi)[termcnt++]);
+                }
+                else if (pmode == PMODE_PS)
+                {
+                    if (sameday)
+                    {
+                        Number2MonthPS(vmonth[moncnt++], 1, 30, true, cmonname);
+                        int nlen = (int)strlen(cmonname);
+                        if (!bSingle)
+                            printf(" grestore -6 0 rmoveto gsave ptc");
+                        if (!bSingle && nlen > 8)
+                        {
+                            double fac = 16.0 / (nlen + 8.0);
+                            printf(" gsave %f 1 scale %s", fac, cmonname);
+                        }
+                        else
+                            printf(" %s", cmonname);
+                    }
+                    else
+                        printf(" ");
+                    printf("%s\n", PSjieqi[termcnt++]);
+                    if (sameday && !bSingle && strlen(cmonname) > 8)
+                        printf("grestore\n");
+                    if (i == 0 || i == 6)
+                        printf("grestore\n");
+                    printf("grestore\n");
+                }
+            }
+            else
+            {
+                if (pmode == PMODE_ASCII)
+                {
+                    if (nEncoding == 'a')
+                        PrintMonthNumber(vmonth[moncnt++]);
+                    else
+                    {
+                        Number2MonthCH(vmonth[moncnt++], 1, 30, nEncoding, cmonname);
+                        char *p = strstr(cmonname, (*CHmiscchar)[14]) + nCHchars;
+                        *p = 0;
+                        int nlen = (int)strlen(cmonname);
+                        if (nlen <= 3 * nCHchars)
+                            printf(" ");
+						//	lc180710 -	enhance format
+                        printf("%s   ", cmonname);
+                        if (nlen == 2 * nCHchars)
+                            printf("   ");
+                        if (nlen == 3 * nCHchars)
+                            printf(" ");
+                    }
+                }
+                else if (pmode == PMODE_HTML || pmode == PMODE_XML)
+                {
+                    Number2MonthCH(vmonth[moncnt++], 1, 30, nEncoding, cmonname);
+                    char *p = strstr(cmonname, (*CHmiscchar)[14]) + nCHchars;
+                    *p = 0;
+                    if (pmode == PMODE_HTML)
+                    {
+                        int nlen = (int)strlen(cmonname);
+                        printf(" %s", cmonname);
+                        if (i == 0 || i == 6)
+                            printf("</font>");
+                        if (nlen == 2 * nCHchars)
+                            printf("&#160;&#160;</td>\n");
+                        else
+                            printf("</td>\n");
+                    }
+                }
+                else if (pmode == PMODE_PS && bSingle)
+                {
+                    Number2MonthPS(vmonth[moncnt++], 1, 30, true, cmonname);
+                    printf(" %s\n", cmonname);
+                    if (i == 0 || i == 6)
+                        printf("grestore\n");
+                    printf("grestore\n");
+                }
+                else if (pmode == PMODE_PS)
+                {
+                    Number2MonthPS(vmonth[moncnt++], 1, 30, true, cmonname);
+                    int nlen = (int)strlen(cmonname);
+                    if (nlen > 8)
+                        printf(" grestore -%d 0 rmoveto gsave ptc",
+                               ((nlen - 8) / 4 * 3));
+                    printf(" %s\n", cmonname);
+                    if (i == 0 || i == 6)
+                        printf("grestore\n");
+                    printf("grestore\n");
+                }
+            }
+            if (pmode == PMODE_XML)
+                printf("cmonthname=\"%s\" cdatename=\"%s\" />\n", cmonname, cdayname);
+#ifdef HILIGHTTODAY
+            if (today->tm_year + 1900 == (int)year && today->tm_mon + 1 == (int)month && today->tm_mday == (int)dcnt)
+            {
+            	if (pmode == PMODE_ASCII)
+                    printf(ANSI_NORMAL);
+            }
+#endif
+            dcnt++;
+            jdcnt++;
+            if (moncnt < int(vmoons.size()) && jdcnt == vmoons[moncnt])
+                ldcnt = 1;
+            else
+                ldcnt++;
+        }
+        if (pmode == PMODE_ASCII)
+        {
+            printf("\n");
+        }
+        else if (pmode == PMODE_HTML)
+        {
+            printf("</tr>\n");
+        }
+        else if (pmode == PMODE_XML)
+        {
+            printf("</ccal:week>\n");
+        }
+    }
+    if (pmode == PMODE_PS && !bSingle)
+    {
+        printf("grestore\n");
+    }
+    else if (pmode == PMODE_XML)
+    {
+        printf("</ccal:month>\n");
+    }
+}
+
 bool ProcessArg(int argc, char** argv, short int& year, short int& month,
-                int& pmode, bool& bSingle, int& nEncoding)
+                int& pmode, int& fmode, bool& bSingle, int& nEncoding)
 {
     if (argc > 6)
         return false;
     pmode = PMODE_ASCII;
+    fmode = FUNC_CAL;
     bSingle = true;
     nEncoding = 'a';
     bool bIsUTF8 = false;
@@ -1065,7 +1892,11 @@ bool ProcessArg(int argc, char** argv, short int& year, short int& month,
             }
         }
         else if (argv[i][1] == 'j')
-            pmode = PMODE_JIEQI;
+            fmode = FUNC_JIEQI;
+        else if (argv[i][1] == 'l')
+            fmode = FUNC_LIST;
+        else if (argv[i][1] == 'i')
+            fmode = FUNC_ICAL;
         else if (argv[i][1] == 'x')
             pmode = PMODE_XML;
         else if (argv[i][1] == 'p')
@@ -1093,7 +1924,7 @@ bool ProcessArg(int argc, char** argv, short int& year, short int& month,
             nEncoding = 'u';
         }
     }
-    if (pmode != PMODE_ASCII && pmode != PMODE_JIEQI)
+    if (pmode != PMODE_ASCII && pmode != FUNC_JIEQI)
     {
         if (nEncoding == 'a')
             nEncoding = 'u';
@@ -1106,19 +1937,24 @@ int main(int argc, char** argv)
     time_t now = time(NULL);
     struct tm *tmnow = localtime(&now);
     short int year, month;
-    int pmode;
+    int pmode;		//	ascii, html, xml, ps
+    int fmode;		//	cal, jieqi, list, ical
     bool bSingle;
     int nEncoding;
     year = (short int) (tmnow->tm_year + 1900);
     month = (short int) (tmnow->tm_mon + 1);
-    if (!ProcessArg(argc, argv, year, month, pmode, bSingle, nEncoding))
+
+	//	lc180716 -	new function FUNC_JIEQI
+    if (!ProcessArg(argc, argv, year, month, pmode, fmode, bSingle, nEncoding))
     {
         printf("ccal version %s: Displays Chinese calendar (Gregorian with Chinese dates).\n", versionstr);
-        printf("Usage: ccal [-t|-p|-x|-j] [-g|-b] [-u] [[<month>] <year>].\n");
+        printf("Usage: ccal [-t|-p|-x] [-j|-l] [-g|-b] [-u] [[<month>] <year>].\n");
         printf("\t-t:\tGenerates HTML table output.\n");
         printf("\t-p:\tGenerates encapsulated PostScript output.\n");
         printf("\t-x:\tGenerates XML output.\n");
         printf("\t-j:\tGenerates list of JieQis.\n");
+        printf("\t-l:\tGenerates list of Dates.\n");
+        printf("\t-i:\tGenerates list of iCAL.\n");
         printf("\t-g:\tGenerates simplified Chinese output.\n");
         printf("\t-b:\tGenerates traditional Chinese output.\n");
         printf("\t-u:\tUses UTF-8 rather than GB or Big5 for Chinese output.\n");
@@ -1142,7 +1978,7 @@ int main(int argc, char** argv)
     bool bIsSim = (nEncoding == 'g');
     char titlestr[20];
 
-    if (pmode == PMODE_JIEQI)
+    if (fmode == FUNC_JIEQI)
     {
 		//	lc220715 -	enhanced to print the name, year, month, day
 	    pc10_4 CHtiangan;
@@ -1163,7 +1999,8 @@ int main(int argc, char** argv)
 		}
 		return 0;
 	}
-
+	
+	//	lc220716 -	default function FUNC_CAL
     if (pmode == PMODE_XML)
     {
         printf("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
