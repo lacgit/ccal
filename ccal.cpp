@@ -177,7 +177,9 @@ const int FUNC_JIEQI	= 5;
 const int FUNC_LIST		= 6;
 const int FUNC_ICAL		= 7;
 
-void SetChinese(int nEncoding, pc10_4& CHtiangan, pc12_4& CHdizhi, pc22_4& CHmiscchar, pc24_7& CHjieqi, pc7_10& daynamesCH)
+void SetChinese(int nEncoding, int pmode, pc10_4& CHtiangan, pc12_4& CHdizhi,
+				pc22_4& CHmiscchar, pc24_7& CHjieqi, pc7_10& daynamesCH,
+				int& nCHchars, char*& sp)
 {
     CHtiangan	= &GBtiangan;
     CHdizhi		= &GBdizhi;
@@ -208,6 +210,11 @@ void SetChinese(int nEncoding, pc10_4& CHtiangan, pc12_4& CHdizhi, pc22_4& CHmis
         CHjieqi = &B5jieqi;
         daynamesCH = &daynamesB5;
     }
+    nCHchars = (int)strlen((*CHmiscchar)[14]);
+    if (pmode == PMODE_HTML)
+        sp = (char *)"&#160;";
+    else
+        sp = (char *)" ";
 }
 
 void PrepareMonthInitials(short int year, short int month,
@@ -241,88 +248,28 @@ void PrepareMonthInitials(short int year, short int month,
         ldcnt = 1;
 }
 
-void PrintMonth(short int year, short int month, vdouble& vterms,
-                double lastnew, double lastmon, vdouble& vmoons,
-                vdouble& vmonth, double nextnew, int pmode,
-                bool bSingle, int nEncoding, bool bNeedsRun,
-				vdouble& vtermhours)
+void PrepareMonthHead(short int year, short int month, vdouble& vterms,
+				vdouble& vmoons, vdouble& vmonth, double nextnew,
+				int	jdcnt, int jdnext, int moncnt, char* sp,
+				bool bSingle, int pmode, int nEncoding,
+				pc10_4 CHtiangan,
+				pc12_4 CHdizhi,
+				pc22_4 CHmiscchar,
+				pc24_7 CHjieqi,
+				pc7_10 daynamesCH,
+				char* monthhead,
+				char* cmonname,
+				short int& cmonth)
 {
-#ifdef HILIGHTTODAY
-#define ANSI_REV "\x1b[7m"
-#define ANSI_NORMAL "\x1b[0m"
-    time_t now = time(NULL);
-    struct tm *today = localtime(&now);
-#endif
-    pc10_4 CHtiangan;
-    pc12_4 CHdizhi;
-    pc22_4 CHmiscchar;
-    pc24_7 CHjieqi;
-    pc7_10 daynamesCH;
-	SetChinese(nEncoding, CHtiangan, CHdizhi, CHmiscchar, CHjieqi, daynamesCH);
-    bool bIsSim = (nEncoding == 'g');
     int nCHchars = (int)strlen((*CHmiscchar)[14]);
-    char space1[] = "&#160;";
-    char space2[] = " ";
-    char *sp;
-    if (pmode == PMODE_HTML)
-        sp = space1;
-    else
-        sp = space2;
-
-    /* Set julian day counter to 1st of the month */
-    double jdcnt;
-    /* Find julian day of the start of the next month */
-    double jdnext;
-    /* Set solarterm counter to day of 1st term of the calendar month */
-    int termcnt;
-    /* Set lunar month counter to the 1st lunar month of the calendar month */
-    int moncnt = 0;
-    /* Initialize counters for lunar days and days of month */
-    int ldcnt, dcnt;
-	PrepareMonthInitials(year, month, lastnew, vterms, vmoons,
-		jdcnt, jdnext, termcnt, moncnt, ldcnt, dcnt);
-
-    /* Set julian day counter to 1st of the month */
-//    double jdcnt = julian_date(year, month, 1, 12.0);
-    /* Find julian day of the start of the next month */
-//    double jdnext;
-//    if (month < 12)
-//        jdnext = julian_date(year, month + 1, 1, 12.0);
-//    else
-//        jdnext = julian_date(year + 1, 1, 1, 12.0);
-    /* Set solarterm counter to day of 1st term of the calendar month */
-//    int termcnt = (month - 1) * 2;
-//    if (vterms[termcnt] < jdcnt)
-//    	termcnt ++;
-    /* Set lunar month counter to the 1st lunar month of the calendar month */
-//    int moncnt = 0;
-//    while (moncnt < int(vmoons.size()) && vmoons[moncnt] < jdcnt)
-//        moncnt++;
-    /* In case solarterm and 1st of lunar month falls on the same day */
-    bool sameday = false;
-    /* Initialize counters for lunar days and days of month */
-//    int ldcnt, dcnt = 1;
-//    if (month != 1)
-//        ldcnt = int(jdcnt - vmoons[moncnt - 1] + 1);
-//    else
-//        ldcnt = int(jdcnt - lastnew + 1);
-//    if (jdcnt == vmoons[moncnt])
-//        ldcnt = 1;
-
-    /* Day of week of the 1st of month */
-    int dofw = (int(jdcnt) + 1) % 7;
-    int nWeeks = 5;
-    if ((dofw > 4 && daysinmonth[month - 1] == 31) || (dofw > 5 && daysinmonth[month - 1] == 30))
-    	nWeeks = 6;
     /* Header of the month */
     short int cyear = (year - 1984) % 60;
     if (cyear < 0)
         cyear += 60;
     int tiancnt = cyear % 10;
     int dicnt = cyear % 12;
-    short int cmonth;
     char leap[2] = {0x00, 0x00};
-    char monthhead[200], cmonname[100];
+    //char monthhead[200], cmonname[100];
     int nstartlm = int(vmoons[moncnt] - jdcnt + 1);
     int ndayslm;
     if (moncnt < int(vmoons.size()) - 1)
@@ -546,6 +493,93 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
             }
         }
     }
+
+}
+
+void PrintMonth(short int year, short int month, vdouble& vterms,
+                double lastnew, double lastmon, vdouble& vmoons,
+                vdouble& vmonth, double nextnew, int pmode,
+                bool bSingle, int nEncoding, bool bNeedsRun,
+				vdouble& vtermhours)
+{
+#ifdef HILIGHTTODAY
+#define ANSI_REV "\x1b[7m"
+#define ANSI_NORMAL "\x1b[0m"
+    time_t now = time(NULL);
+    struct tm *today = localtime(&now);
+#endif
+    pc10_4 CHtiangan;
+    pc12_4 CHdizhi;
+    pc22_4 CHmiscchar;
+    pc24_7 CHjieqi;
+    pc7_10 daynamesCH;
+    bool bIsSim = (nEncoding == 'g');
+    int nCHchars;
+    char *sp;
+	SetChinese(nEncoding, pmode, CHtiangan, CHdizhi, CHmiscchar, CHjieqi, daynamesCH, nCHchars, sp);
+
+    /* Set julian day counter to 1st of the month */
+    double jdcnt;
+    /* Find julian day of the start of the next month */
+    double jdnext;
+    /* Set solarterm counter to day of 1st term of the calendar month */
+    int termcnt;
+    /* Set lunar month counter to the 1st lunar month of the calendar month */
+    int moncnt = 0;
+    /* Initialize counters for lunar days and days of month */
+    int ldcnt, dcnt;
+	PrepareMonthInitials(year, month, lastnew, vterms, vmoons,
+		jdcnt, jdnext, termcnt, moncnt, ldcnt, dcnt);
+
+    /* Set julian day counter to 1st of the month */
+//    double jdcnt = julian_date(year, month, 1, 12.0);
+    /* Find julian day of the start of the next month */
+//    double jdnext;
+//    if (month < 12)
+//        jdnext = julian_date(year, month + 1, 1, 12.0);
+//    else
+//        jdnext = julian_date(year + 1, 1, 1, 12.0);
+    /* Set solarterm counter to day of 1st term of the calendar month */
+//    int termcnt = (month - 1) * 2;
+//    if (vterms[termcnt] < jdcnt)
+//    	termcnt ++;
+    /* Set lunar month counter to the 1st lunar month of the calendar month */
+//    int moncnt = 0;
+//    while (moncnt < int(vmoons.size()) && vmoons[moncnt] < jdcnt)
+//        moncnt++;
+    /* In case solarterm and 1st of lunar month falls on the same day */
+    bool sameday = false;
+    /* Initialize counters for lunar days and days of month */
+//    int ldcnt, dcnt = 1;
+//    if (month != 1)
+//        ldcnt = int(jdcnt - vmoons[moncnt - 1] + 1);
+//    else
+//        ldcnt = int(jdcnt - lastnew + 1);
+//    if (jdcnt == vmoons[moncnt])
+//        ldcnt = 1;
+
+    /* Day of week of the 1st of month */
+    int dofw = (int(jdcnt) + 1) % 7;
+    int nWeeks = 5;
+    if ((dofw > 4 && daysinmonth[month - 1] == 31) || (dofw > 5 && daysinmonth[month - 1] == 30))
+    	nWeeks = 6;
+
+    char monthhead[200], cmonname[100];
+    short int cmonth;
+    char leap[2] = {0x00, 0x00};
+	PrepareMonthHead(year, month, vterms,
+				vmoons, vmonth, nextnew,
+				jdcnt, jdnext, moncnt, sp,
+				bSingle, pmode, nEncoding,
+				CHtiangan,
+				CHdizhi,
+				CHmiscchar,
+				CHjieqi,
+				daynamesCH,
+				monthhead,
+				cmonname,
+				cmonth);
+
     int nmove, i;
     if (pmode == PMODE_ASCII)
     {
@@ -1095,16 +1129,10 @@ void PrintMonthList(short int year, short int month, vdouble& vterms,
     pc22_4 CHmiscchar;
     pc24_7 CHjieqi;
     pc7_10 daynamesCH;
-	SetChinese(nEncoding, CHtiangan, CHdizhi, CHmiscchar, CHjieqi, daynamesCH);
     bool bIsSim = (nEncoding == 'g');
-    int nCHchars = (int)strlen((*CHmiscchar)[14]);
-    char space1[] = "&#160;";
-    char space2[] = " ";
+    int nCHchars;
     char *sp;
-    if (pmode == PMODE_HTML)
-        sp = space1;
-    else
-        sp = space2;
+	SetChinese(nEncoding, pmode, CHtiangan, CHdizhi, CHmiscchar, CHjieqi, daynamesCH, nCHchars, sp);
 
     /* Set julian day counter to 1st of the month */
     double jdcnt;
@@ -1119,31 +1147,6 @@ void PrintMonthList(short int year, short int month, vdouble& vterms,
 	PrepareMonthInitials(year, month, lastnew, vterms, vmoons,
 		jdcnt, jdnext, termcnt, moncnt, ldcnt, dcnt);
 
-    /* Set julian day counter to 1st of the month */
-//    double jdcnt = julian_date(year, month, 1, 12.0);
-    /* Find julian day of the start of the next month */
-//    double jdnext;
-//    if (month < 12)
-//        jdnext = julian_date(year, month + 1, 1, 12.0);
-//    else
-//        jdnext = julian_date(year + 1, 1, 1, 12.0);
-    /* Set solarterm counter to day of 1st term of the calendar month */
-//    int termcnt = (month - 1) * 2;
-//    if (vterms[termcnt] < jdcnt)
-//    	termcnt ++;
-    /* Set lunar month counter to the 1st lunar month of the calendar month */
-//    int moncnt = 0;
-//    while (moncnt < int(vmoons.size()) && vmoons[moncnt] < jdcnt)
-//        moncnt++;
-    /* Initialize counters for lunar days and days of month */
-//    int ldcnt, dcnt = 1;
-//    if (month != 1)
-//        ldcnt = int(jdcnt - vmoons[moncnt - 1] + 1);
-//    else
-//        ldcnt = int(jdcnt - lastnew + 1);
-//    if (jdcnt == vmoons[moncnt])
-//        ldcnt = 1;
-
     /* In case solarterm and 1st of lunar month falls on the same day */
     bool sameday = false;
 
@@ -1152,238 +1155,23 @@ void PrintMonthList(short int year, short int month, vdouble& vterms,
     int nWeeks = 5;
     if ((dofw > 4 && daysinmonth[month - 1] == 31) || (dofw > 5 && daysinmonth[month - 1] == 30))
     	nWeeks = 6;
-    /* Header of the month */
-    short int cyear = (year - 1984) % 60;
-    if (cyear < 0)
-        cyear += 60;
-    int tiancnt = cyear % 10;
-    int dicnt = cyear % 12;
+
+    char monthhead[200], cmonname[100];
     short int cmonth;
     char leap[2] = {0x00, 0x00};
-    char monthhead[200], cmonname[100];
-    int nstartlm = int(vmoons[moncnt] - jdcnt + 1);
-    int ndayslm;
-    if (moncnt < int(vmoons.size()) - 1)
-        ndayslm = int(vmoons[moncnt + 1] - vmoons[moncnt]);
-    else
-        ndayslm = int(nextnew - vmoons.back());
-    GetMonthNumber(vmonth[moncnt], cmonth, leap);
-    if ((pmode == PMODE_ASCII && nEncoding != 'a') || pmode == PMODE_HTML || pmode == PMODE_XML)
-        Number2MonthCH(vmonth[moncnt], nstartlm, ndayslm, nEncoding, cmonname);
-    else if (pmode == PMODE_PS)
-        Number2MonthPS(vmonth[moncnt], nstartlm, ndayslm, !bSingle, cmonname);
-    /* January is special if lunar New Year is in February */
-    if (month == 1 && cmonth != 1)
-    {
-        int tiancnt0 = (cyear + 59) % 10;
-        int dicnt0 = (cyear + 59) % 12;
-        if (vmoons[moncnt + 1] < jdnext) /* Two lunar months in one month */
-        {
-            short int cmonth1;
-            char leap1[2] = {0x00, 0x00};
-            int nstartlm1 = int(vmoons[moncnt + 1] - jdcnt + 1);
-            int ndayslm1;
-            char cmonname1[100];
-            if (moncnt < int(vmoons.size()) - 2)
-                ndayslm1 = int(vmoons[moncnt + 2] - vmoons[moncnt + 1]);
-            else
-                ndayslm1 = int(nextnew - vmoons.back());
-            if (pmode == PMODE_ASCII && nEncoding == 'a')
-            {
-                GetMonthNumber(vmonth[moncnt + 1], cmonth1, leap1);
-                sprintf(monthhead,
-                    "%s %d (Year %s%s, Month %s%d%c S%d, Year %s%s, Month %s%d%c S%d)",
-                    monnames[month - 1], year, tiangan[tiancnt0], dizhi[dicnt0],
-                    leap, cmonth, (ndayslm == 30) ? 'D' : 'X', nstartlm,
-                    tiangan[tiancnt], dizhi[dicnt],
-                    leap1, cmonth1, (ndayslm1 == 30) ? 'D' : 'X', nstartlm1);
-            }
-            else if ((pmode == PMODE_ASCII && nEncoding != 'a') || pmode == PMODE_HTML)
-            {
-                Number2MonthCH(vmonth[moncnt + 1], nstartlm1, ndayslm1, nEncoding, cmonname1);
-                sprintf(monthhead,
-                    "%s %d%s%s%s%s%s%s%s%s%s%s%s",
-                    monnames[month - 1], year, sp, sp, (*CHtiangan)[tiancnt0], (*CHdizhi)[dicnt0],
-                    (*CHmiscchar)[16], cmonname, (*CHmiscchar)[19], (*CHtiangan)[tiancnt],
-                    (*CHdizhi)[dicnt], (*CHmiscchar)[16], cmonname1);
-            }
-            else if (pmode == PMODE_XML)
-            {
-                Number2MonthCH(vmonth[moncnt + 1], nstartlm1, ndayslm1, nEncoding, cmonname1);
-                sprintf(monthhead,
-                    "%s%s%s%s%s%s%s%s%s",
-                    (*CHtiangan)[tiancnt0], (*CHdizhi)[dicnt0],
-                    (*CHmiscchar)[16], cmonname, (*CHmiscchar)[19], (*CHtiangan)[tiancnt],
-                    (*CHdizhi)[dicnt], (*CHmiscchar)[16], cmonname1);
-            }
-            else if (bSingle)
-            {
-                Number2MonthPS(vmonth[moncnt + 1], nstartlm1, ndayslm1, !bSingle, cmonname1);
-                sprintf(monthhead,
-                    "20 1 SF (%s %d) S\n/fsc 21 def gsave ptc\n"
-                    "%s%s%s%s%s\n%s%s%s%s%sgrestore",
-                    monnames[month - 1], year, PSbigmchar[20], PStiangan[tiancnt0],
-                    PSdizhi[dicnt0], PSbigmchar[16], cmonname, PSbigmchar[19],
-                    PStiangan[tiancnt], PSdizhi[dicnt], PSbigmchar[16], cmonname1);
-            }
-        }
-        else
-        {
-            if (pmode == PMODE_ASCII && nEncoding == 'a')
-            {
-                sprintf(monthhead, "%s %d (Year %s%s, Month %s%d%c S%d)",
-                    monnames[month - 1], year, tiangan[tiancnt0], dizhi[dicnt0],
-                    leap, cmonth, (ndayslm == 30) ? 'D' : 'X', nstartlm);
-            }
-            else if ((pmode == PMODE_ASCII && nEncoding != 'a') || pmode == PMODE_HTML)
-            {
-                sprintf(monthhead,
-                    "%s %d%s%s%s%s%s%s",
-                    monnames[month - 1], year, sp, sp, (*CHtiangan)[tiancnt0],
-                    (*CHdizhi)[dicnt0], (*CHmiscchar)[16], cmonname);
-            }
-            else if (pmode == PMODE_XML)
-            {
-                sprintf(monthhead,
-                    "%s%s%s%s",
-                    (*CHtiangan)[tiancnt0],
-                    (*CHdizhi)[dicnt0], (*CHmiscchar)[16], cmonname);
-            }
-            else if (bSingle)
-            {
-                sprintf(monthhead,
-                    "20 1 SF (%s %d) S\n/fsc 21 def gsave ptc\n"
-                    "%s%s%s%s%sgrestore",
-                    monnames[month - 1], year, PSbigmchar[20], PStiangan[tiancnt0],
-                    PSdizhi[dicnt0], PSbigmchar[16], cmonname);
-            }
-        }
-    }
-    else
-    {
-        if (moncnt < int(vmoons.size()) - 1 && vmoons[moncnt + 1] < jdnext)
-        /* Two lunar months in one month */
-        {
-            short int cmonth1;
-            char leap1[2] = {0x00, 0x00};
-            int nstartlm1 = int(vmoons[moncnt + 1] - jdcnt + 1);
-            int ndayslm1;
-            char cmonname1[100];
-            if (moncnt < int(vmoons.size()) - 2)
-                ndayslm1 = int(vmoons[moncnt + 2] - vmoons[moncnt + 1]);
-            else
-                ndayslm1 = int(nextnew - vmoons.back());
-            if (pmode == PMODE_ASCII && nEncoding == 'a')
-            {
-                GetMonthNumber(vmonth[moncnt + 1], cmonth1, leap1);
-                sprintf(monthhead,
-                    "%s %d (Year %s%s, Month %s%d%c S%d, %s%d%c S%d)",
-                    monnames[month - 1], year, tiangan[tiancnt], dizhi[dicnt],
-                    leap, cmonth, (ndayslm == 30) ? 'D' : 'X', nstartlm,
-                    leap1, cmonth1, (ndayslm1 == 30) ? 'D' : 'X', nstartlm1);
-            }
-            else if ((pmode == PMODE_ASCII && nEncoding != 'a') || pmode == PMODE_HTML)
-            {
-                Number2MonthCH(vmonth[moncnt + 1], nstartlm1, ndayslm1, nEncoding, cmonname1);
-                sprintf(monthhead,
-                    "%s %d%s%s%s%s%s%s%s%s", monnames[month - 1], year, sp, sp,
-                    (*CHtiangan)[tiancnt], (*CHdizhi)[dicnt],
-                    (*CHmiscchar)[16], cmonname, (*CHmiscchar)[19], cmonname1);
-            }
-            else if (pmode == PMODE_XML)
-            {
-                Number2MonthCH(vmonth[moncnt + 1], nstartlm1, ndayslm1, nEncoding, cmonname1);
-                sprintf(monthhead,
-                    "%s%s%s%s%s%s",
-                    (*CHtiangan)[tiancnt], (*CHdizhi)[dicnt],
-                    (*CHmiscchar)[16], cmonname, (*CHmiscchar)[19], cmonname1);
-            }
-            else if (bSingle)
-            {
-                Number2MonthPS(vmonth[moncnt + 1], nstartlm1, ndayslm1, !bSingle, cmonname1);
-                sprintf(monthhead,
-                    "20 1 SF (%s %d) S\n/fsc 21 def gsave ptc\n"
-                    "%s%s%s%s%s%s%sgrestore",
-                    monnames[month - 1], year, PSbigmchar[20], PStiangan[tiancnt],
-                    PSdizhi[dicnt], PSbigmchar[16], cmonname, PSbigmchar[19],
-                    cmonname1);
-            }
-        }
-        else if (month == 2 && vmoons[moncnt] >= jdnext)
-        /* No new moon in February */
-        {
-            ndayslm = int(vmoons[moncnt] - vmoons[moncnt - 1]);
-            if (pmode == PMODE_ASCII && nEncoding == 'a')
-            {
-                GetMonthNumber(vmonth[moncnt - 1], cmonth, leap);
-                sprintf(monthhead, "%s %d (Year %s%s, Month %s%d%c)",
-                    monnames[month - 1], year, tiangan[tiancnt], dizhi[dicnt],
-                    leap, cmonth, (ndayslm == 30) ? 'D' : 'X');
-            }
-            else if ((pmode == PMODE_ASCII && nEncoding != 'a') || pmode == PMODE_HTML)
-            {
-                Number2MonthCH(vmonth[moncnt - 1], nstartlm, ndayslm, nEncoding, cmonname);
-                char *p = strstr(cmonname, (*CHmiscchar)[14]) + 2 * nCHchars;
-                *p = 0;
-                sprintf(monthhead,
-                    "%s %d%s%s%s%s%s%s", monnames[month - 1], year, sp, sp,
-                    (*CHtiangan)[tiancnt], (*CHdizhi)[dicnt],
-                    (*CHmiscchar)[16], cmonname);
-            }
-            else if (pmode == PMODE_XML)
-            {
-                Number2MonthCH(vmonth[moncnt - 1], nstartlm, ndayslm, nEncoding, cmonname);
-                char *p = strstr(cmonname, (*CHmiscchar)[14]) + 2 * nCHchars;
-                *p = 0;
-                sprintf(monthhead,
-                    "%s%s%s%s",
-                    (*CHtiangan)[tiancnt], (*CHdizhi)[dicnt],
-                    (*CHmiscchar)[16], cmonname);
-            }
-            else if (bSingle)
-            {
-                Number2MonthPS(vmonth[moncnt - 1], nstartlm, ndayslm, !bSingle, cmonname);
-                char *p = strstr(cmonname, PSbigmchar[14]) + 8;
-                *p = 0;
-                sprintf(monthhead,
-                    "20 1 SF (%s %d) S\n/fsc 21 def gsave ptc\n"
-                    "%s%s%s%s%sgrestore",
-                    monnames[month - 1], year, PSbigmchar[20], PStiangan[tiancnt],
-                    PSdizhi[dicnt], PSbigmchar[16], cmonname);
-            }
-        }
-        else
-        {
-            if (pmode == PMODE_ASCII && nEncoding == 'a')
-            {
-                sprintf(monthhead, "%s %d (Year %s%s, Month %s%d%c S%d)",
-                    monnames[month - 1], year, tiangan[tiancnt], dizhi[dicnt],
-                    leap, cmonth, (ndayslm == 30) ? 'D' : 'X', nstartlm);
-            }
-            else if ((pmode == PMODE_ASCII && nEncoding != 'a') || pmode == PMODE_HTML)
-            {
-                sprintf(monthhead,
-                    "%s %d%s%s%s%s%s%s", monnames[month - 1], year, sp, sp,
-                    (*CHtiangan)[tiancnt], (*CHdizhi)[dicnt],
-                    (*CHmiscchar)[16], cmonname);
-            }
-            else if (pmode == PMODE_XML)
-            {
-                sprintf(monthhead,
-                    "%s%s%s%s",
-                    (*CHtiangan)[tiancnt], (*CHdizhi)[dicnt],
-                    (*CHmiscchar)[16], cmonname);
-            }
-            else if (bSingle)
-            {
-                sprintf(monthhead,
-                    "20 1 SF (%s %d) S\n/fsc 21 def gsave ptc\n"
-                    "%s%s%s%s%sgrestore",
-                    monnames[month - 1], year, PSbigmchar[20], PStiangan[tiancnt],
-                    PSdizhi[dicnt], PSbigmchar[16], cmonname);
-            }
-        }
-    }
+	PrepareMonthHead(year, month, vterms,
+				vmoons, vmonth, nextnew,
+				jdcnt, jdnext, moncnt, sp,
+				bSingle, pmode, nEncoding,
+				CHtiangan,
+				CHdizhi,
+				CHmiscchar,
+				CHjieqi,
+				daynamesCH,
+				monthhead,
+				cmonname,
+				cmonth);
+
     int nmove, i;
     if (pmode == PMODE_ASCII)
     {
@@ -1995,7 +1783,7 @@ bool ProcessArg(int argc, char** argv, short int& year, short int& month,
 }
 
 void PrintJieQiList(short int year, vdouble& vterms, vdouble& vtermhours,
-		int nEncoding)
+		int pmode, int nEncoding)
 { 
 		//	lc220715 -	enhanced to print the name, year, month, day
 	    pc10_4 CHtiangan;
@@ -2003,7 +1791,9 @@ void PrintJieQiList(short int year, vdouble& vterms, vdouble& vtermhours,
 		pc22_4 CHmiscchar;
         pc24_7 CHjieqi;
         pc7_10 daynamesCH;
-	    SetChinese(nEncoding, CHtiangan, CHdizhi, CHmiscchar, CHjieqi, daynamesCH);
+    	int nCHchars;
+    	char *sp;
+		SetChinese(nEncoding, pmode, CHtiangan, CHdizhi, CHmiscchar, CHjieqi, daynamesCH, nCHchars, sp);
 		printf("year %04d no of terms %d:\n", year, int(vterms.size()));
 		for (int t=0; t<int(vtermhours.size()); t++) {
 			double frac	= vtermhours[t];
@@ -2065,9 +1855,27 @@ int main(int argc, char** argv)
     if (fmode == FUNC_JIEQI)
     {
 		//	lc220715 -	enhanced to print the name, year, month, day
-		PrintJieQiList(year, vterms, vtermhours, nEncoding);
+		PrintJieQiList(year, vterms, vtermhours, pmode, nEncoding);
 		return 0;
 	}
+
+    if (fmode == FUNC_LIST)
+    {
+		//	lc220716 -	enhanced to print date list of a month
+	    if (bSingle)
+		{
+        	PrintMonthList(year, month, vterms, lastnew, lastmon, vmoons, vmonth, nextnew, pmode, bSingle, nEncoding,
+                   ((short int)(lmon) == month || (short int)(lmon + 0.9) == month), vtermhours);
+		}
+		else
+		{
+			short int i;
+			for (i = 1; i <= 12; i++)
+				PrintMonthList(year, i, vterms, lastnew, lastmon, vmoons, vmonth, nextnew, pmode, bSingle, nEncoding, false, vtermhours);
+		}
+		return 0;
+	}
+
 	
 	//	lc220716 -	default function FUNC_CAL
     if (pmode == PMODE_XML)
