@@ -210,6 +210,37 @@ void SetChinese(int nEncoding, pc10_4& CHtiangan, pc12_4& CHdizhi, pc22_4& CHmis
     }
 }
 
+void PrepareMonthInitials(short int year, short int month,
+		int lastnew,
+		vdouble& vterms, vdouble& vmoons,
+		double& jdcnt, double& jdnext, int& termcnt, int& moncnt,
+		int& ldcnt, int& dcnt)
+{
+    /* Set julian day counter to 1st of the month */
+    jdcnt = julian_date(year, month, 1, 12.0);
+    /* Find julian day of the start of the next month */
+    if (month < 12)
+        jdnext = julian_date(year, month + 1, 1, 12.0);
+    else
+        jdnext = julian_date(year + 1, 1, 1, 12.0);
+    /* Set solarterm counter to day of 1st term of the calendar month */
+    termcnt = (month - 1) * 2;
+    if (vterms[termcnt] < jdcnt)
+    	termcnt ++;
+    /* Set lunar month counter to the 1st lunar month of the calendar month */
+    moncnt = 0;
+    while (moncnt < int(vmoons.size()) && vmoons[moncnt] < jdcnt)
+        moncnt++;
+    /* Initialize counters for lunar days and days of month */
+    ldcnt, dcnt = 1;
+    if (month != 1)
+        ldcnt = int(jdcnt - vmoons[moncnt - 1] + 1);
+    else
+        ldcnt = int(jdcnt - lastnew + 1);
+    if (jdcnt == vmoons[moncnt])
+        ldcnt = 1;
+}
+
 void PrintMonth(short int year, short int month, vdouble& vterms,
                 double lastnew, double lastmon, vdouble& vmoons,
                 vdouble& vmonth, double nextnew, int pmode,
@@ -237,32 +268,47 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
         sp = space1;
     else
         sp = space2;
+
     /* Set julian day counter to 1st of the month */
-    double jdcnt = julian_date(year, month, 1, 12.0);
+    double jdcnt;
     /* Find julian day of the start of the next month */
     double jdnext;
-    if (month < 12)
-        jdnext = julian_date(year, month + 1, 1, 12.0);
-    else
-        jdnext = julian_date(year + 1, 1, 1, 12.0);
     /* Set solarterm counter to day of 1st term of the calendar month */
-    int termcnt = (month - 1) * 2;
-    if (vterms[termcnt] < jdcnt)
-    	termcnt ++;
+    int termcnt;
     /* Set lunar month counter to the 1st lunar month of the calendar month */
     int moncnt = 0;
-    while (moncnt < int(vmoons.size()) && vmoons[moncnt] < jdcnt)
-        moncnt++;
+    /* Initialize counters for lunar days and days of month */
+    int ldcnt, dcnt;
+	PrepareMonthInitials(year, month, lastnew, vterms, vmoons,
+		jdcnt, jdnext, termcnt, moncnt, ldcnt, dcnt);
+
+    /* Set julian day counter to 1st of the month */
+//    double jdcnt = julian_date(year, month, 1, 12.0);
+    /* Find julian day of the start of the next month */
+//    double jdnext;
+//    if (month < 12)
+//        jdnext = julian_date(year, month + 1, 1, 12.0);
+//    else
+//        jdnext = julian_date(year + 1, 1, 1, 12.0);
+    /* Set solarterm counter to day of 1st term of the calendar month */
+//    int termcnt = (month - 1) * 2;
+//    if (vterms[termcnt] < jdcnt)
+//    	termcnt ++;
+    /* Set lunar month counter to the 1st lunar month of the calendar month */
+//    int moncnt = 0;
+//    while (moncnt < int(vmoons.size()) && vmoons[moncnt] < jdcnt)
+//        moncnt++;
     /* In case solarterm and 1st of lunar month falls on the same day */
     bool sameday = false;
     /* Initialize counters for lunar days and days of month */
-    int ldcnt, dcnt = 1;
-    if (month != 1)
-        ldcnt = int(jdcnt - vmoons[moncnt - 1] + 1);
-    else
-        ldcnt = int(jdcnt - lastnew + 1);
-    if (jdcnt == vmoons[moncnt])
-        ldcnt = 1;
+//    int ldcnt, dcnt = 1;
+//    if (month != 1)
+//        ldcnt = int(jdcnt - vmoons[moncnt - 1] + 1);
+//    else
+//        ldcnt = int(jdcnt - lastnew + 1);
+//    if (jdcnt == vmoons[moncnt])
+//        ldcnt = 1;
+
     /* Day of week of the 1st of month */
     int dofw = (int(jdcnt) + 1) % 7;
     int nWeeks = 5;
@@ -1059,32 +1105,48 @@ void PrintMonthList(short int year, short int month, vdouble& vterms,
         sp = space1;
     else
         sp = space2;
+
     /* Set julian day counter to 1st of the month */
-    double jdcnt = julian_date(year, month, 1, 12.0);
+    double jdcnt;
     /* Find julian day of the start of the next month */
     double jdnext;
-    if (month < 12)
-        jdnext = julian_date(year, month + 1, 1, 12.0);
-    else
-        jdnext = julian_date(year + 1, 1, 1, 12.0);
     /* Set solarterm counter to day of 1st term of the calendar month */
-    int termcnt = (month - 1) * 2;
-    if (vterms[termcnt] < jdcnt)
-    	termcnt ++;
+    int termcnt;
     /* Set lunar month counter to the 1st lunar month of the calendar month */
     int moncnt = 0;
-    while (moncnt < int(vmoons.size()) && vmoons[moncnt] < jdcnt)
-        moncnt++;
+    /* Initialize counters for lunar days and days of month */
+    int ldcnt, dcnt;
+	PrepareMonthInitials(year, month, lastnew, vterms, vmoons,
+		jdcnt, jdnext, termcnt, moncnt, ldcnt, dcnt);
+
+    /* Set julian day counter to 1st of the month */
+//    double jdcnt = julian_date(year, month, 1, 12.0);
+    /* Find julian day of the start of the next month */
+//    double jdnext;
+//    if (month < 12)
+//        jdnext = julian_date(year, month + 1, 1, 12.0);
+//    else
+//        jdnext = julian_date(year + 1, 1, 1, 12.0);
+    /* Set solarterm counter to day of 1st term of the calendar month */
+//    int termcnt = (month - 1) * 2;
+//    if (vterms[termcnt] < jdcnt)
+//    	termcnt ++;
+    /* Set lunar month counter to the 1st lunar month of the calendar month */
+//    int moncnt = 0;
+//    while (moncnt < int(vmoons.size()) && vmoons[moncnt] < jdcnt)
+//        moncnt++;
+    /* Initialize counters for lunar days and days of month */
+//    int ldcnt, dcnt = 1;
+//    if (month != 1)
+//        ldcnt = int(jdcnt - vmoons[moncnt - 1] + 1);
+//    else
+//        ldcnt = int(jdcnt - lastnew + 1);
+//    if (jdcnt == vmoons[moncnt])
+//        ldcnt = 1;
+
     /* In case solarterm and 1st of lunar month falls on the same day */
     bool sameday = false;
-    /* Initialize counters for lunar days and days of month */
-    int ldcnt, dcnt = 1;
-    if (month != 1)
-        ldcnt = int(jdcnt - vmoons[moncnt - 1] + 1);
-    else
-        ldcnt = int(jdcnt - lastnew + 1);
-    if (jdcnt == vmoons[moncnt])
-        ldcnt = 1;
+
     /* Day of week of the 1st of month */
     int dofw = (int(jdcnt) + 1) % 7;
     int nWeeks = 5;
@@ -1932,6 +1994,28 @@ bool ProcessArg(int argc, char** argv, short int& year, short int& month,
     return true;
 }
 
+void PrintJieQiList(short int year, vdouble& vterms, vdouble& vtermhours,
+		int nEncoding)
+{ 
+		//	lc220715 -	enhanced to print the name, year, month, day
+	    pc10_4 CHtiangan;
+		pc12_4 CHdizhi;
+		pc22_4 CHmiscchar;
+        pc24_7 CHjieqi;
+        pc7_10 daynamesCH;
+	    SetChinese(nEncoding, CHtiangan, CHdizhi, CHmiscchar, CHjieqi, daynamesCH);
+		printf("year %04d no of terms %d:\n", year, int(vterms.size()));
+		for (int t=0; t<int(vtermhours.size()); t++) {
+			double frac	= vtermhours[t];
+			int hr, min, sec;
+			j2hms(frac, hr, min, sec);
+			short int lyear, month, day;
+			double hour;
+			cal_date(frac, &lyear, &month, &day, &hour);
+			printf("%2d\t%.6f\t%s\t%04d-%02d-%02d\t%02d:%02d\n", t+1, vtermhours[t], nEncoding == 'a' ? jieqi[t] : (*CHjieqi)[t], lyear, month, day, hr, min);
+		}
+}
+
 int main(int argc, char** argv)
 {
     time_t now = time(NULL);
@@ -1981,22 +2065,7 @@ int main(int argc, char** argv)
     if (fmode == FUNC_JIEQI)
     {
 		//	lc220715 -	enhanced to print the name, year, month, day
-	    pc10_4 CHtiangan;
-		pc12_4 CHdizhi;
-		pc22_4 CHmiscchar;
-        pc24_7 CHjieqi;
-        pc7_10 daynamesCH;
-	    SetChinese(nEncoding, CHtiangan, CHdizhi, CHmiscchar, CHjieqi, daynamesCH);
-		printf("year %04d no of terms %d:\n", year, int(vterms.size()));
-		for (int t=0; t<int(vtermhours.size()); t++) {
-			double frac	= vtermhours[t];
-			int hr, min, sec;
-			j2hms(frac, hr, min, sec);
-			short int year, month, day;
-			double hour;
-			cal_date(frac, &year, &month, &day, &hour);
-			printf("%2d\t%.6f\t%s\t%04d-%02d-%02d\t%02d:%02d\n", t+1, vtermhours[t], nEncoding == 'a' ? jieqi[t] : (*CHjieqi)[t], year, month, day, hr, min);
-		}
+		PrintJieQiList(year, vterms, vtermhours, nEncoding);
 		return 0;
 	}
 	
