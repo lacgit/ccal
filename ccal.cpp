@@ -921,11 +921,13 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
                         int nlen = (int)strlen(cmonname);
                         if (nlen <= 3 * nCHchars)
                             printf("  ");
-                        printf("%s", cmonname);
+						char day2[8];
+						Number2DayCH(2, nEncoding, day2);
+                        printf("%s%s", cmonname, day2);
                         if (nlen == 2 * nCHchars)
-                            printf("   ");
-                        if (nlen == 3 * nCHchars)
-                            printf(" ");
+                            printf("  ");
+                    //	if (nlen == 3 * nCHchars)
+                    //		printf(" ");
                     }
                 }
                 else if (pmode == PMODE_HTML)
