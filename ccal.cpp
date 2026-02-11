@@ -152,7 +152,7 @@ void PrintMonthNumber(double mnumber)
 	//	lc180710 -	enhance format
 	//	lc260211 -	moved the leap prefix to front
 	//				and use M instead of Y to indicate new lunar month.
-    printf("%1s[%2d]M     ", leap, month);
+    printf(" %1s[%2d]M     ", leap, month);
 }
 
 /* Inputs:
@@ -648,10 +648,10 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
         {
             if (nEncoding != 'u')
 			//	lc180710 -	enhance format
-                printf("%-10s   ", (*daynamesCH)[i]);
+                printf("%-10s    ", (*daynamesCH)[i]);
             else
 			//	lc180710 -	enhance format
-                printf("%s      ", (*daynamesCH)[i]);
+                printf("%s       ", (*daynamesCH)[i]);
         }
         printf("\n");
     }
@@ -756,7 +756,7 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
                 {
                     if (pmode == PMODE_ASCII)
 					//	lc180710 -	enhance format
-                        printf("%10s   ", " ");
+                        printf("%10s    ", " ");
                     else if (pmode == PMODE_HTML)
                     {
                         if (i == 0 || i == 6)
@@ -852,12 +852,12 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
                 {
                     if (nEncoding == 'a')
 						//	lc180710 -	enhance format
-                        printf(" [%2d]      ", ldcnt);
+                        printf("  [%2d]      ", ldcnt);
                     else
                     {
                         Number2DayCH(ldcnt, nEncoding, cdayname);
 						//	lc180710 -	enhance format
-                        printf(" %s      ", cdayname);
+                        printf("  %s      ", cdayname);
                     }
                 }
                 else if (pmode == PMODE_HTML)
@@ -920,7 +920,7 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
                         *p = 0;
                         int nlen = (int)strlen(cmonname);
                         if (nlen <= 3 * nCHchars)
-                            printf(" ");
+                            printf("  ");
                         printf("%s", cmonname);
                         if (nlen == 2 * nCHchars)
                             printf("   ");
@@ -960,18 +960,18 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
 					j2hms(vtermhours[termcnt], hr, min, sec);
                     if (nEncoding == 'a') {
 					//	lc180710 -	enhance format
-                        printf("  %s %02d:%02d ", jieqi[termcnt++], hr, min);
+                        printf("  %s %02d:%02d  ", jieqi[termcnt++], hr, min);
 					}
                     else
                     {
 					//	lc180710 -	enhance format
-                        printf(" %s%02d:%02d ", (*CHjieqi)[termcnt++], hr, min);
+                        printf("  %s%02d:%02d ", (*CHjieqi)[termcnt++], hr, min);
                     }
                 }
                 else if (pmode == PMODE_HTML)
                 {
                     if (sameday)
-                        printf(" %s", cmonname);
+                        printf("  %s", cmonname);
                     else
                         printf(" ");
 					int hr, min, sec;
@@ -1028,13 +1028,13 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
                         *p = 0;
                         int nlen = (int)strlen(cmonname);
                         if (nlen <= 3 * nCHchars)
-                            printf(" ");
+                            printf("  ");
 						//	lc180710 -	enhance format
-                        printf("%s   ", cmonname);
+                        printf("%s    ", cmonname);
                         if (nlen == 2 * nCHchars)
-                            printf("   ");
+                            printf("  ");
                         if (nlen == 3 * nCHchars)
-                            printf(" ");
+                            printf("  ");
                     }
                 }
                 else if (pmode == PMODE_HTML || pmode == PMODE_XML)
@@ -1444,12 +1444,12 @@ void PrintMonthList(short int year, short int month, vdouble& vterms,
                 {
                     if (nEncoding == 'a')
 						//	lc180710 -	enhance format
-                        printf(" [%2d]      ", ldcnt);
+                        printf("  [%2d]      ", ldcnt);
                     else
                     {
                         Number2DayCH(ldcnt, nEncoding, cdayname);
 						//	lc180710 -	enhance format
-                        printf(" %s      ", cdayname);
+                        printf("  %s      ", cdayname);
                     }
                 }
                 else if (pmode == PMODE_HTML)
@@ -1557,13 +1557,13 @@ void PrintMonthList(short int year, short int month, vdouble& vterms,
                     else
                     {
 					//	lc180710 -	enhance format
-                        printf(" %s%02d:%02d ", (*CHjieqi)[termcnt++], hr, min);
+                        printf("  %s%02d:%02d ", (*CHjieqi)[termcnt++], hr, min);
                     }
                 }
                 else if (pmode == PMODE_HTML)
                 {
                     if (sameday)
-                        printf(" %s", cmonname);
+                        printf("  %s", cmonname);
                     else
                         printf(" ");
 					int hr, min, sec;
