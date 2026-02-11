@@ -150,7 +150,9 @@ void PrintMonthNumber(double mnumber)
     char leap[2] = {0x00, 0x00};
     GetMonthNumber(mnumber, month, leap);
 	//	lc180710 -	enhance format
-    printf(" [%2d]Y%1s    ", month, leap);
+	//	lc260211 -	moved the leap prefix to front
+	//				and use M instead of Y to indicate new lunar month.
+    printf("%1s[%2d]M     ", leap, month);
 }
 
 /* Inputs:
