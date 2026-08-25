@@ -2092,7 +2092,11 @@ void PrintICalendar(short int year, short int month, vdouble& vterms,
                 sl += sprintf(szSum + sl, "%s ",
                               JianChuName(GetJianChu(jdcnt, vterms), 'u'));
             if (bTerm)
-                sl += sprintf(szSum + sl, "%s ", (*CHjieqi)[termcnt]);
+            {
+                int hr, min, sec;
+                j2hms(vtermhours[termcnt], hr, min, sec);
+                sl += sprintf(szSum + sl, "%s %02d:%02d ", (*CHjieqi)[termcnt], hr, min);
+            }
             sprintf(szSum + sl, "%s%s", (ldcnt == 1) ? cmonname : "", cdayname);
 
             /* DESCRIPTION */
