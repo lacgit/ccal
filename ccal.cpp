@@ -1035,8 +1035,9 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
                         printf("%s    ", cmonname);
                         if (nlen == 2 * nCHchars)
                             printf("  ");
-                        if (nlen == 3 * nCHchars)
-                            printf("  ");
+						//	lc260825 -	when month >= 11, in chinese, one space less to align text print
+                        //if (nlen == 3 * nCHchars)
+                        //    printf("");
                     }
                 }
                 else if (pmode == PMODE_HTML || pmode == PMODE_XML)
