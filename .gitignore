@@ -1,2 +1,3 @@
 *.o
 ccal
+store-gh-token.sh
