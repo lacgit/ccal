@@ -75,6 +75,31 @@ XML output also include a legend explaining each deity's 神煞, 吉凶,
 simple meaning (含义), suitable (宜) and avoid (忌) activities.  In
 PostScript mode a two-letter code is printed in each day cell, and a
 legend is added on the whole-year page only.
+.TP
+.B \-i
+Generates an iCalendar 2.0 (.ics) file on standard output with one
+all-day event per Gregorian day, for import or subscription in Outlook,
+Google Calendar, Apple Calendar, OneCalendar and similar applications.
+The event title shows the lunar date, prefixed by the solar term (節氣)
+when one falls on that day and, with
+.B \-c
+, by the Jianchu deity.  The event description gives the lunar date and
+year (干支), the day's ganzhi, and with
+.B \-c
+the Jianchu suitability (宜) and avoidance (忌) activities, plus the
+solar-term time.  Output is UTF-8 (use
+.B \-b
+for traditional characters), uses CRLF line endings, folds lines at 75
+octets per RFC 5545, and uses stable per-day UIDs so re-importing the
+same year does not create duplicate events.  Redirect to a file, e.g.
+.RS
+.nf
+ccal -i 2026 > chinese-calendar-2026.ics
+.fi
+.RE
+to import.  As with other modes, giving a
+.I month
+operand limits the output to that month.
 .SH OPERANDS
 The following operands are supported:
 .TP 8
