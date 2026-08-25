@@ -10,6 +10,8 @@ ccal \- display a calendar together with Chinese calendar
 .B \-g|\-b
 ] [
 .B \-u
+] [
+.B \-c
 ] [ [
 .I month
 ]
@@ -62,6 +64,17 @@ character or HTML modes.
 .B \-u
 Outputs Chinese characters in UTF-8 encoding rathern than GB or big5.
 No effect in Encapsulated PostScript mode.
+.TP
+.B \-c
+Prints the Jianchu (建除) twelve deities for each day: 建 除 滿 平 定 執
+破 危 成 收 開 閉 (Jianchu twelve day-officers of the Chinese almanac).
+In ASCII mode a two-letter pinyin code is shown (JN, CU, MN, PG, DG, ZH,
+PO, WE, CG, SO, KI, BI).  In character, HTML and XML modes the character
+itself is shown (respecting -g/-b for simplified/traditional).  HTML and
+XML output also include a legend explaining each deity's 神煞, 吉凶,
+simple meaning (含义), suitable (宜) and avoid (忌) activities.  In
+PostScript mode a two-letter code is printed in each day cell, and a
+legend is added on the whole-year page only.
 .SH OPERANDS
 The following operands are supported:
 .TP 8
