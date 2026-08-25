@@ -2086,18 +2086,18 @@ void PrintICalendar(short int year, short int month, vdouble& vterms,
             Number2DayCH(ldcnt, 'u', cdayname);
 
             char szSum[160], szDesc[512], szEsc[1100];
-            /* SUMMARY: [建除] [節氣] 農曆日, month name only on 初一 */
+            /* SUMMARY: 農曆日 [節氣 HH:MM] [建除] — day first */
             int sl = 0;
-            if (bJianChu)
-                sl += sprintf(szSum + sl, "%s ",
-                              JianChuName(GetJianChu(jdcnt, vterms), 'u'));
+            sl += sprintf(szSum + sl, "%s%s", (ldcnt == 1) ? cmonname : "", cdayname);
             if (bTerm)
             {
                 int hr, min, sec;
                 j2hms(vtermhours[termcnt], hr, min, sec);
-                sl += sprintf(szSum + sl, "%s %02d:%02d ", (*CHjieqi)[termcnt], hr, min);
+                sl += sprintf(szSum + sl, " %s %02d:%02d", (*CHjieqi)[termcnt], hr, min);
             }
-            sprintf(szSum + sl, "%s%s", (ldcnt == 1) ? cmonname : "", cdayname);
+            if (bJianChu)
+                sl += sprintf(szSum + sl, " %s",
+                              JianChuName(GetJianChu(jdcnt, vterms), 'u'));
 
             /* DESCRIPTION */
             int dl = 0;
