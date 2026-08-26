@@ -930,15 +930,8 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
                 }
                 else if (pmode == PMODE_XML)
                 {
-                    Number2DayPS(ldcnt, cdayname);
-                    int nlen = (int)strlen(cdayname);
-                    if (nlen > 8)
-                        printf(" grestore -%d 0 rmoveto gsave ptc",
-                               ((nlen - 8) / 4 * 3));
-                    printf(" %s\n", cdayname);
-                    if (i == 0 || i == 6)
-                        printf("grestore\n");
-                    printf("grestore\n");
+                    /* The day name is emitted in the closing
+                       <ccal:day ... cdatename="..."/> element. */
                 }
             }
             else if (sameday)
@@ -1116,11 +1109,14 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
             {
                 if (bJianChu)
                 {
-                    /* shichen: 12 吉凶 chars for 子時..亥時 (以日支起建) */
+                    /* shichen: 12 吉凶 chars for 子時..亥時 */
                     char szShichen[40] = "";
                     int db = (int(jdcnt) + 1) % 12;
+                    int yb = (year - 4) % 12;
+                    if (yb < 0)
+                        yb += 12;
                     for (int h = 0; h < 12; h++)
-                        strcat(szShichen, ShiChenJixiong(h, db, nEncoding));
+                        strcat(szShichen, ShiChenJixiong(h, db, yb, nEncoding));
                     printf("cmonthname=\"%s\" cdatename=\"%s\" jianchu=\"%s\" shichen=\"%s\" />\n",
                            cmonname, cdayname, JianChuName(jc, nEncoding), szShichen);
                 }
@@ -1549,15 +1545,8 @@ void PrintMonthList(short int year, short int month, vdouble& vterms,
                 }
                 else if (pmode == PMODE_XML)
                 {
-                    Number2DayPS(ldcnt, cdayname);
-                    int nlen = (int)strlen(cdayname);
-                    if (nlen > 8)
-                        printf(" grestore -%d 0 rmoveto gsave ptc",
-                               ((nlen - 8) / 4 * 3));
-                    printf(" %s\n", cdayname);
-                    if (i == 0 || i == 6)
-                        printf("grestore\n");
-                    printf("grestore\n");
+                    /* The day name is emitted in the closing
+                       <ccal:day ... cdatename="..."/> element. */
                 }
             }
             else if (sameday)
@@ -1732,11 +1721,14 @@ void PrintMonthList(short int year, short int month, vdouble& vterms,
             {
                 if (bJianChu)
                 {
-                    /* shichen: 12 吉凶 chars for 子時..亥時 (以日支起建) */
+                    /* shichen: 12 吉凶 chars for 子時..亥時 */
                     char szShichen[40] = "";
                     int db = (int(jdcnt) + 1) % 12;
+                    int yb = (year - 4) % 12;
+                    if (yb < 0)
+                        yb += 12;
                     for (int h = 0; h < 12; h++)
-                        strcat(szShichen, ShiChenJixiong(h, db, nEncoding));
+                        strcat(szShichen, ShiChenJixiong(h, db, yb, nEncoding));
                     printf("cmonthname=\"%s\" cdatename=\"%s\" jianchu=\"%s\" shichen=\"%s\" />\n",
                            cmonname, cdayname, JianChuName(jc, nEncoding), szShichen);
                 }
@@ -2139,13 +2131,16 @@ void PrintICalendar(short int year, short int month, vdouble& vterms,
                     dl += sprintf(szDesc + dl, "宜：%s\n", pyi);
                 if (pji != 0 && pji[0] != 0)
                     dl += sprintf(szDesc + dl, "忌：%s\n", pji);
-                /* 時辰吉凶 (以日支起建), with hh:mm ranges for reference */
+                /* 時辰吉凶, with hh:mm ranges for reference */
                 int db = (int(jdcnt) + 1) % 12;
+                int yb = (lyear - 4) % 12;
+                if (yb < 0)
+                    yb += 12;
                 dl += sprintf(szDesc + dl, "時辰吉凶：\n");
                 for (int h = 0; h < 12; h++)
                     dl += sprintf(szDesc + dl, "%s時 %s %s\n",
                                   (*CHdizhi)[h], ShiChenHHMM(h),
-                                  ShiChenJixiong(h, db, 'u'));
+                                  ShiChenJixiong(h, db, yb, 'u'));
             }
             if (bTerm)
             {

@@ -32,24 +32,25 @@ char U8jianchu_tra[12][4] = {
    "\xe6\x94\xb6", "\xe9\x96\x8b", "\xe9\x96\x89"
 };
 
-/* ---- 吉凶 (auspiciousness) ---- */
+/* ---- 吉凶 (auspiciousness) ----
+   十二建星黃黑道: 除危定執成開 = 黃道吉; 建滿平收閉破 = 黑道凶. */
 char GBjixiong[12][4] = {
-   "\xbc\xaa", "\xbc\xaa", "\xbc\xaa",
-   "\xc6\xbd", "\xbc\xaa", "\xbc\xaa",
-   "\xd0\xd7", "\xd0\xd7", "\xbc\xaa",
-   "\xbc\xaa", "\xbc\xaa", "\xd0\xd7"
+   "\xd0\xd7", "\xbc\xaa", "\xd0\xd7",
+   "\xd0\xd7", "\xbc\xaa", "\xbc\xaa",
+   "\xd0\xd7", "\xbc\xaa", "\xbc\xaa",
+   "\xd0\xd7", "\xbc\xaa", "\xd0\xd7"
 };
 char B5jixiong[12][4] = {
-   "\xa6\x4e", "\xa6\x4e", "\xa6\x4e",
-   "\xa5\xad", "\xa6\x4e", "\xa6\x4e",
-   "\xa4\xbf", "\xa4\xbf", "\xa6\x4e",
-   "\xa6\x4e", "\xa6\x4e", "\xa4\xbf"
+   "\xa4\xbf", "\xa6\x4e", "\xa4\xbf",
+   "\xa4\xbf", "\xa6\x4e", "\xa6\x4e",
+   "\xa4\xbf", "\xa6\x4e", "\xa6\x4e",
+   "\xa4\xbf", "\xa6\x4e", "\xa4\xbf"
 };
 char U8jixiong[12][4] = {
-   "\xe5\x90\x89", "\xe5\x90\x89", "\xe5\x90\x89",
-   "\xe5\xb9\xb3", "\xe5\x90\x89", "\xe5\x90\x89",
-   "\xe5\x87\xb6", "\xe5\x87\xb6", "\xe5\x90\x89",
-   "\xe5\x90\x89", "\xe5\x90\x89", "\xe5\x87\xb6"
+   "\xe5\x87\xb6", "\xe5\x90\x89", "\xe5\x87\xb6",
+   "\xe5\x87\xb6", "\xe5\x90\x89", "\xe5\x90\x89",
+   "\xe5\x87\xb6", "\xe5\x90\x89", "\xe5\x90\x89",
+   "\xe5\x87\xb6", "\xe5\x90\x89", "\xe5\x87\xb6"
 };
 
 /* ---- 含义 (meaning) ---- */
@@ -185,8 +186,10 @@ const char* JianChuLabel(int col, int enc)
 
 /* ---- 時辰吉凶 (double-hour auspiciousness) ----
    以日支起建: the hour whose branch equals the day's branch is 建時,
-   then the 建除 cycle continues through the remaining hours.  The
-   吉凶 of each hour follows the day-officer 吉凶 table. */
+   then the 建除 cycle continues through the remaining hours.
+   Verified against 永經堂通勝 (2026-09): 沖年支/沖日支 = 凶,
+   伏吟 (時支=日支) = 吉, 六害 = 中; the remaining hours fall back to
+   the 時建 officer rated by the 十二建星黃黑道. */
 
 /* hh:mm ranges, 0=子(23-01)..11=亥(21-23) */
 static const char* shichen_hhmm[12] = {
@@ -200,8 +203,30 @@ int GetShiChenJianChu(int hb, int db)
     return (hb - db + 12) % 12;
 }
 
-const char* ShiChenJixiong(int hb, int db, int enc)
+/* 六害 pairs: 子未 丑午 寅巳 卯辰 申亥 酉戌 */
+static bool ShiChenHai(int hb, int db)
 {
+    static const char hai[12] = {7, 6, 5, 4, -1, -1, -1, 0, 11, 10, -1, 8};
+    if (hb < 0 || hb > 11) return false;
+    return hai[hb] == db;
+}
+
+const char* ShiChenJixiong(int hb, int db, int yearbranch, int enc)
+{
+    if (hb < 0) hb = 0; if (hb > 11) hb = 11;
+    /* 沖年支 (歲破時) → 凶 */
+    if ((hb + 6) % 12 == yearbranch)
+        return (enc == 'u') ? "\xe5\x87\xb6" : (enc == 'g') ? "\xd0\xd7" : "\xa4\xbf";
+    /* 沖日支 → 凶 */
+    if ((hb + 6) % 12 == db)
+        return (enc == 'u') ? "\xe5\x87\xb6" : (enc == 'g') ? "\xd0\xd7" : "\xa4\xbf";
+    /* 伏吟/自刑 (時支 = 日支) → 吉 */
+    if (hb == db)
+        return (enc == 'u') ? "\xe5\x90\x89" : (enc == 'g') ? "\xbc\xaa" : "\xa6\x4e";
+    /* 六害 → 中 */
+    if (ShiChenHai(hb, db))
+        return (enc == 'u') ? "\xe4\xb8\xad" : (enc == 'g') ? "\xd6\xd0" : "\xa4\xa4";
+    /* 其餘: 時建 (日支起建) 按 黃黑道 評吉凶 */
     return JianChuField(1, GetShiChenJianChu(hb, db), enc);
 }
 

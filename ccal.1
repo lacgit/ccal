@@ -68,11 +68,15 @@ No effect in Encapsulated PostScript mode.
 .B \-c
 Prints the Jianchu (建除) twelve deities for each day: 建 除 滿 平 定 執
 破 危 成 收 開 閉 (Jianchu twelve day-officers of the Chinese almanac),
-and also computes the 時辰吉凶 (double-hour auspiciousness): the 建除
-cycle applied to the twelve 時辰, 以日支起建 (the hour whose branch equals
-the day's branch is 建時).  In ASCII mode a two-letter pinyin code is
-shown (JN, CU, MN, PG, DG, ZH, PO, WE, CG, SO, KI, BI).  In character,
-HTML and XML modes the character itself is shown (respecting
+rated 吉/凶 by the 十二建星黃黑道 (除危定執成開 = 黃道吉; 建滿平收閉破 =
+黑道凶), and also computes the 時辰吉凶 (double-hour auspiciousness) for
+the twelve 時辰, 以日支起建 (the hour whose branch equals the day's
+branch is 建時), where 沖年支 (歲破) and 沖日支 hours are 凶, 伏吟
+(時支 = 日支) hours are 吉 and 六害 hours are 中; the remaining hours
+fall back to the 時建 officer rated by the 黃黑道.  In ASCII mode a
+two-letter pinyin code is shown (JN, CU, MN, PG, DG, ZH, PO, WE, CG, SO,
+KI, BI).  In character, HTML and XML modes the character itself is shown
+(respecting
 .B \-g/\-b
 for simplified/traditional), and XML day elements gain a
 .I shichen
