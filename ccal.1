@@ -98,11 +98,13 @@ term (節氣) and its time (e.g. 雨水 11:51) when one falls on that day
 and, with
 .B \-c
 , by the Jianchu deity.  The event description gives the lunar date and
-year (干支), the day's ganzhi, and with
+the 年/月/日 干支 (year, month and day ganzhi; the month pillar follows
+立春), and with
 .B \-c
 the Jianchu suitability (宜) and avoidance (忌) activities, the 時辰吉凶
-(a 12-line table of every double-hour with its hh:mm range and 吉凶,
-子時 23:00-01:00 .. 亥時 21:00-23:00), plus the solar-term time.  Output
+(a 12-line table of every double-hour with its 時柱, hh:mm range and
+吉凶, 子時 甲子 23:00-01:00 .. 亥時 乙亥 21:00-23:00), plus the
+solar-term time.  Output
 is UTF-8 (use
 .B \-b
 for traditional characters), uses CRLF line endings, folds lines at 75
@@ -123,10 +125,11 @@ The following operands are supported:
 Specify a single day (1 to the number of days in the month) to display.
 With three operands (day month year) the default ASCII mode prints a
 detail view for that one day: the Gregorian date and weekday, the lunar
-date and year, the day's ganzhi, the Jianchu (建除) day-officer with its
+date, the 年/月/日 干支 (year, month and day ganzhi; the month pillar
+follows 立春), the Jianchu (建除) day-officer with its
 黃黑道 吉凶 and suitable (宜) and avoid (忌) activities, the solar term
 with its time when one falls on that day, and the 時辰吉凶 table with
-hh:mm ranges for the twelve double-hours.  The
+each double-hour's 時柱 (hour ganzhi, 五鼠遁), hh:mm range and 吉凶.  The
 .B \-i
 mode emits just that day's iCalendar event.  In HTML, PostScript, XML,
 JieQi-list and date-list modes the day operand is ignored.

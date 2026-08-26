@@ -71,6 +71,19 @@ static char jianchu_ascii[12][3] = {"JN", "CU", "MN", "PG", "DG", "ZH",
    小暑,立秋,白露,寒露,立冬,大雪.  Branch: 子=0 丑=1 寅=2 ... 亥=11. */
 static int jieyuejian[12] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 0};
 
+/* 月建 (month branch) for the day with julian day jd: the 12 節 (even
+   indices of vterms) set the month branch.  0=子 1=丑 2=寅 ... 11=亥. */
+int GetMonthBranch(double jd, vdouble& vterms)
+{
+    int jdi = int(jd);
+    if (jdi < int(vterms[0]))
+        return 0;  /* before 小寒 -> 子月 (prev-year 大雪) */
+    for (int k = 11; k >= 0; k--)
+        if (jdi >= int(vterms[2 * k]))
+            return jieyuejian[k];
+    return 0;
+}
+
 /* 建除十二神 index (0..11 = 建除滿平定執破危成收開閉) for the day with
    julian day jd (whole-day noon JD).  Reuses the solar terms in vterms to
    derive 月建, and the day's Earthly branch from the Julian day number. */
@@ -78,13 +91,22 @@ int GetJianChu(double jd, vdouble& vterms)
 {
     int jdi = int(jd);
     int daybranch = (jdi + 1) % 12;
-    int monthbranch = 0;
-    if (jdi < int(vterms[0]))
-        monthbranch = 0;  /* before 小寒 -> 子月 (prev-year 大雪) */
-    else
-        for (int k = 11; k >= 0; k--)
-            if (jdi >= int(vterms[2 * k])) { monthbranch = jieyuejian[k]; break; }
+    int monthbranch = GetMonthBranch(jd, vterms);
     return (daybranch - monthbranch + 12) % 12;
+}
+
+/* 月柱 天干: 年上起月 (五虎遁).  ystem: 年干 index 0=甲;  mbranch: 月建
+   branch 0=子.  Returns the 月干 index 0=甲. */
+int GetMonthStem(int ystem, int mbranch)
+{
+    return (ystem * 2 + 2 + (mbranch - 2 + 12) % 12) % 10;
+}
+
+/* 時柱 天干: 日上起時 (五鼠遁).  dstem: 日干 index 0=甲;  hb: 時支 0=子.
+   Returns the 時干 index 0=甲. */
+int GetHourStem(int dstem, int hb)
+{
+    return (dstem * 2 + hb) % 10;
 }
 extern char GBjieqi[24][7];
 extern char B5jieqi[24][7];
@@ -1109,16 +1131,24 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
             {
                 if (bJianChu)
                 {
-                    /* shichen: 12 吉凶 chars for 子時..亥時 */
+                    /* shichen: 12 吉凶 chars for 子時..亥時; yuezhu: 月柱 */
                     char szShichen[40] = "";
+                    char szYue[8];
                     int db = (int(jdcnt) + 1) % 12;
                     int yb = (year - 4) % 12;
                     if (yb < 0)
                         yb += 12;
+                    int mbranch = GetMonthBranch(jdcnt, vterms);
+                    int ystem = (year - 4) % 10;
+                    if (jdcnt < vterms[2])
+                        ystem = (ystem - 1 + 10) % 10;
+                    sprintf(szYue, "%s%s",
+                            (*CHtiangan)[GetMonthStem(ystem, mbranch)],
+                            (*CHdizhi)[mbranch]);
                     for (int h = 0; h < 12; h++)
                         strcat(szShichen, ShiChenJixiong(h, db, yb, nEncoding));
-                    printf("cmonthname=\"%s\" cdatename=\"%s\" jianchu=\"%s\" shichen=\"%s\" />\n",
-                           cmonname, cdayname, JianChuName(jc, nEncoding), szShichen);
+                    printf("cmonthname=\"%s\" cdatename=\"%s\" jianchu=\"%s\" yuezhu=\"%s\" shichen=\"%s\" />\n",
+                           cmonname, cdayname, JianChuName(jc, nEncoding), szYue, szShichen);
                 }
                 else
                     printf("cmonthname=\"%s\" cdatename=\"%s\" />\n", cmonname, cdayname);
@@ -1721,16 +1751,24 @@ void PrintMonthList(short int year, short int month, vdouble& vterms,
             {
                 if (bJianChu)
                 {
-                    /* shichen: 12 吉凶 chars for 子時..亥時 */
+                    /* shichen: 12 吉凶 chars for 子時..亥時; yuezhu: 月柱 */
                     char szShichen[40] = "";
+                    char szYue[8];
                     int db = (int(jdcnt) + 1) % 12;
                     int yb = (year - 4) % 12;
                     if (yb < 0)
                         yb += 12;
+                    int mbranch = GetMonthBranch(jdcnt, vterms);
+                    int ystem = (year - 4) % 10;
+                    if (jdcnt < vterms[2])
+                        ystem = (ystem - 1 + 10) % 10;
+                    sprintf(szYue, "%s%s",
+                            (*CHtiangan)[GetMonthStem(ystem, mbranch)],
+                            (*CHdizhi)[mbranch]);
                     for (int h = 0; h < 12; h++)
                         strcat(szShichen, ShiChenJixiong(h, db, yb, nEncoding));
-                    printf("cmonthname=\"%s\" cdatename=\"%s\" jianchu=\"%s\" shichen=\"%s\" />\n",
-                           cmonname, cdayname, JianChuName(jc, nEncoding), szShichen);
+                    printf("cmonthname=\"%s\" cdatename=\"%s\" jianchu=\"%s\" yuezhu=\"%s\" shichen=\"%s\" />\n",
+                           cmonname, cdayname, JianChuName(jc, nEncoding), szYue, szShichen);
                 }
                 else
                     printf("cmonthname=\"%s\" cdatename=\"%s\" />\n", cmonname, cdayname);
@@ -2130,8 +2168,15 @@ void PrintICalendar(short int year, short int month, short int day,
             int cyear = (lyear - 1984) % 60;
             if (cyear < 0)
                 cyear += 60;
-            dl += sprintf(szDesc + dl, "農曆：%s%s（%s%s年）\n", cmonname, cdayname,
-                          (*CHtiangan)[cyear % 10], (*CHdizhi)[cyear % 12]);
+            /* 月柱 (五虎遁 年上起月; the 年干 for the 月柱 follows 立春) */
+            int mbranch = GetMonthBranch(jdcnt, vterms);
+            int ystem = (year - 4) % 10;
+            if (jdcnt < vterms[2])
+                ystem = (ystem - 1 + 10) % 10;
+            dl += sprintf(szDesc + dl, "農曆：%s%s（%s%s年 %s%s月）\n", cmonname, cdayname,
+                          (*CHtiangan)[cyear % 10], (*CHdizhi)[cyear % 12],
+                          (*CHtiangan)[GetMonthStem(ystem, mbranch)],
+                          (*CHdizhi)[mbranch]);
             int n = (int(jdcnt) + 49) % 60;
             dl += sprintf(szDesc + dl, "干支：%s%s日\n",
                           (*CHtiangan)[n % 10], (*CHdizhi)[n % 12]);
@@ -2153,9 +2198,10 @@ void PrintICalendar(short int year, short int month, short int day,
                     yb += 12;
                 dl += sprintf(szDesc + dl, "時辰吉凶：\n");
                 for (int h = 0; h < 12; h++)
-                    dl += sprintf(szDesc + dl, "%s時 %s %s\n",
-                                  (*CHdizhi)[h], ShiChenHHMM(h),
-                                  ShiChenJixiong(h, db, yb, 'u'));
+                    dl += sprintf(szDesc + dl, "%s時 %s%s %s %s\n",
+                                  (*CHdizhi)[h],
+                                  (*CHtiangan)[GetHourStem(n % 10, h)], (*CHdizhi)[h],
+                                  ShiChenHHMM(h), ShiChenJixiong(h, db, yb, 'u'));
             }
             if (bTerm)
             {
@@ -2279,6 +2325,14 @@ void PrintDayASCII(short int year, short int month, short int day,
     if (yb < 0)
         yb += 12;
 
+    /* 月柱 (五虎遁 年上起月; the 年干 for the 月柱 follows 立春) */
+    int mbranch = GetMonthBranch(jdcnt, vterms);
+    int ystem = (year - 4) % 10;
+    if (jdcnt < vterms[2])
+        ystem = (ystem - 1 + 10) % 10;
+    int mstem = GetMonthStem(ystem, mbranch);
+    int dstem = n % 10;
+
     if (nEncoding == 'a')
     {
         static const char* jcpx[12] = {"Jian", "Chu", "Man", "Ping", "Ding", "Zhi",
@@ -2288,9 +2342,10 @@ void PrintDayASCII(short int year, short int month, short int day,
         char dayshort[4];
         strncpy(dayshort, daynames[dofw], 3);
         dayshort[3] = 0;
-        printf("%04d-%02d-%02d %s  %s%s Year, %s%s Day, Lunar %s%d/%d\n",
+        printf("%04d-%02d-%02d %s  %s%s Year, %s%s Month, %s%s Day, Lunar %s%d/%d\n",
                year, month, day, dayshort,
                tiangan[cyear % 10], dizhi[cyear % 12],
+               tiangan[mstem], dizhi[mbranch],
                tiangan[n % 10], dizhi[n % 12],
                leap[0] == 'R' ? "Leap " : "", cmonth, ldcnt);
         printf("JianChu: %s (%s)\n", jcpx[jc], jcjx[jc]);
@@ -2309,7 +2364,9 @@ void PrintDayASCII(short int year, short int month, short int day,
                 pinyin = "Ji";
             else if (strcmp(jx, "\xe5\x87\xb6") == 0) /* 凶 */
                 pinyin = "Xiong";
-            printf("  %s %s %s\n", dizhi[h], ShiChenHHMM(h), pinyin);
+            printf("  %s %s%s %s %s\n", dizhi[h],
+                   tiangan[GetHourStem(dstem, h)], dizhi[h],
+                   ShiChenHHMM(h), pinyin);
         }
     }
     else
@@ -2327,10 +2384,11 @@ void PrintDayASCII(short int year, short int month, short int day,
         LunarMonthNameCH(mnum, nEncoding, cmonname);
         char cdayname[8];
         Number2DayCH(ldcnt, nEncoding, cdayname);
-        printf("%04d-%02d-%02d %s  農曆：%s%s（%s%s年）  干支：%s%s日\n",
+        printf("%04d-%02d-%02d %s  農曆：%s%s（%s%s年 %s%s月）  干支：%s%s日\n",
                year, month, day, (*daynamesCH)[dofw],
                cmonname, cdayname,
                (*CHtiangan)[cyear % 10], (*CHdizhi)[cyear % 12],
+               (*CHtiangan)[mstem], (*CHdizhi)[mbranch],
                (*CHtiangan)[n % 10], (*CHdizhi)[n % 12]);
         printf("建除：%s日（%s）\n", JianChuName(jc, nEncoding),
                JianChuField(1, jc, nEncoding));
@@ -2348,8 +2406,9 @@ void PrintDayASCII(short int year, short int month, short int day,
         }
         printf("時辰吉凶：\n");
         for (int h = 0; h < 12; h++)
-            printf("  %s時 %s %s\n", (*CHdizhi)[h], ShiChenHHMM(h),
-                   ShiChenJixiong(h, db, yb, nEncoding));
+            printf("  %s時 %s%s %s %s\n", (*CHdizhi)[h],
+                   (*CHtiangan)[GetHourStem(dstem, h)], (*CHdizhi)[h],
+                   ShiChenHHMM(h), ShiChenJixiong(h, db, yb, nEncoding));
     }
 }
 
