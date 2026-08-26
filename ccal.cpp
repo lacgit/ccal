@@ -849,7 +849,8 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
                 if (pmode == PMODE_ASCII && bJianChu)
                     printf(" %s", (nEncoding == 'a') ? jianchu_ascii[jc] : JianChuName(jc, nEncoding));
                 else if (pmode == PMODE_HTML && bJianChu)
-                    printf(" <span class=\"jianchu\">%s</span>", JianChuName(jc, nEncoding));
+                    printf(" <span class=\"jianchu\">%s%s</span>", JianChuName(jc, nEncoding),
+                           JianChuField(1, jc, nEncoding));
             }
             else if (pmode == PMODE_XML)
             {
@@ -1147,8 +1148,9 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
                             (*CHdizhi)[mbranch]);
                     for (int h = 0; h < 12; h++)
                         strcat(szShichen, ShiChenJixiong(h, db, yb, nEncoding));
-                    printf("cmonthname=\"%s\" cdatename=\"%s\" jianchu=\"%s\" yuezhu=\"%s\" shichen=\"%s\" />\n",
-                           cmonname, cdayname, JianChuName(jc, nEncoding), szYue, szShichen);
+                    printf("cmonthname=\"%s\" cdatename=\"%s\" jianchu=\"%s\" jixiong=\"%s\" yuezhu=\"%s\" shichen=\"%s\" />\n",
+                           cmonname, cdayname, JianChuName(jc, nEncoding),
+                           JianChuField(1, jc, nEncoding), szYue, szShichen);
                 }
                 else
                     printf("cmonthname=\"%s\" cdatename=\"%s\" />\n", cmonname, cdayname);
@@ -1472,7 +1474,8 @@ void PrintMonthList(short int year, short int month, vdouble& vterms,
                 if (pmode == PMODE_ASCII && bJianChu)
                     printf(" %s", (nEncoding == 'a') ? jianchu_ascii[jc] : JianChuName(jc, nEncoding));
                 else if (pmode == PMODE_HTML && bJianChu)
-                    printf(" <span class=\"jianchu\">%s</span>", JianChuName(jc, nEncoding));
+                    printf(" <span class=\"jianchu\">%s%s</span>", JianChuName(jc, nEncoding),
+                           JianChuField(1, jc, nEncoding));
             }
             else if (pmode == PMODE_XML)
             {
@@ -1767,8 +1770,9 @@ void PrintMonthList(short int year, short int month, vdouble& vterms,
                             (*CHdizhi)[mbranch]);
                     for (int h = 0; h < 12; h++)
                         strcat(szShichen, ShiChenJixiong(h, db, yb, nEncoding));
-                    printf("cmonthname=\"%s\" cdatename=\"%s\" jianchu=\"%s\" yuezhu=\"%s\" shichen=\"%s\" />\n",
-                           cmonname, cdayname, JianChuName(jc, nEncoding), szYue, szShichen);
+                    printf("cmonthname=\"%s\" cdatename=\"%s\" jianchu=\"%s\" jixiong=\"%s\" yuezhu=\"%s\" shichen=\"%s\" />\n",
+                           cmonname, cdayname, JianChuName(jc, nEncoding),
+                           JianChuField(1, jc, nEncoding), szYue, szShichen);
                 }
                 else
                     printf("cmonthname=\"%s\" cdatename=\"%s\" />\n", cmonname, cdayname);
@@ -1970,8 +1974,8 @@ void PrintJianChuLegend(int pmode, int nEncoding, bool bSingle)
             return;
         static const char* jcpx[12] = {"Jian", "Chu", "Man", "Ping", "Ding", "Zhi",
                                        "Po", "Wei", "Cheng", "Shou", "Kai", "Bi"};
-        static const char* jcjx[12] = {"Ji", "Ji", "Ji", "Ping", "Ji", "Ji",
-                                       "Xiong", "Xiong", "Ji", "Ji", "Ji", "Xiong"};
+        static const char* jcjx[12] = {"Xiong", "Ji", "Xiong", "Xiong", "Ji", "Ji",
+                                       "Xiong", "Ji", "Ji", "Xiong", "Ji", "Xiong"};
         printf("%% Jianchu (JianChu) twelve deities legend (ASCII)\n");
         printf("/Times-Bold findfont 9 scalefont setfont\n");
         for (i = 0; i < 12; i++)
@@ -2157,8 +2161,11 @@ void PrintICalendar(short int year, short int month, short int day,
                 sl += sprintf(szSum + sl, " %s %02d:%02d", (*CHjieqi)[termcnt], hr, min);
             }
             if (bJianChu)
-                sl += sprintf(szSum + sl, " %s",
-                              JianChuName(GetJianChu(jdcnt, vterms), 'u'));
+            {
+                int jc = GetJianChu(jdcnt, vterms);
+                sl += sprintf(szSum + sl, " %s%s",
+                              JianChuName(jc, 'u'), JianChuField(1, jc, 'u'));
+            }
 
             /* DESCRIPTION */
             int dl = 0;
