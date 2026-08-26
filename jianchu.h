@@ -18,4 +18,20 @@ const char* JianChuField(int field, int idx, int enc);
 /* Legend column header text. col: 0=神煞 1=吉凶 2=含义 3=宜 4=忌. */
 const char* JianChuLabel(int col, int enc);
 
+/* ---- 時辰吉凶 (double-hour auspiciousness) ----
+   The 建除 twelve-officer cycle also applies to the 12 時辰 (double
+   hours): the hour whose branch equals the day's branch is 建時
+   (以日支起建), then 除滿平定執破危成收開閉 follow the branch order.
+   hb: hour branch 0=子..11=亥; db: day branch 0=子..11=亥. */
+
+/* 時辰建除 index 0..11 for hour branch hb on a day with branch db. */
+int GetShiChenJianChu(int hb, int db);
+
+/* 吉凶 character (吉/凶/平) for hour hb on a day with branch db.
+   enc: 'g'/'b'/'u' as above. */
+const char* ShiChenJixiong(int hb, int db, int enc);
+
+/* hh:mm range of hour hb, e.g. "23:00-01:00" for 子時 (0). */
+const char* ShiChenHHMM(int hb);
+
 #endif /* JIANCHU_H */

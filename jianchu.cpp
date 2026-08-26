@@ -182,3 +182,31 @@ const char* JianChuLabel(int col, int enc)
     if (enc == 'b') return B5jclabel[col];
     return (bJianChuTrad ? U8jclabel_tra[col] : U8jclabel_sim[col]);
 }
+
+/* ---- 時辰吉凶 (double-hour auspiciousness) ----
+   以日支起建: the hour whose branch equals the day's branch is 建時,
+   then the 建除 cycle continues through the remaining hours.  The
+   吉凶 of each hour follows the day-officer 吉凶 table. */
+
+/* hh:mm ranges, 0=子(23-01)..11=亥(21-23) */
+static const char* shichen_hhmm[12] = {
+    "23:00-01:00", "01:00-03:00", "03:00-05:00", "05:00-07:00",
+    "07:00-09:00", "09:00-11:00", "11:00-13:00", "13:00-15:00",
+    "15:00-17:00", "17:00-19:00", "19:00-21:00", "21:00-23:00"
+};
+
+int GetShiChenJianChu(int hb, int db)
+{
+    return (hb - db + 12) % 12;
+}
+
+const char* ShiChenJixiong(int hb, int db, int enc)
+{
+    return JianChuField(1, GetShiChenJianChu(hb, db), enc);
+}
+
+const char* ShiChenHHMM(int hb)
+{
+    if (hb < 0) hb = 0; if (hb > 11) hb = 11;
+    return shichen_hhmm[hb];
+}

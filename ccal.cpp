@@ -1115,7 +1115,15 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
             if (pmode == PMODE_XML)
             {
                 if (bJianChu)
-                    printf("cmonthname=\"%s\" cdatename=\"%s\" jianchu=\"%s\" />\n", cmonname, cdayname, JianChuName(jc, nEncoding));
+                {
+                    /* shichen: 12 吉凶 chars for 子時..亥時 (以日支起建) */
+                    char szShichen[40] = "";
+                    int db = (int(jdcnt) + 1) % 12;
+                    for (int h = 0; h < 12; h++)
+                        strcat(szShichen, ShiChenJixiong(h, db, nEncoding));
+                    printf("cmonthname=\"%s\" cdatename=\"%s\" jianchu=\"%s\" shichen=\"%s\" />\n",
+                           cmonname, cdayname, JianChuName(jc, nEncoding), szShichen);
+                }
                 else
                     printf("cmonthname=\"%s\" cdatename=\"%s\" />\n", cmonname, cdayname);
             }
@@ -1723,7 +1731,15 @@ void PrintMonthList(short int year, short int month, vdouble& vterms,
             if (pmode == PMODE_XML)
             {
                 if (bJianChu)
-                    printf("cmonthname=\"%s\" cdatename=\"%s\" jianchu=\"%s\" />\n", cmonname, cdayname, JianChuName(jc, nEncoding));
+                {
+                    /* shichen: 12 吉凶 chars for 子時..亥時 (以日支起建) */
+                    char szShichen[40] = "";
+                    int db = (int(jdcnt) + 1) % 12;
+                    for (int h = 0; h < 12; h++)
+                        strcat(szShichen, ShiChenJixiong(h, db, nEncoding));
+                    printf("cmonthname=\"%s\" cdatename=\"%s\" jianchu=\"%s\" shichen=\"%s\" />\n",
+                           cmonname, cdayname, JianChuName(jc, nEncoding), szShichen);
+                }
                 else
                     printf("cmonthname=\"%s\" cdatename=\"%s\" />\n", cmonname, cdayname);
             }
@@ -2085,7 +2101,7 @@ void PrintICalendar(short int year, short int month, vdouble& vterms,
             char cdayname[8];
             Number2DayCH(ldcnt, 'u', cdayname);
 
-            char szSum[160], szDesc[512], szEsc[1100];
+            char szSum[160], szDesc[1024], szEsc[1600];
             /* SUMMARY: 農曆日 [節氣 HH:MM] [建除] — day first */
             int sl = 0;
             sl += sprintf(szSum + sl, "%s%s", (ldcnt == 1) ? cmonname : "", cdayname);
@@ -2123,6 +2139,13 @@ void PrintICalendar(short int year, short int month, vdouble& vterms,
                     dl += sprintf(szDesc + dl, "宜：%s\n", pyi);
                 if (pji != 0 && pji[0] != 0)
                     dl += sprintf(szDesc + dl, "忌：%s\n", pji);
+                /* 時辰吉凶 (以日支起建), with hh:mm ranges for reference */
+                int db = (int(jdcnt) + 1) % 12;
+                dl += sprintf(szDesc + dl, "時辰吉凶：\n");
+                for (int h = 0; h < 12; h++)
+                    dl += sprintf(szDesc + dl, "%s時 %s %s\n",
+                                  (*CHdizhi)[h], ShiChenHHMM(h),
+                                  ShiChenJixiong(h, db, 'u'));
             }
             if (bTerm)
             {
@@ -2209,7 +2232,7 @@ int main(int argc, char** argv)
         printf("\t-g:\tGenerates simplified Chinese output.\n");
         printf("\t-b:\tGenerates traditional Chinese output.\n");
         printf("\t-u:\tUses UTF-8 rather than GB or Big5 for Chinese output.\n");
-        printf("\t-c:\tPrints the Jianchu (建除) twelve deities for each day.\n");
+        printf("\t-c:\tPrints the Jianchu (建除) twelve deities and the 時辰吉凶 for each day.\n");
         exit(1);
     }
     if (month < 1 || month > 12)

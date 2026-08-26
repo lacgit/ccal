@@ -67,10 +67,16 @@ No effect in Encapsulated PostScript mode.
 .TP
 .B \-c
 Prints the Jianchu (建除) twelve deities for each day: 建 除 滿 平 定 執
-破 危 成 收 開 閉 (Jianchu twelve day-officers of the Chinese almanac).
-In ASCII mode a two-letter pinyin code is shown (JN, CU, MN, PG, DG, ZH,
-PO, WE, CG, SO, KI, BI).  In character, HTML and XML modes the character
-itself is shown (respecting -g/-b for simplified/traditional).  HTML and
+破 危 成 收 開 閉 (Jianchu twelve day-officers of the Chinese almanac),
+and also computes the 時辰吉凶 (double-hour auspiciousness): the 建除
+cycle applied to the twelve 時辰, 以日支起建 (the hour whose branch equals
+the day's branch is 建時).  In ASCII mode a two-letter pinyin code is
+shown (JN, CU, MN, PG, DG, ZH, PO, WE, CG, SO, KI, BI).  In character,
+HTML and XML modes the character itself is shown (respecting
+.B \-g/\-b
+for simplified/traditional), and XML day elements gain a
+.I shichen
+attribute holding the twelve 吉凶 characters for 子時..亥時.  HTML and
 XML output also include a legend explaining each deity's 神煞, 吉凶,
 simple meaning (含义), suitable (宜) and avoid (忌) activities.  In
 PostScript mode a two-letter code is printed in each day cell, and a
@@ -88,8 +94,10 @@ and, with
 , by the Jianchu deity.  The event description gives the lunar date and
 year (干支), the day's ganzhi, and with
 .B \-c
-the Jianchu suitability (宜) and avoidance (忌) activities, plus the
-solar-term time.  Output is UTF-8 (use
+the Jianchu suitability (宜) and avoidance (忌) activities, the 時辰吉凶
+(a 12-line table of every double-hour with its hh:mm range and 吉凶,
+子時 23:00-01:00 .. 亥時 21:00-23:00), plus the solar-term time.  Output
+is UTF-8 (use
 .B \-b
 for traditional characters), uses CRLF line endings, folds lines at 75
 octets per RFC 5545, and uses stable per-day UIDs so re-importing the
