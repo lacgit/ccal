@@ -1773,8 +1773,8 @@ void PrintMonthList(short int year, short int month, vdouble& vterms,
 }
 
 bool ProcessArg(int argc, char** argv, short int& year, short int& month,
-                int& pmode, int& fmode, bool& bSingle, int& nEncoding,
-                bool& bJianChu)
+                short int& day, int& pmode, int& fmode, bool& bSingle,
+                int& nEncoding, bool& bJianChu)
 {
     if (argc > 6)
         return false;
@@ -1783,6 +1783,7 @@ bool ProcessArg(int argc, char** argv, short int& year, short int& month,
     bSingle = true;
     nEncoding = 'a';
     bJianChu = false;
+    day = 0;
     bool bIsUTF8 = false;
     bool bTrad = false;
     if (argc == 1)
@@ -1801,6 +1802,14 @@ bool ProcessArg(int argc, char** argv, short int& year, short int& month,
             }
             else if (nParam == 1)
             {
+                month = year;
+                year = atoi(argv[i]);
+                bSingle = true;
+                nParam++;
+            }
+            else if (nParam == 2)
+            {
+                day = month;
                 month = year;
                 year = atoi(argv[i]);
                 bSingle = true;
@@ -2024,7 +2033,8 @@ void IcsLine(const char* s)
    Google Calendar, Apple Calendar, OneCalendar etc.: CRLF line endings,
    UTF-8, 75-octet folding, DATE values for all-day events and stable UIDs
    so a re-import does not create duplicates. */
-void PrintICalendar(short int year, short int month, vdouble& vterms,
+void PrintICalendar(short int year, short int month, short int day,
+                    vdouble& vterms,
                     double lastnew, double lastmon, vdouble& vmoons,
                     vdouble& vmonth, double nextnew, bool bSingle,
                     bool bJianChu, vdouble& vtermhours)
@@ -2050,7 +2060,9 @@ void PrintICalendar(short int year, short int month, vdouble& vterms,
     printf("PRODID:-//chinesebay//ccal %s//EN\r\n", versionstr);
     printf("CALSCALE:GREGORIAN\r\n");
     printf("METHOD:PUBLISH\r\n");
-    if (bSingle)
+    if (day > 0)
+        sprintf(line, "X-WR-CALNAME:Chinese Calendar %d-%02d-%02d", year, month, day);
+    else if (bSingle)
         sprintf(line, "X-WR-CALNAME:Chinese Calendar %d-%02d", year, month);
     else
         sprintf(line, "X-WR-CALNAME:Chinese Calendar %d", year);
@@ -2093,6 +2105,8 @@ void PrintICalendar(short int year, short int month, vdouble& vterms,
             char cdayname[8];
             Number2DayCH(ldcnt, 'u', cdayname);
 
+            if (day == 0 || dcnt == day)
+            {
             char szSum[160], szDesc[1024], szEsc[1600];
             /* SUMMARY: 農曆日 [節氣 HH:MM] [建除] — day first */
             int sl = 0;
@@ -2173,6 +2187,7 @@ void PrintICalendar(short int year, short int month, vdouble& vterms,
             printf("X-MICROSOFT-CDO-ALLDAYEVENT:TRUE\r\n");
             printf("SEQUENCE:0\r\n");
             printf("END:VEVENT\r\n");
+            }
 
             /* Advance counters exactly like PrintMonth's branches */
             if (bTerm)
@@ -2199,11 +2214,149 @@ void PrintICalendar(short int year, short int month, vdouble& vterms,
     printf("END:VCALENDAR\r\n");
 }
 
+/* Print a single-day detail view: Gregorian date, weekday, lunar date,
+   day ganzhi, 建除 with 宜/忌, and the 時辰吉凶 table with hh:mm ranges. */
+void PrintDayASCII(short int year, short int month, short int day,
+                   vdouble& vterms, double lastnew, double lastmon,
+                   vdouble& vmoons, vdouble& vmonth, double nextnew,
+                   vdouble& vtermhours, int nEncoding)
+{
+    double jdcnt, jdnext;
+    int termcnt, moncnt = 0, ldcnt, dcnt;
+    PrepareMonthInitials(year, month, lastnew, vterms, vmoons,
+                         jdcnt, jdnext, termcnt, moncnt, ldcnt, dcnt);
+
+    /* Advance the lunar/solar-term counters to the requested day,
+       mirroring PrintMonth's day-loop advancement. */
+    bool sameday = false;
+    for (dcnt = 1; dcnt < day; dcnt++, jdcnt++)
+    {
+        bool bTerm = (termcnt < int(vterms.size()) && jdcnt == vterms[termcnt]);
+        bool bNew  = (moncnt < int(vmoons.size()) && jdcnt == vmoons[moncnt]);
+        if (bTerm)
+        {
+            termcnt++;
+            if (bNew)
+                sameday = true;
+        }
+        else if (sameday)
+            sameday = false;
+        else if (bNew)
+            moncnt++;
+        if (moncnt < int(vmoons.size()) && jdcnt + 1.0 == vmoons[moncnt])
+            ldcnt = 1;
+        else
+            ldcnt++;
+    }
+
+    int db = (int(jdcnt) + 1) % 12;
+    int jc = GetJianChu(jdcnt, vterms);
+    int n = (int(jdcnt) + 49) % 60;
+    int mcnt = moncnt;
+    if (ldcnt != 1)
+        mcnt--;
+    double mnum = (mcnt >= 0) ? vmonth[mcnt] : lastmon;
+    short int cmonth;
+    char leap[2] = {0x00, 0x00};
+    GetMonthNumber(mnum, cmonth, leap);
+    bool bTerm = (termcnt < int(vterms.size()) && jdcnt == vterms[termcnt]);
+    int dofw = (int(jdcnt) + 1) % 7;
+
+    /* 年柱: flips at 正月初一 */
+    int lyear = year;
+    for (int i = 0; i < int(vmonth.size()); i++)
+        if (vmonth[i] == 1.0)
+        {
+            if (jdcnt < vmoons[i])
+                lyear--;
+            break;
+        }
+    int cyear = (lyear - 1984) % 60;
+    if (cyear < 0)
+        cyear += 60;
+    int yb = (lyear - 4) % 12;
+    if (yb < 0)
+        yb += 12;
+
+    if (nEncoding == 'a')
+    {
+        static const char* jcpx[12] = {"Jian", "Chu", "Man", "Ping", "Ding", "Zhi",
+                                       "Po", "Wei", "Cheng", "Shou", "Kai", "Bi"};
+        static const char* jcjx[12] = {"Xiong", "Ji", "Xiong", "Xiong", "Ji", "Ji",
+                                       "Xiong", "Ji", "Ji", "Xiong", "Ji", "Xiong"};
+        char dayshort[4];
+        strncpy(dayshort, daynames[dofw], 3);
+        dayshort[3] = 0;
+        printf("%04d-%02d-%02d %s  %s%s Year, %s%s Day, Lunar %s%d/%d\n",
+               year, month, day, dayshort,
+               tiangan[cyear % 10], dizhi[cyear % 12],
+               tiangan[n % 10], dizhi[n % 12],
+               leap[0] == 'R' ? "Leap " : "", cmonth, ldcnt);
+        printf("JianChu: %s (%s)\n", jcpx[jc], jcjx[jc]);
+        if (bTerm)
+        {
+            int hr, min, sec;
+            j2hms(vtermhours[termcnt], hr, min, sec);
+            printf("JieQi: %s %02d:%02d\n", jieqi[termcnt], hr, min);
+        }
+        printf("ShiChen JiXiong (day branch %s):\n", dizhi[db]);
+        for (int h = 0; h < 12; h++)
+        {
+            const char* jx = ShiChenJixiong(h, db, yb, 'u');
+            const char* pinyin = "Zhong";
+            if (strcmp(jx, "\xe5\x90\x89") == 0)      /* 吉 */
+                pinyin = "Ji";
+            else if (strcmp(jx, "\xe5\x87\xb6") == 0) /* 凶 */
+                pinyin = "Xiong";
+            printf("  %s %s %s\n", dizhi[h], ShiChenHHMM(h), pinyin);
+        }
+    }
+    else
+    {
+        pc10_4 CHtiangan;
+        pc12_4 CHdizhi;
+        pc22_4 CHmiscchar;
+        pc24_7 CHjieqi;
+        pc7_10 daynamesCH;
+        int nCHchars;
+        char *sp;
+        SetChinese(nEncoding, PMODE_ASCII, CHtiangan, CHdizhi, CHmiscchar,
+                   CHjieqi, daynamesCH, nCHchars, sp);
+        char cmonname[24];
+        LunarMonthNameCH(mnum, nEncoding, cmonname);
+        char cdayname[8];
+        Number2DayCH(ldcnt, nEncoding, cdayname);
+        printf("%04d-%02d-%02d %s  農曆：%s%s（%s%s年）  干支：%s%s日\n",
+               year, month, day, (*daynamesCH)[dofw],
+               cmonname, cdayname,
+               (*CHtiangan)[cyear % 10], (*CHdizhi)[cyear % 12],
+               (*CHtiangan)[n % 10], (*CHdizhi)[n % 12]);
+        printf("建除：%s日（%s）\n", JianChuName(jc, nEncoding),
+               JianChuField(1, jc, nEncoding));
+        const char* pyi = JianChuField(3, jc, nEncoding);
+        const char* pji = JianChuField(4, jc, nEncoding);
+        if (pyi != 0 && pyi[0] != 0)
+            printf("宜：%s\n", pyi);
+        if (pji != 0 && pji[0] != 0)
+            printf("忌：%s\n", pji);
+        if (bTerm)
+        {
+            int hr, min, sec;
+            j2hms(vtermhours[termcnt], hr, min, sec);
+            printf("節氣：%s %02d:%02d\n", (*CHjieqi)[termcnt], hr, min);
+        }
+        printf("時辰吉凶：\n");
+        for (int h = 0; h < 12; h++)
+            printf("  %s時 %s %s\n", (*CHdizhi)[h], ShiChenHHMM(h),
+                   ShiChenJixiong(h, db, yb, nEncoding));
+    }
+}
+
 int main(int argc, char** argv)
 {
     time_t now = time(NULL);
     struct tm *tmnow = localtime(&now);
-    short int year, month;
+    short int year, month, day;
     int pmode;		//	ascii, html, xml, ps
     int fmode;		//	cal, jieqi, list, ical
     bool bSingle;
@@ -2213,11 +2366,11 @@ int main(int argc, char** argv)
     month = (short int) (tmnow->tm_mon + 1);
 
 	//	lc180716 -	new function FUNC_JIEQI
-    if (!ProcessArg(argc, argv, year, month, pmode, fmode, bSingle, nEncoding,
+    if (!ProcessArg(argc, argv, year, month, day, pmode, fmode, bSingle, nEncoding,
                     bJianChu))
     {
         printf("ccal version %s: Displays Chinese calendar (Gregorian with Chinese dates).\n", versionstr);
-        printf("Usage: ccal [-t|-p|-x] [-j|-l] [-g|-b] [-u] [-c] [[<month>] <year>].\n");
+        printf("Usage: ccal [-t|-p|-x] [-j|-l|-i] [-g|-b] [-u] [-c] [[<day>] <month>] <year>.\n");
         printf("\t-t:\tGenerates HTML table output.\n");
         printf("\t-p:\tGenerates encapsulated PostScript output.\n");
         printf("\t-x:\tGenerates XML output.\n");
@@ -2242,6 +2395,12 @@ int main(int argc, char** argv)
     }
     if (IsLeapYear(year))
         daysinmonth[1] = 29;
+    if (day != 0 && (day < 1 || day > daysinmonth[month - 1]))
+    {
+        printf("ccal: Invalid day value: day 1-%d for month %d.\n",
+               daysinmonth[month - 1], month);
+        exit(1);
+    }
     vdouble vterms, vmoons, vmonth, vtermhours;
     double lastnew, lastmon, nextnew;
     double lmon = lunaryear(year, vterms, lastnew, lastmon, vmoons, vmonth, nextnew, vtermhours);
@@ -2280,8 +2439,15 @@ int main(int argc, char** argv)
         else
             SetU8Characters(true);
         nEncoding = 'u';
-        PrintICalendar(year, month, vterms, lastnew, lastmon, vmoons, vmonth,
+        PrintICalendar(year, month, day, vterms, lastnew, lastmon, vmoons, vmonth,
                        nextnew, bSingle, bJianChu, vtermhours);
+        return 0;
+    }
+
+    if (day > 0 && pmode == PMODE_ASCII)
+    {
+        PrintDayASCII(year, month, day, vterms, lastnew, lastmon, vmoons,
+                      vmonth, nextnew, vtermhours, nEncoding);
         return 0;
     }
 
