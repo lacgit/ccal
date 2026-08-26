@@ -1776,8 +1776,9 @@ bool ProcessArg(int argc, char** argv, short int& year, short int& month,
                 short int& day, int& pmode, int& fmode, bool& bSingle,
                 int& nEncoding, bool& bJianChu)
 {
-    if (argc > 6)
-        return false;
+    /* No argc limit: options are single-char flags and at most three
+       numeric operands are accepted (4th numeric → "Too many parameters"
+       below). */
     pmode = PMODE_ASCII;
     fmode = FUNC_CAL;
     bSingle = true;
@@ -2436,8 +2437,6 @@ int main(int argc, char** argv)
 		//	lc260825 -	iCalendar (.ics) output: always UTF-8, -b selects traditional
         if (nEncoding == 'b')
             SetU8Characters(false);
-        else
-            SetU8Characters(true);
         nEncoding = 'u';
         PrintICalendar(year, month, day, vterms, lastnew, lastmon, vmoons, vmonth,
                        nextnew, bSingle, bJianChu, vtermhours);
