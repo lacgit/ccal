@@ -1143,9 +1143,8 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
                     int ystem = (year - 4) % 10;
                     if (jdcnt < vterms[2])
                         ystem = (ystem - 1 + 10) % 10;
-                    sprintf(szYue, "%s%s",
-                            (*CHtiangan)[GetMonthStem(ystem, mbranch)],
-                            (*CHdizhi)[mbranch]);
+                    strcpy(szYue, (*CHtiangan)[GetMonthStem(ystem, mbranch)]);
+                    strcat(szYue, (*CHdizhi)[mbranch]);
                     for (int h = 0; h < 12; h++)
                         strcat(szShichen, ShiChenJixiong(h, db, yb, nEncoding));
                     printf("cmonthname=\"%s\" cdatename=\"%s\" jianchu=\"%s\" jixiong=\"%s\" yuezhu=\"%s\" shichen=\"%s\" />\n",
@@ -1765,9 +1764,8 @@ void PrintMonthList(short int year, short int month, vdouble& vterms,
                     int ystem = (year - 4) % 10;
                     if (jdcnt < vterms[2])
                         ystem = (ystem - 1 + 10) % 10;
-                    sprintf(szYue, "%s%s",
-                            (*CHtiangan)[GetMonthStem(ystem, mbranch)],
-                            (*CHdizhi)[mbranch]);
+                    strcpy(szYue, (*CHtiangan)[GetMonthStem(ystem, mbranch)]);
+                    strcat(szYue, (*CHdizhi)[mbranch]);
                     for (int h = 0; h < 12; h++)
                         strcat(szShichen, ShiChenJixiong(h, db, yb, nEncoding));
                     printf("cmonthname=\"%s\" cdatename=\"%s\" jianchu=\"%s\" jixiong=\"%s\" yuezhu=\"%s\" shichen=\"%s\" />\n",
@@ -2097,7 +2095,7 @@ void PrintICalendar(short int year, short int month, short int day,
     struct tm *tmnow = gmtime(&now);
     strftime(szStamp, sizeof(szStamp), "%Y%m%dT%H%M%SZ", tmnow);
 
-    char line[1100];
+    char line[1700];   /* fits DESCRIPTION: + szEsc[1600] before folding */
     printf("BEGIN:VCALENDAR\r\n");
     printf("VERSION:2.0\r\n");
     printf("PRODID:-//chinesebay//ccal %s//EN\r\n", versionstr);
