@@ -1,3 +1,4 @@
 *.o
 ccal
 store-gh-token.sh
+.gh-token
