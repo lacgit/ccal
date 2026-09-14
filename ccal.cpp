@@ -138,7 +138,10 @@ typedef c7_10 *pc7_10;
 
 void j2hms(double d, int& hr, int& min, int& sec)
 {
-	double frac = d	- (int) d;
+	/* Julian date integer part is noon: shift +0.5 so .0 == 00:00
+       (same convention as cal_date, which does djd = tjd + 0.5). */
+	double dj = d + 0.5;
+	double frac = dj - (int) dj;
 	double tsec	= frac * 86400;
 	double fhr	= tsec/3600;
 	hr	= (int) fhr;
