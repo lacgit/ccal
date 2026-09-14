@@ -142,13 +142,13 @@ void j2hms(double d, int& hr, int& min, int& sec)
        (same convention as cal_date, which does djd = tjd + 0.5). */
 	double dj = d + 0.5;
 	double frac = dj - (int) dj;
-	double tsec	= frac * 86400;
-	double fhr	= tsec/3600;
-	hr	= (int) fhr;
-	double fmin	= (fhr - hr)*60;
+	/* Round to nearest second (with carry into min/hr), matching how
+       almanacs round to the minute, instead of truncating. */
+	double tsec	= fmod(frac * 86400 + 0.5, 86400);
+	hr	= (int) (tsec/3600);
+	double fmin	= (tsec - hr*3600)/60;
 	min	= (int) fmin;
-	double fsec = (fmin - min)*60;
-	sec = (int) fsec;
+	sec	= (int) ((fmin - min)*60 + 1e-9);
 }
 
 /* Input:
