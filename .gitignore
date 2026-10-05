@@ -2,3 +2,10 @@
 ccal
 store-gh-token.sh
 .gh-token
+novascon.cpp
+novascon.h
+novas.cpp
+novas.h
+nutation.cpp
+nutation.h
+solsys3.cpp
