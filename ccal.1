@@ -87,6 +87,31 @@ XML output also include a legend explaining each deity's 神煞, 吉凶,
 simple meaning (含义), suitable (宜) and avoid (忌) activities.  In
 PostScript mode a two-letter code is printed in each day cell, and a
 legend is added on the whole-year page only.
+.sp
+With
+.B \-c
+the 四離四絕日 are also marked, right after the day's 建除 officer (in
+ASCII mode in the blank cell beside the officer, so the table columns do
+not move): the day before 春分, 夏至, 秋分 and 冬至 is 四離 (marked 離 /
+LI) and the day before 立春, 立夏, 立秋 and 立冬 is 四絕 (marked 絕 / JE);
+both are 諸事不宜 days.  No extra cell or box is used for them.  The
+single-day view prints them on their own line, XML day elements gain a
+.I lijue
+attribute (四離 / 四絕), and HTML/iCalendar output append the name after
+the 建除 name.
+.sp
+The 三娘煞 days are shown in the same places except the monthly tables
+(text, HTML): 農曆每月 初三、初七、十三、十八、廿二、廿七 (通勝歌訣
+「上旬初三與初七, 中旬十三二十八當, 下旬廿二與廿七」).  Of those, a day
+whose 日柱 is 庚午 (初三), 辛未 (初七), 戊申 (十三), 己酉 (十八), 丙午
+(廿二) or 丁未 (廿七) is a 真三娘煞 and is labelled 真三娘煞; the other
+三娘煞 days are labelled 三娘煞.  Both are 忌嫁娶 days.  The single-day
+view prints them on their own line (SanNiangSha in ASCII mode), XML day
+elements gain a
+.I sanniangsha
+attribute and HTML gains a
+.I sanniangsha
+span.
 .TP
 .B \-i
 Generates an iCalendar 2.0 (.ics) file on standard output with one
@@ -104,7 +129,10 @@ the 年/月/日 干支 (year, month and day ganzhi; the month pillar follows
 the Jianchu suitability (宜) and avoidance (忌) activities, the 時辰吉凶
 (a 12-line table of every double-hour with its 時柱, hh:mm range and
 吉凶, 子時 甲子 23:00-01:00 .. 亥時 乙亥 21:00-23:00), plus the
-solar-term time.  Output
+solar-term time; the 三娘煞 / 真三娘煞 marker (see
+.B \-c
+above) is appended after the 建除 field of both the title and the
+description.  Output
 is UTF-8 (use
 .B \-b
 for traditional characters), uses CRLF line endings, folds lines at 75

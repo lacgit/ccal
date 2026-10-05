@@ -18,6 +18,28 @@ const char* JianChuField(int field, int idx, int enc);
 /* Legend column header text. col: 0=神煞 1=吉凶 2=含义 3=宜 4=忌. */
 const char* JianChuLabel(int col, int enc);
 
+/* ---- 四離四絕日 ----
+   四離 = 春分 夏至 秋分 冬至 之前一日 (陰陽分離之日);
+   四絕 = 立春 立夏 立秋 立冬 之前一日 (四時之絕).
+   kind: 0 = 四離, 1 = 四絕.  enc: 'g'/'b'/'u' as above. */
+
+/* The single marker character 離 / 絕 (2 columns wide in every encoding). */
+const char* LiJueChar(int kind, int enc);
+
+/* The full name 四離 / 四絕. */
+const char* LiJueName(int kind, int enc);
+
+/* 2-character ASCII marker for -a and PostScript output: "LI" / "JE". */
+const char* LiJueAscii(int kind);
+
+/* ---- 三娘煞 ----
+   三娘煞 = 農曆每月 初三、初七、十三、十八、廿二、廿七 (通勝歌訣: 上旬初三
+   與初七, 中旬十三二十八當, 下旬廿二與廿七, 作事求謀定不昌, 迎親嫁娶無男女).
+   真三娘煞 = 這六日之中日柱干支相合者: 初三逢庚午、初七逢辛未、十三逢戊申、
+   十八逢己酉、廿二逢丙午、廿七逢丁未 (嫁娶尤忌).
+   idx: 0 = 三娘煞, 1 = 真三娘煞.  enc: 'g'/'b'/'u' as above. */
+const char* SanNiangShaName(int idx, int enc);
+
 /* ---- 時辰吉凶 (double-hour auspiciousness) ----
    The 建除 twelve-officer cycle also applies to the 12 時辰 (double
    hours): the hour whose branch equals the day's branch is 建時

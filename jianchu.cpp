@@ -131,6 +131,37 @@ char U8ji_tra[12][96] = {
    "\xe9\x96\x8b\xe5\xb8\x82\xe3\x80\x81\xe5\x87\xba\xe8\xa1\x8c\xe3\x80\x81\xe6\xb1\x82\xe9\x86\xab\xe3\x80\x81\xe4\xb8\x8a\xe4\xbb\xbb", "\xe6\xb1\x82\xe8\xb2\xa1\xe3\x80\x81\xe9\x96\x8b\xe5\x80\x89", "\xe9\x96\x8b\xe5\xb8\x82\xe3\x80\x81\xe5\x87\xba\xe8\xa1\x8c\xe3\x80\x81\xe5\xab\x81\xe5\xa8\xb6\xe3\x80\x81\xe9\x81\xa0\xe8\xa1\x8c\xe3\x80\x81\xe4\xb8\x8a\xe4\xbb\xbb\xe3\x80\x81\xe5\x8b\x95\xe5\x9c\x9f"
 };
 
+/* ---- 四離四絕日 ----
+   四離 = 春分/夏至/秋分/冬至 之前一日; 四絕 = 立春/立夏/立秋/立冬 之前一日.
+   GB arrays hold simplified (离/绝); B5 arrays hold traditional (離/絕).
+   8 days a year, all verified against 永經堂通勝: 立春前一日為四絕,
+   春分前一日為四離, 立夏前一日為四絕, 夏至前一日為四離, ... */
+char GBlijue[2][4] = {
+   "\xc0\xeb", "\xbe\xf8"
+};
+char B5lijue[2][4] = {
+   "\xc2\xf7", "\xb5\xb4"
+};
+char U8lijue_sim[2][4] = {
+   "\xe7\xa6\xbb", "\xe7\xbb\x9d"
+};
+char U8lijue_tra[2][4] = {
+   "\xe9\x9b\xa2", "\xe7\xb5\x95"
+};
+char GBlijuefull[2][8] = {
+   "\xcb\xc4\xc0\xeb", "\xcb\xc4\xbe\xf8"
+};
+char B5lijuefull[2][8] = {
+   "\xa5\x7c\xc2\xf7", "\xa5\x7c\xb5\xb4"
+};
+char U8lijuefull_sim[2][8] = {
+   "\xe5\x9b\x9b\xe7\xa6\xbb", "\xe5\x9b\x9b\xe7\xbb\x9d"
+};
+char U8lijuefull_tra[2][8] = {
+   "\xe5\x9b\x9b\xe9\x9b\xa2", "\xe5\x9b\x9b\xe7\xb5\x95"
+};
+static const char *lijue_ascii[2] = {"LI", "JE"};
+
 static bool bJianChuTrad = false;
 
 void SetJianChuTrad(bool bTrad)
@@ -144,6 +175,48 @@ const char* JianChuName(int idx, int enc)
     if (enc == 'g') return GBjianchu[idx];
     if (enc == 'b') return B5jianchu[idx];
     return (bJianChuTrad ? U8jianchu_tra[idx] : U8jianchu_sim[idx]);
+}
+
+const char* LiJueChar(int kind, int enc)
+{
+    if (kind < 0) kind = 0; if (kind > 1) kind = 1;
+    if (enc == 'g') return GBlijue[kind];
+    if (enc == 'b') return B5lijue[kind];
+    return (bJianChuTrad ? U8lijue_tra[kind] : U8lijue_sim[kind]);
+}
+
+const char* LiJueName(int kind, int enc)
+{
+    if (kind < 0) kind = 0; if (kind > 1) kind = 1;
+    if (enc == 'g') return GBlijuefull[kind];
+    if (enc == 'b') return B5lijuefull[kind];
+    return (bJianChuTrad ? U8lijuefull_tra[kind] : U8lijuefull_sim[kind]);
+}
+
+const char* LiJueAscii(int kind)
+{
+    if (kind < 0) kind = 0; if (kind > 1) kind = 1;
+    return lijue_ascii[kind];
+}
+
+/* ---- 三娘煞 / 真三娘煞 (same characters in simplified and traditional) ---- */
+char GBsanniang[2][12] = {
+   "\xc8\xfd\xc4\xef\xc9\xb7", "\xd5\xe6\xc8\xfd\xc4\xef\xc9\xb7"
+};
+char B5sanniang[2][12] = {
+   "\xa4\x54\xae\x51\xb7\xd9", "\xaf\x75\xa4\x54\xae\x51\xb7\xd9"
+};
+char U8sanniang[2][16] = {
+   "\xe4\xb8\x89\xe5\xa8\x98\xe7\x85\x9e",
+   "\xe7\x9c\x9f\xe4\xb8\x89\xe5\xa8\x98\xe7\x85\x9e"
+};
+
+const char* SanNiangShaName(int idx, int enc)
+{
+    if (idx < 0) idx = 0; if (idx > 1) idx = 1;
+    if (enc == 'g') return GBsanniang[idx];
+    if (enc == 'b') return B5sanniang[idx];
+    return U8sanniang[idx];
 }
 
 /* field: 0=神煞(name), 1=吉凶, 2=含义, 3=宜, 4=忌 */

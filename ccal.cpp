@@ -95,6 +95,44 @@ int GetJianChu(double jd, vdouble& vterms)
     return (daybranch - monthbranch + 12) % 12;
 }
 
+/* 四離四絕日.  四離 = 春分/夏至/秋分/冬至 之 前一日 (陰陽分離之日);
+   四絕 = 立春/立夏/立秋/立冬 之 前一日 (四時之絕).
+   vterms holds the year's 24 節氣 (0=小寒 .. 23=冬至), so 立春=2 春分=5
+   立夏=8 夏至=11 立秋=14 秋分=17 立冬=20 冬至=23; the almanac marks the
+   day before each of those 8 terms.
+   Returns 1 for 四離, 2 for 四絕, 0 for neither. */
+int GetLiJue(double jd, vdouble& vterms)
+{
+    static const int li[4]  = {5, 11, 17, 23};   /* 春分 夏至 秋分 冬至 */
+    static const int jue[4] = {2, 8, 14, 20};    /* 立春 立夏 立秋 立冬 */
+    int jdi = int(jd);
+    int k;
+    for (k = 0; k < 4; k++)
+        if (li[k] < int(vterms.size()) && jdi == int(vterms[li[k]]) - 1)
+            return 1;
+    for (k = 0; k < 4; k++)
+        if (jue[k] < int(vterms.size()) && jdi == int(vterms[jue[k]]) - 1)
+            return 2;
+    return 0;
+}
+
+/* 三娘煞: 農曆每月 初三、初七、十三、十八、廿二、廿七 (通勝歌訣: 上旬初三與
+   初七, 中旬十三二十八當, 下旬廿二與廿七).
+   真三娘煞: 這六日之中日柱干支相合者 —— 初三逢庚午、初七逢辛未、十三逢戊申、
+   十八逢己酉、廿二逢丙午、廿七逢丁未, 嫁娶尤忌.
+   lday: 農曆日 (1..30); dayganzhi: 日柱 index 0=甲子.
+   Returns 2 = 真三娘煞, 1 = 三娘煞, 0 = 非三娘煞日. */
+int GetSanNiangSha(int lday, int dayganzhi)
+{
+    static const int sjday[6] = {3, 7, 13, 18, 22, 27};
+    static const int sjgz[6]  = {6, 7, 44, 45, 42, 43};   /* 庚午 辛未 戊申 己酉 丙午 丁未 */
+    int k;
+    for (k = 0; k < 6; k++)
+        if (lday == sjday[k])
+            return (dayganzhi == sjgz[k]) ? 2 : 1;
+    return 0;
+}
+
 /* 月柱 天干: 年上起月 (五虎遁).  ystem: 年干 index 0=甲;  mbranch: 月建
    branch 0=子.  Returns the 月干 index 0=甲. */
 int GetMonthStem(int ystem, int mbranch)
@@ -192,15 +230,29 @@ void GetMonthNumber(double mnumber, short int& month, char* leap)
 /* Input:
    mnumber: month number with .5 indicating leap month
 */
-void PrintMonthNumber(double mnumber)
+void PrintMonthNumber(double mnumber, int nshrink = 0)
 {
     short int month;
     char leap[2] = {0x00, 0x00};
+    int i, nlead, ntrail;
+    char szMon[16];
     GetMonthNumber(mnumber, month, leap);
 	//	lc180710 -	enhance format
 	//	lc260211 -	moved the leap prefix to front
 	//				and use M instead of Y to indicate new lunar month.
-    printf(" %1s[%2d]M     ", leap, month);
+    sprintf(szMon, "%s[%2d]M", leap, month);
+    /* 12 - nshrink columns follow the 建除 character: nshrink of the
+       2-column blank is already taken by the 四離四絕 marker, then the month
+       (with its R leap prefix), then the pad that keeps the cell 17 wide. */
+    nlead = 12 - nshrink - (int)strlen(szMon) - 5;
+    if (nlead < 0)
+        nlead = 0;
+    ntrail = 12 - nshrink - nlead - (int)strlen(szMon);
+    for (i = 0; i < nlead; i++)
+        printf(" ");
+    printf("%s", szMon);
+    for (i = 0; i < ntrail; i++)
+        printf(" ");
 }
 
 /* Inputs:
@@ -846,14 +898,32 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
             }
 #endif
             int jc = (bJianChu) ? GetJianChu(jdcnt, vterms) : 0;
+            /* 四離四絕日: 1 = 四離, 2 = 四絕.  The marker is shown right after
+               the 建除 officer. */
+            int lj = (bJianChu) ? GetLiJue(jdcnt, vterms) : 0;
+            /* 三娘煞 / 真三娘煞: 1 = 三娘煞, 2 = 真三娘煞.  Not shown in the
+               monthly table (no room in a 17-column cell, and it falls on six
+               days of every month); shown in the other outputs. */
+            int sns = (bJianChu) ? GetSanNiangSha(ldcnt, (int(jdcnt) + 49) % 60) : 0;
+            const char *pmk = (lj == 0) ? "" :
+                              ((nEncoding == 'a') ? LiJueAscii(lj - 1)
+                                                  : LiJueChar(lj - 1, nEncoding));
+            /* The marker takes the blank beside 建除: the same 2 columns are
+               dropped from the leading pad so the cell keeps its width and the
+               lunar date keeps its column. */
+            const char *pmkpad = (lj == 0) ? "  " : "";
             if (pmode == PMODE_ASCII || pmode == PMODE_HTML)
             {
                 printf("%2d", dcnt);
                 if (pmode == PMODE_ASCII && bJianChu)
-                    printf(" %s", (nEncoding == 'a') ? jianchu_ascii[jc] : JianChuName(jc, nEncoding));
+                    printf(" %s%s", (nEncoding == 'a') ? jianchu_ascii[jc] : JianChuName(jc, nEncoding), pmk);
                 else if (pmode == PMODE_HTML && bJianChu)
                     printf(" <span class=\"jianchu\">%s%s</span>", JianChuName(jc, nEncoding),
                            JianChuField(1, jc, nEncoding));
+                if (pmode == PMODE_HTML && bJianChu && lj != 0)
+                    printf("<span class=\"lijue\">%s</span>", LiJueName(lj - 1, nEncoding));
+                if (pmode == PMODE_HTML && bJianChu && sns != 0)
+                    printf("<span class=\"sanniangsha\">%s</span>", SanNiangShaName(sns - 1, nEncoding));
             }
             else if (pmode == PMODE_XML)
             {
@@ -872,7 +942,7 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
                     printf("gsave 0 0.8 0 K\n");
                 printf("%d %d m (%2d) S\ngsave 8 0 SF ", posx, posy, dcnt);
                 if (bJianChu)
-                    printf("(%s) 2 0 rmoveto show ", jianchu_ascii[jc]);
+                    printf("(%s%s) 2 0 rmoveto show ", jianchu_ascii[jc], (lj == 0) ? "" : LiJueAscii(lj - 1));
                 posx += 170;
                 if (dcnt == 1 || ldcnt == 1)
                 {
@@ -912,12 +982,12 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
                 {
                     if (nEncoding == 'a')
 						//	lc180710 -	enhance format
-                        printf("  [%2d]      ", ldcnt);
+                        printf("%s[%2d]      ", pmkpad, ldcnt);
                     else
                     {
                         Number2DayCH(ldcnt, nEncoding, cdayname);
 						//	lc180710 -	enhance format
-                        printf("  %s      ", cdayname);
+                        printf("%s%s      ", pmkpad, cdayname);
                     }
                 }
                 else if (pmode == PMODE_HTML)
@@ -965,7 +1035,7 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
                 if (pmode == PMODE_ASCII)
                 {
                     if (nEncoding == 'a')
-                        PrintMonthNumber(vmonth[moncnt++]);
+                        PrintMonthNumber(vmonth[moncnt++], (lj == 0) ? 0 : 2);
                     else
                     {
                         Number2MonthCH(vmonth[moncnt++], 1, 30, nEncoding, cmonname);
@@ -973,7 +1043,7 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
                         *p = 0;
                         int nlen = (int)strlen(cmonname);
                         if (nlen <= 3 * nCHchars)
-                            printf("  ");
+                            printf("%s", pmkpad);
 						char day2[8];
 						Number2DayCH(2, nEncoding, day2);
                         printf("%s%s", cmonname, day2);
@@ -1015,12 +1085,12 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
 					j2hms(vtermhours[termcnt], hr, min, sec);
                     if (nEncoding == 'a') {
 					//	lc180710 -	enhance format
-                        printf("  %s %02d:%02d  ", jieqi[termcnt++], hr, min);
+                        printf("%s%s %02d:%02d  ", pmkpad, jieqi[termcnt++], hr, min);
 					}
                     else
                     {
 					//	lc180710 -	enhance format
-                        printf("  %s%02d:%02d ", (*CHjieqi)[termcnt++], hr, min);
+                        printf("%s%s%02d:%02d ", pmkpad, (*CHjieqi)[termcnt++], hr, min);
                     }
                 }
                 else if (pmode == PMODE_HTML)
@@ -1075,7 +1145,7 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
                 if (pmode == PMODE_ASCII)
                 {
                     if (nEncoding == 'a')
-                        PrintMonthNumber(vmonth[moncnt++]);
+                        PrintMonthNumber(vmonth[moncnt++], (lj == 0) ? 0 : 2);
                     else
                     {
                         Number2MonthCH(vmonth[moncnt++], 1, 30, nEncoding, cmonname);
@@ -1083,7 +1153,7 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
                         *p = 0;
                         int nlen = (int)strlen(cmonname);
                         if (nlen <= 3 * nCHchars)
-                            printf("  ");
+                            printf("%s", pmkpad);
 						//	lc180710 -	enhance format
                         printf("%s    ", cmonname);
                         if (nlen == 2 * nCHchars)
@@ -1150,9 +1220,12 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
                     strcat(szYue, (*CHdizhi)[mbranch]);
                     for (int h = 0; h < 12; h++)
                         strcat(szShichen, ShiChenJixiong(h, db, yb, nEncoding));
-                    printf("cmonthname=\"%s\" cdatename=\"%s\" jianchu=\"%s\" jixiong=\"%s\" yuezhu=\"%s\" shichen=\"%s\" />\n",
+                    printf("cmonthname=\"%s\" cdatename=\"%s\" jianchu=\"%s\" jixiong=\"%s\" lijue=\"%s\" sanniangsha=\"%s\" yuezhu=\"%s\" shichen=\"%s\" />\n",
                            cmonname, cdayname, JianChuName(jc, nEncoding),
-                           JianChuField(1, jc, nEncoding), szYue, szShichen);
+                           JianChuField(1, jc, nEncoding),
+                           (lj == 0) ? "" : LiJueName(lj - 1, nEncoding),
+                           (sns == 0) ? "" : SanNiangShaName(sns - 1, nEncoding),
+                           szYue, szShichen);
                 }
                 else
                     printf("cmonthname=\"%s\" cdatename=\"%s\" />\n", cmonname, cdayname);
@@ -1470,14 +1543,32 @@ void PrintMonthList(short int year, short int month, vdouble& vterms,
             }
 #endif
             int jc = (bJianChu) ? GetJianChu(jdcnt, vterms) : 0;
+            /* 四離四絕日: 1 = 四離, 2 = 四絕.  The marker is shown right after
+               the 建除 officer. */
+            int lj = (bJianChu) ? GetLiJue(jdcnt, vterms) : 0;
+            /* 三娘煞 / 真三娘煞: 1 = 三娘煞, 2 = 真三娘煞.  Not shown in the
+               monthly table (no room in a 17-column cell, and it falls on six
+               days of every month); shown in the other outputs. */
+            int sns = (bJianChu) ? GetSanNiangSha(ldcnt, (int(jdcnt) + 49) % 60) : 0;
+            const char *pmk = (lj == 0) ? "" :
+                              ((nEncoding == 'a') ? LiJueAscii(lj - 1)
+                                                  : LiJueChar(lj - 1, nEncoding));
+            /* The marker takes the blank beside 建除: the same 2 columns are
+               dropped from the leading pad so the cell keeps its width and the
+               lunar date keeps its column. */
+            const char *pmkpad = (lj == 0) ? "  " : "";
             if (pmode == PMODE_ASCII || pmode == PMODE_HTML)
             {
                 printf("%2d", dcnt);
                 if (pmode == PMODE_ASCII && bJianChu)
-                    printf(" %s", (nEncoding == 'a') ? jianchu_ascii[jc] : JianChuName(jc, nEncoding));
+                    printf(" %s%s", (nEncoding == 'a') ? jianchu_ascii[jc] : JianChuName(jc, nEncoding), pmk);
                 else if (pmode == PMODE_HTML && bJianChu)
                     printf(" <span class=\"jianchu\">%s%s</span>", JianChuName(jc, nEncoding),
                            JianChuField(1, jc, nEncoding));
+                if (pmode == PMODE_HTML && bJianChu && lj != 0)
+                    printf("<span class=\"lijue\">%s</span>", LiJueName(lj - 1, nEncoding));
+                if (pmode == PMODE_HTML && bJianChu && sns != 0)
+                    printf("<span class=\"sanniangsha\">%s</span>", SanNiangShaName(sns - 1, nEncoding));
             }
             else if (pmode == PMODE_XML)
             {
@@ -1496,7 +1587,7 @@ void PrintMonthList(short int year, short int month, vdouble& vterms,
                     printf("gsave 0 0.8 0 K\n");
                 printf("%d %d m (%2d) S\ngsave 8 0 SF ", posx, posy, dcnt);
                 if (bJianChu)
-                    printf("(%s) 2 0 rmoveto show ", jianchu_ascii[jc]);
+                    printf("(%s%s) 2 0 rmoveto show ", jianchu_ascii[jc], (lj == 0) ? "" : LiJueAscii(lj - 1));
                 posx += 170;
                 if (dcnt == 1 || ldcnt == 1)
                 {
@@ -1536,12 +1627,12 @@ void PrintMonthList(short int year, short int month, vdouble& vterms,
                 {
                     if (nEncoding == 'a')
 						//	lc180710 -	enhance format
-                        printf("  [%2d]      ", ldcnt);
+                        printf("%s[%2d]      ", pmkpad, ldcnt);
                     else
                     {
                         Number2DayCH(ldcnt, nEncoding, cdayname);
 						//	lc180710 -	enhance format
-                        printf("  %s      ", cdayname);
+                        printf("%s%s      ", pmkpad, cdayname);
                     }
                 }
                 else if (pmode == PMODE_HTML)
@@ -1589,7 +1680,7 @@ void PrintMonthList(short int year, short int month, vdouble& vterms,
                 if (pmode == PMODE_ASCII)
                 {
                     if (nEncoding == 'a')
-                        PrintMonthNumber(vmonth[moncnt++]);
+                        PrintMonthNumber(vmonth[moncnt++], (lj == 0) ? 0 : 2);
                     else
                     {
                         Number2MonthCH(vmonth[moncnt++], 1, 30, nEncoding, cmonname);
@@ -1597,12 +1688,12 @@ void PrintMonthList(short int year, short int month, vdouble& vterms,
                         *p = 0;
                         int nlen = (int)strlen(cmonname);
                         if (nlen <= 3 * nCHchars)
-                            printf(" ");
+                            printf("%s", (lj == 0) ? " " : "");
                         printf("%s", cmonname);
                         if (nlen == 2 * nCHchars)
-                            printf("   ");
+                            printf("%s", (lj == 0) ? "   " : "  ");
                         if (nlen == 3 * nCHchars)
-                            printf(" ");
+                            printf("%s", (lj == 0) ? " " : "");
                     }
                 }
                 else if (pmode == PMODE_HTML)
@@ -1637,12 +1728,12 @@ void PrintMonthList(short int year, short int month, vdouble& vterms,
 					j2hms(vtermhours[termcnt], hr, min, sec);
                     if (nEncoding == 'a') {
 					//	lc180710 -	enhance format
-                        printf("  %s %02d:%02d ", jieqi[termcnt++], hr, min);
+                        printf("%s%s %02d:%02d ", pmkpad, jieqi[termcnt++], hr, min);
 					}
                     else
                     {
 					//	lc180710 -	enhance format
-                        printf("  %s%02d:%02d ", (*CHjieqi)[termcnt++], hr, min);
+                        printf("%s%s%02d:%02d ", pmkpad, (*CHjieqi)[termcnt++], hr, min);
                     }
                 }
                 else if (pmode == PMODE_HTML)
@@ -1697,7 +1788,7 @@ void PrintMonthList(short int year, short int month, vdouble& vterms,
                 if (pmode == PMODE_ASCII)
                 {
                     if (nEncoding == 'a')
-                        PrintMonthNumber(vmonth[moncnt++]);
+                        PrintMonthNumber(vmonth[moncnt++], (lj == 0) ? 0 : 2);
                     else
                     {
                         Number2MonthCH(vmonth[moncnt++], 1, 30, nEncoding, cmonname);
@@ -1705,13 +1796,13 @@ void PrintMonthList(short int year, short int month, vdouble& vterms,
                         *p = 0;
                         int nlen = (int)strlen(cmonname);
                         if (nlen <= 3 * nCHchars)
-                            printf(" ");
+                            printf("%s", (lj == 0) ? " " : "");
 						//	lc180710 -	enhance format
                         printf("%s   ", cmonname);
                         if (nlen == 2 * nCHchars)
-                            printf("   ");
+                            printf("%s", (lj == 0) ? "   " : "  ");
                         if (nlen == 3 * nCHchars)
-                            printf(" ");
+                            printf("%s", (lj == 0) ? " " : "");
                     }
                 }
                 else if (pmode == PMODE_HTML || pmode == PMODE_XML)
@@ -1771,9 +1862,12 @@ void PrintMonthList(short int year, short int month, vdouble& vterms,
                     strcat(szYue, (*CHdizhi)[mbranch]);
                     for (int h = 0; h < 12; h++)
                         strcat(szShichen, ShiChenJixiong(h, db, yb, nEncoding));
-                    printf("cmonthname=\"%s\" cdatename=\"%s\" jianchu=\"%s\" jixiong=\"%s\" yuezhu=\"%s\" shichen=\"%s\" />\n",
+                    printf("cmonthname=\"%s\" cdatename=\"%s\" jianchu=\"%s\" jixiong=\"%s\" lijue=\"%s\" sanniangsha=\"%s\" yuezhu=\"%s\" shichen=\"%s\" />\n",
                            cmonname, cdayname, JianChuName(jc, nEncoding),
-                           JianChuField(1, jc, nEncoding), szYue, szShichen);
+                           JianChuField(1, jc, nEncoding),
+                           (lj == 0) ? "" : LiJueName(lj - 1, nEncoding),
+                           (sns == 0) ? "" : SanNiangShaName(sns - 1, nEncoding),
+                           szYue, szShichen);
                 }
                 else
                     printf("cmonthname=\"%s\" cdatename=\"%s\" />\n", cmonname, cdayname);
@@ -2152,7 +2246,10 @@ void PrintICalendar(short int year, short int month, short int day,
             if (day == 0 || dcnt == day)
             {
             char szSum[160], szDesc[1024], szEsc[1600];
-            /* SUMMARY: 農曆日 [節氣 HH:MM] [建除] — day first */
+            /* 日柱 index (0=甲子): 真三娘煞 and the 干支 line both need it */
+            int n = (int(jdcnt) + 49) % 60;
+            int sns = GetSanNiangSha(ldcnt, n);
+            /* SUMMARY: 農曆日 [節氣 HH:MM] [建除] [四離/四絕] [三娘煞] */
             int sl = 0;
             sl += sprintf(szSum + sl, "%s%s", (ldcnt == 1) ? cmonname : "", cdayname);
             if (bTerm)
@@ -2161,12 +2258,18 @@ void PrintICalendar(short int year, short int month, short int day,
                 j2hms(vtermhours[termcnt], hr, min, sec);
                 sl += sprintf(szSum + sl, " %s %02d:%02d", (*CHjieqi)[termcnt], hr, min);
             }
+            int lj = bJianChu ? GetLiJue(jdcnt, vterms) : 0;
             if (bJianChu)
             {
                 int jc = GetJianChu(jdcnt, vterms);
                 sl += sprintf(szSum + sl, " %s%s",
                               JianChuName(jc, 'u'), JianChuField(1, jc, 'u'));
+                if (lj != 0)
+                    sl += sprintf(szSum + sl, " %s", LiJueName(lj - 1, 'u'));
             }
+            /* 三娘煞 標於建除之后 */
+            if (sns != 0)
+                sl += sprintf(szSum + sl, " %s", SanNiangShaName(sns - 1, 'u'));
 
             /* DESCRIPTION */
             int dl = 0;
@@ -2185,7 +2288,6 @@ void PrintICalendar(short int year, short int month, short int day,
                           (*CHtiangan)[cyear % 10], (*CHdizhi)[cyear % 12],
                           (*CHtiangan)[GetMonthStem(ystem, mbranch)],
                           (*CHdizhi)[mbranch]);
-            int n = (int(jdcnt) + 49) % 60;
             dl += sprintf(szDesc + dl, "干支：%s%s日\n",
                           (*CHtiangan)[n % 10], (*CHdizhi)[n % 12]);
             if (bJianChu)
@@ -2195,6 +2297,10 @@ void PrintICalendar(short int year, short int month, short int day,
                 const char* pji = JianChuField(4, jc, 'u');
                 dl += sprintf(szDesc + dl, "建除：%s日（%s）\n",
                               JianChuName(jc, 'u'), JianChuField(1, jc, 'u'));
+                if (lj != 0)
+                    dl += sprintf(szDesc + dl, "%s（諸事不宜）\n", LiJueName(lj - 1, 'u'));
+                if (sns != 0)
+                    dl += sprintf(szDesc + dl, "%s（忌嫁娶）\n", SanNiangShaName(sns - 1, 'u'));
                 if (pyi != 0 && pyi[0] != 0)
                     dl += sprintf(szDesc + dl, "宜：%s\n", pyi);
                 if (pji != 0 && pji[0] != 0)
@@ -2211,6 +2317,8 @@ void PrintICalendar(short int year, short int month, short int day,
                                   (*CHtiangan)[GetHourStem(n % 10, h)], (*CHdizhi)[h],
                                   ShiChenHHMM(h), ShiChenJixiong(h, db, yb, 'u'));
             }
+            if (!bJianChu && sns != 0)
+                dl += sprintf(szDesc + dl, "%s（忌嫁娶）\n", SanNiangShaName(sns - 1, 'u'));
             if (bTerm)
             {
                 int hr, min, sec;
@@ -2306,7 +2414,9 @@ void PrintDayASCII(short int year, short int month, short int day,
 
     int db = (int(jdcnt) + 1) % 12;
     int jc = GetJianChu(jdcnt, vterms);
+    int lj = GetLiJue(jdcnt, vterms);
     int n = (int(jdcnt) + 49) % 60;
+    int sns = GetSanNiangSha(ldcnt, n);
     int mcnt = moncnt;
     if (ldcnt != 1)
         mcnt--;
@@ -2357,6 +2467,12 @@ void PrintDayASCII(short int year, short int month, short int day,
                tiangan[n % 10], dizhi[n % 12],
                leap[0] == 'R' ? "Leap " : "", cmonth, ldcnt);
         printf("JianChu: %s (%s)\n", jcpx[jc], jcjx[jc]);
+        if (lj != 0)
+            printf("LiJue: %s\n", (lj == 1) ? "SiLi" : "SiJue");
+        if (sns != 0)
+            printf("SanNiangSha: %s\n",
+                   (sns == 2) ? "Zhen San Niang Sha (avoid marriage)"
+                              : "San Niang Sha (avoid marriage)");
         if (bTerm)
         {
             int hr, min, sec;
@@ -2400,6 +2516,10 @@ void PrintDayASCII(short int year, short int month, short int day,
                (*CHtiangan)[n % 10], (*CHdizhi)[n % 12]);
         printf("建除：%s日（%s）\n", JianChuName(jc, nEncoding),
                JianChuField(1, jc, nEncoding));
+        if (lj != 0)
+            printf("%s（諸事不宜）\n", LiJueName(lj - 1, nEncoding));
+        if (sns != 0)
+            printf("%s（忌嫁娶）\n", SanNiangShaName(sns - 1, nEncoding));
         const char* pyi = JianChuField(3, jc, nEncoding);
         const char* pji = JianChuField(4, jc, nEncoding);
         if (pyi != 0 && pyi[0] != 0)
@@ -2448,7 +2568,7 @@ int main(int argc, char** argv)
         printf("\t-g:\tGenerates simplified Chinese output.\n");
         printf("\t-b:\tGenerates traditional Chinese output.\n");
         printf("\t-u:\tUses UTF-8 rather than GB or Big5 for Chinese output.\n");
-        printf("\t-c:\tPrints the Jianchu (建除) twelve deities and the 時辰吉凶 for each day.\n");
+        printf("\t-c:\tPrints the Jianchu (建除) twelve deities, the 四離四絕日, the 三娘煞 and the 時辰吉凶 for each day.\n");
         exit(1);
     }
     if (month < 1 || month > 12)
