@@ -119,7 +119,11 @@ all-day event per Gregorian day, for import or subscription in Outlook,
 Google Calendar, Apple Calendar, OneCalendar and similar applications.
 The event title shows the lunar day first (e.g. 十五), with the lunar
 month name shown only on 初一 (e.g. 正月初一), followed by the solar
-term (節氣) and its time (e.g. 雨水 11:51) when one falls on that day
+term (節氣) with its time when one falls on that day.  Its 節氣月
+(節氣-month) is added after the 建除 field (e.g. 收凶 （正月氣 寅月）), or,
+without
+.B \-c
+, with the term itself (e.g. 雨水 11:51 （正月氣 寅月）)
 and, with
 .B \-c
 , by the Jianchu deity.  The event description gives the lunar date and
@@ -156,7 +160,11 @@ detail view for that one day: the Gregorian date and weekday, the lunar
 date, the 年/月/日 干支 (year, month and day ganzhi; the month pillar
 follows 立春), the Jianchu (建除) day-officer with its
 黃黑道 吉凶 and suitable (宜) and avoid (忌) activities, the solar term
-with its time when one falls on that day, and the 時辰吉凶 table with
+with its time and its 節氣月 when one falls on that day (e.g.
+.IR "清明 02:39 （三月節 辰月）" :
+the month numbered with 立春 = 正月 and its 月建 branch, so 立春 is the
+正月節 of 寅月, 清明 the 三月節 of 辰月, 冬至 the 十一月氣 of 子月), and the
+時辰吉凶 table with
 each double-hour's 時柱 (hour ganzhi, 五鼠遁), hh:mm range and 吉凶.  The
 .B \-i
 mode emits just that day's iCalendar event.  In HTML, PostScript, XML,

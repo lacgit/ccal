@@ -2107,6 +2107,61 @@ void LunarMonthNameCH(double mnumber, int nEncoding, char* monname)
     strcat(monname, (*miscchar)[14]);
 }
 
+/* ---- 節氣月 ----
+   Each 節氣 belongs to a 節氣月: the twelve 節 (小寒, 立春, 驚蟄 ...) start the
+   month, the 中氣 fall inside it, so the month of a 中氣 is the month of the 節
+   before it.  The month is numbered with 立春 = 正月 (寅月), 驚蟄 = 二月 (卯月),
+   清明 = 三月 (辰月) ... 大雪 = 十一月 (子月), 小寒 = 十二月 (丑月). */
+
+/* 月建 branch (0=子 .. 11=亥) of the 節氣月 that solar term termidx belongs to
+   (termidx 0=小寒 .. 23=冬至, the vterms / -j order). */
+int JieQiMonthBranch(int termidx)
+{
+    if (termidx < 0) termidx = 0;
+    if (termidx > 23) termidx = 23;
+    return jieyuejian[termidx / 2];
+}
+
+/* Month number (立春 = 1 = 正月) of a 月建 branch. */
+int BranchMonthNumber(int branch)
+{
+    return ((branch - 2 + 12) % 12) + 1;
+}
+
+/* Chinese 節氣月 label of solar term termidx, e.g. 清明 (6) -> "三月節 辰月".
+   out must hold at least 24 bytes; enc: 'g'/'b'/'u'. */
+void JieQiMonthLabel(int termidx, int enc, char* out)
+{
+    pc10_4 CHtiangan;
+    pc12_4 CHdizhi;
+    pc22_4 CHmiscchar;
+    pc24_7 CHjieqi;
+    pc7_10 daynamesCH;
+    int nCHchars;
+    char* sp;
+    if (termidx < 0) termidx = 0;
+    if (termidx > 23) termidx = 23;
+    SetChinese(enc, PMODE_ASCII, CHtiangan, CHdizhi, CHmiscchar, CHjieqi,
+               daynamesCH, nCHchars, sp);
+    int branch = JieQiMonthBranch(termidx);
+    int mnum = BranchMonthNumber(branch);
+    out[0] = 0;
+    if (mnum == 1)
+        strcat(out, (*CHmiscchar)[12]);                 /* 正月, not 一月 */
+    else if (mnum <= 10)
+        strcat(out, (*CHmiscchar)[mnum]);
+    else
+    {
+        strcat(out, (*CHmiscchar)[10]);                 /* 十 + 一/二 */
+        strcat(out, (*CHmiscchar)[mnum - 10]);
+    }
+    strcat(out, (*CHmiscchar)[14]);                     /* 月 */
+    strcat(out, JieQiKindName(termidx % 2, enc));       /* 節 / 氣 */
+    strcat(out, " ");
+    strcat(out, (*CHdizhi)[branch]);                    /* 月建, e.g. 辰 */
+    strcat(out, (*CHmiscchar)[14]);                     /* 月 */
+}
+
 /* Escape a string for an iCalendar TEXT property value (RFC 5545). */
 void IcsEscape(const char* in, char* out, int outsize)
 {
@@ -2255,8 +2310,17 @@ void PrintICalendar(short int year, short int month, short int day,
             if (bTerm)
             {
                 int hr, min, sec;
+                char szJQ[24];
                 j2hms(vtermhours[termcnt], hr, min, sec);
-                sl += sprintf(szSum + sl, " %s %02d:%02d", (*CHjieqi)[termcnt], hr, min);
+                JieQiMonthLabel(termcnt, 'u', szJQ);
+                /* without 建除 the 節氣月 stays with the 節氣; with 建除 it
+                   moves to right after the 建除 field below */
+                if (bJianChu)
+                    sl += sprintf(szSum + sl, " %s %02d:%02d",
+                                  (*CHjieqi)[termcnt], hr, min);
+                else
+                    sl += sprintf(szSum + sl, " %s %02d:%02d （%s）",
+                                  (*CHjieqi)[termcnt], hr, min, szJQ);
             }
             int lj = bJianChu ? GetLiJue(jdcnt, vterms) : 0;
             if (bJianChu)
@@ -2264,6 +2328,12 @@ void PrintICalendar(short int year, short int month, short int day,
                 int jc = GetJianChu(jdcnt, vterms);
                 sl += sprintf(szSum + sl, " %s%s",
                               JianChuName(jc, 'u'), JianChuField(1, jc, 'u'));
+                if (bTerm)                    /* 節氣月, 建除之后 */
+                {
+                    char szJQ[24];
+                    JieQiMonthLabel(termcnt, 'u', szJQ);
+                    sl += sprintf(szSum + sl, " （%s）", szJQ);
+                }
                 if (lj != 0)
                     sl += sprintf(szSum + sl, " %s", LiJueName(lj - 1, 'u'));
             }
@@ -2297,6 +2367,12 @@ void PrintICalendar(short int year, short int month, short int day,
                 const char* pji = JianChuField(4, jc, 'u');
                 dl += sprintf(szDesc + dl, "建除：%s日（%s）\n",
                               JianChuName(jc, 'u'), JianChuField(1, jc, 'u'));
+                if (bTerm)                    /* 節氣月, 建除之后 */
+                {
+                    char szJQ[24];
+                    JieQiMonthLabel(termcnt, 'u', szJQ);
+                    dl += sprintf(szDesc + dl, "節氣月：%s\n", szJQ);
+                }
                 if (lj != 0)
                     dl += sprintf(szDesc + dl, "%s（諸事不宜）\n", LiJueName(lj - 1, 'u'));
                 if (sns != 0)
@@ -2322,9 +2398,17 @@ void PrintICalendar(short int year, short int month, short int day,
             if (bTerm)
             {
                 int hr, min, sec;
+                char szJQ[24];
                 j2hms(vtermhours[termcnt], hr, min, sec);
-                dl += sprintf(szDesc + dl, "節氣：%s %02d:%02d\n",
-                              (*CHjieqi)[termcnt], hr, min);
+                if (!bJianChu)
+                {
+                    JieQiMonthLabel(termcnt, 'u', szJQ);
+                    dl += sprintf(szDesc + dl, "節氣：%s %02d:%02d （%s）\n",
+                                  (*CHjieqi)[termcnt], hr, min, szJQ);
+                }
+                else
+                    dl += sprintf(szDesc + dl, "節氣：%s %02d:%02d\n",
+                                  (*CHjieqi)[termcnt], hr, min);
             }
             /* Drop the trailing newline: keeps the last fold clean */
             if (dl > 0 && szDesc[dl - 1] == '\n')
@@ -2476,8 +2560,13 @@ void PrintDayASCII(short int year, short int month, short int day,
         if (bTerm)
         {
             int hr, min, sec;
+            char szJQ[24];
             j2hms(vtermhours[termcnt], hr, min, sec);
-            printf("JieQi: %s %02d:%02d\n", jieqi[termcnt], hr, min);
+            JieQiMonthLabel(termcnt, nEncoding, szJQ);
+            printf("JieQi: %s %02d:%02d (month %d %s, %s month)\n", jieqi[termcnt], hr, min,
+                   BranchMonthNumber(JieQiMonthBranch(termcnt)),
+                   (termcnt % 2 == 0) ? "Jie" : "Qi",
+                   dizhi[JieQiMonthBranch(termcnt)]);
         }
         printf("ShiChen JiXiong (day branch %s):\n", dizhi[db]);
         for (int h = 0; h < 12; h++)
@@ -2529,8 +2618,10 @@ void PrintDayASCII(short int year, short int month, short int day,
         if (bTerm)
         {
             int hr, min, sec;
+            char szJQ[24];
             j2hms(vtermhours[termcnt], hr, min, sec);
-            printf("節氣：%s %02d:%02d\n", (*CHjieqi)[termcnt], hr, min);
+            JieQiMonthLabel(termcnt, nEncoding, szJQ);
+            printf("節氣：%s %02d:%02d （%s）\n", (*CHjieqi)[termcnt], hr, min, szJQ);
         }
         printf("時辰吉凶：\n");
         for (int h = 0; h < 12; h++)

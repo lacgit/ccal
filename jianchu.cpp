@@ -199,6 +199,28 @@ const char* LiJueAscii(int kind)
     return lijue_ascii[kind];
 }
 
+/* ---- 節 / 氣 (twelve 節 + twelve 中氣) ---- */
+char GBjieqikind[2][4] = {
+   "\xbd\xda", "\xc6\xf8"          /* 节 气 */
+};
+char B5jieqikind[2][4] = {
+   "\xb8\x60", "\xae\xf0"          /* 節 氣 */
+};
+char U8jieqikind_sim[2][4] = {
+   "\xe8\x8a\x82", "\xe6\xb0\xa3"   /* 节 气 */
+};
+char U8jieqikind_tra[2][4] = {
+   "\xe7\xaf\x80", "\xe6\xb0\xa3"   /* 節 氣 */
+};
+
+const char* JieQiKindName(int bQi, int enc)
+{
+    if (bQi < 0) bQi = 0; if (bQi > 1) bQi = 1;
+    if (enc == 'g') return GBjieqikind[bQi];
+    if (enc == 'b') return B5jieqikind[bQi];
+    return (bJianChuTrad ? U8jieqikind_tra[bQi] : U8jieqikind_sim[bQi]);
+}
+
 /* ---- 三娘煞 / 真三娘煞 (same characters in simplified and traditional) ---- */
 char GBsanniang[2][12] = {
    "\xc8\xfd\xc4\xef\xc9\xb7", "\xd5\xe6\xc8\xfd\xc4\xef\xc9\xb7"

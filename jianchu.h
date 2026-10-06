@@ -32,6 +32,11 @@ const char* LiJueName(int kind, int enc);
 /* 2-character ASCII marker for -a and PostScript output: "LI" / "JE". */
 const char* LiJueAscii(int kind);
 
+/* ---- 節 / 氣 ----
+   The 24 solar terms are twelve 節 (小寒, 立春, 驚蟄, 清明, 立夏, 芒種, 小暑,
+   立秋, 白露, 寒露, 立冬, 大雪) and twelve 氣 (中氣).  bQi: 0 = 節, 1 = 氣. */
+const char* JieQiKindName(int bQi, int enc);
+
 /* ---- 三娘煞 ----
    三娘煞 = 農曆每月 初三、初七、十三、十八、廿二、廿七 (通勝歌訣: 上旬初三
    與初七, 中旬十三二十八當, 下旬廿二與廿七, 作事求謀定不昌, 迎親嫁娶無男女).
