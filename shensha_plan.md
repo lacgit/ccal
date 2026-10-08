@@ -15,6 +15,17 @@
    「通勝有我冇」才係要解釋嘅硬證據。
 4. 用戶(通勝權威)嘅版面裁決優先於 OCR。
 
+## 工作規範(每張卡都跟)
+
+1. 一開波先 `cd /root/.hermes/webui/attachments/ccal-fix/ccal`(派卡嘅 scratch workspace
+   有時係 dangling cwd,唔好靠佢)。
+2. 每個神煞一個 commit;容器未設 git identity,要咁寫:
+   `git add -A && git -c user.name=lc -c user.email=lc@comerich.com commit -m "<神煞>: ..."`
+3. **唔好 push**;remote 保持 `https://github.com/lacgit/ccal.git`,唔好將 token 放入 remote URL。
+4. 唔好改月曆表 / PS 輸出寬度:text 月曆表必須 byte-identical。
+5. 新/改檔案要 `chown 1101:1101`。
+6. 規則核唔實(多版本 / 對唔上通勝)= `kanban_block(kind='needs_input')`,唔好自己估。
+
 ## 已完成 (commit 83a4f34 起)
 
 | 神煞 | 規則 | 核對 |
