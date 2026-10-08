@@ -26,6 +26,7 @@ enum {
     SS_YANGGONGJI,      /* 楊公忌 凶 */
     SS_SANNIANGSHA,     /* 三娘煞 凶 */
     SS_ZHENSANNIANGSHA, /* 真三娘煞 凶 */
+    SS_ZAISHA,          /* 災煞   凶 */
     SS_COUNT
 };
 
