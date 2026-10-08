@@ -17,6 +17,11 @@
  * keyed to the solar-term month (節氣月, i.e. the 月建 used by 月破/大耗).
  * Within each month's 三合局 it sits on the 胎 position (劫煞前一辰):
  *   寅午戌月->子日, 亥卯未月->酉日, 巳酉丑月->卯日, 申子辰月->午日.
+ *
+ * 月厭: the day whose 日支 sits on "正月起戌逆行十二辰", keyed to the
+ * solar-term month (節氣月/月建, same convention as 月破/大耗/災煞):
+ *   寅月->戌日, 卯月->酉日, 辰月->申日, 巳月->未日, 午月->午日, 未月->巳日,
+ *   申月->辰日, 酉月->卯日, 戌月->寅日, 亥月->丑日, 子月->子日, 丑月->亥日.
  */
 #include <string.h>
 #include "shensha.h"
@@ -91,6 +96,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xd4\xd6\xc9\xb7", "\xa8\x61\xb7\xd9",
       "\xe7\x81\xbe\xe7\x85\x9e",
       "\xe7\x81\xbd\xe7\x85\x9e" },   /* 災煞 */
+    { "YueYan",
+      "\xd4\xc2\x85\x92", "\xa4\xeb\xb9\xbd",
+      "\xe6\x9c\x88\xe5\x8e\x8c",
+      "\xe6\x9c\x88\xe5\x8e\xad" },   /* 月厭 */
 };
 
 int ShenShaCount(void)
@@ -183,6 +192,13 @@ static const char sanniang_gz[6] = {6, 7, 44, 45, 42, 43};
      巳酉丑(5,9,1)->卯(3)    申子辰(8,0,4)->午(6) */
 static const char zai_branch[12] = {6, 3, 0, 9, 6, 3, 0, 9, 6, 3, 0, 9};
 
+/* 月厭 by 月建 (solar-term month): "正月起戌逆行十二辰" on the day branch.
+   Index = mbranch 0=子..11=亥:
+     寅(2)->戌(10)  卯(3)->酉(9)  辰(4)->申(8)  巳(5)->未(7)
+     午(6)->午(6)   未(7)->巳(5)  申(8)->辰(4)  酉(9)->卯(3)
+     戌(10)->寅(2)  亥(11)->丑(1) 子(0)->子(0)  丑(1)->亥(11) */
+static const char yueyan_branch[12] = {0, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1};
+
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch)
 {
     int k, mm = mmonth_of(mbranch);
@@ -233,6 +249,8 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch)
         return 0;
     case SS_ZAISHA:
         return dbranch == zai_branch[mbranch];
+    case SS_YUEYAN:
+        return dbranch == yueyan_branch[mbranch];
     }
     return 0;
 }

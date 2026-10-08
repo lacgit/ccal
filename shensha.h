@@ -10,7 +10,8 @@
      ganzhi  日柱 index 0 = 甲子      (ccal: (int(jdcnt) + 49) % 60)
      mbranch 月建 branch 0=子..11=亥  (ccal: GetMonthBranch(jd, vterms))
      dbranch 日支 0=子..11=亥         (ccal: (int(jdcnt) + 1) % 12)
-   enc: 'a' ASCII, 'g' GB2312, 'b' Big5, 'u' UTF-8. */
+   enc: 'a' ASCII, 'g' GB/GBK ('GB2312' plus a few GBK-extension
+ *   characters such as the 厭 in 月厭), 'b' Big5, 'u' UTF-8. */
 enum {
     SS_TIANSHE = 0,     /* 天赦   吉 */
     SS_TIANDE,          /* 天德   吉 */
@@ -27,6 +28,7 @@ enum {
     SS_SANNIANGSHA,     /* 三娘煞 凶 */
     SS_ZHENSANNIANGSHA, /* 真三娘煞 凶 */
     SS_ZAISHA,          /* 災煞   凶 */
+    SS_YUEYAN,          /* 月厭   凶 */
     SS_COUNT
 };
 
