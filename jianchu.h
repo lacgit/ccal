@@ -32,6 +32,11 @@ const char* LiJueName(int kind, int enc);
 /* 2-character ASCII marker for -a and PostScript output: "LI" / "JE". */
 const char* LiJueAscii(int kind);
 
+/* ---- 歲破 ----
+   歲破 = the day whose 日支 沖 the 太歲 (年支 of the 干支 year, which turns at
+   立春).  Returns the label 歲破. */
+const char* SuiPoName(int enc);
+
 /* ---- 節 / 氣 ----
    The 24 solar terms are twelve 節 (小寒, 立春, 驚蟄, 清明, 立夏, 芒種, 小暑,
    立秋, 白露, 寒露, 立冬, 大雪) and twelve 氣 (中氣).  bQi: 0 = 節, 1 = 氣. */

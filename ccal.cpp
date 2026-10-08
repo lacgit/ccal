@@ -116,6 +116,22 @@ int GetLiJue(double jd, vdouble& vterms)
     return 0;
 }
 
+/* 歲破: the day whose 日支 沖 the 太歲 (年支).  The 干支 year turns at 立春,
+   so a date before 立春 (vterms index 2) belongs to the previous 干支 year.
+   Verified against the user's 通勝 volumes: 2026 丙午 -> 子日, 2025 乙巳 ->
+   亥日, and 2025-01-29, before 立春, is a 戌 day = 沖 甲辰.
+   daybranch: 日支 (0=子 .. 11=亥).  Returns 1 when the day is 歲破. */
+int IsSuiPo(double jd, vdouble& vterms, int year, int daybranch)
+{
+    int y = year;
+    if (int(vterms.size()) > 2 && int(jd) < int(vterms[2]))
+        y--;
+    int yb = (y - 4) % 12;
+    if (yb < 0)
+        yb += 12;
+    return ((daybranch + 6) % 12 == yb) ? 1 : 0;
+}
+
 /* 三娘煞: 農曆每月 初三、初七、十三、十八、廿二、廿七 (通勝歌訣: 上旬初三與
    初七, 中旬十三二十八當, 下旬廿二與廿七).
    真三娘煞: 這六日之中日柱干支相合者 —— 初三逢庚午、初七逢辛未、十三逢戊申、
@@ -905,6 +921,10 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
                monthly table (no room in a 17-column cell, and it falls on six
                days of every month); shown in the other outputs. */
             int sns = (bJianChu) ? GetSanNiangSha(ldcnt, (int(jdcnt) + 49) % 60) : 0;
+            /* 歲破: 日支 沖 太歲.  Shown in the other outputs only: a 17-column
+               cell has no room for a 4-column marker on 節氣/初一 days (the
+               2-column blank is taken by 四離/四絕). */
+            int sup = (bJianChu) ? IsSuiPo(jdcnt, vterms, year, (int(jdcnt) + 1) % 12) : 0;
             const char *pmk = (lj == 0) ? "" :
                               ((nEncoding == 'a') ? LiJueAscii(lj - 1)
                                                   : LiJueChar(lj - 1, nEncoding));
@@ -922,6 +942,8 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
                            JianChuField(1, jc, nEncoding));
                 if (pmode == PMODE_HTML && bJianChu && lj != 0)
                     printf("<span class=\"lijue\">%s</span>", LiJueName(lj - 1, nEncoding));
+                if (pmode == PMODE_HTML && bJianChu && sup != 0)
+                    printf("<span class=\"suipo\">%s</span>", SuiPoName(nEncoding));
                 if (pmode == PMODE_HTML && bJianChu && sns != 0)
                     printf("<span class=\"sanniangsha\">%s</span>", SanNiangShaName(sns - 1, nEncoding));
             }
@@ -1220,10 +1242,11 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
                     strcat(szYue, (*CHdizhi)[mbranch]);
                     for (int h = 0; h < 12; h++)
                         strcat(szShichen, ShiChenJixiong(h, db, yb, nEncoding));
-                    printf("cmonthname=\"%s\" cdatename=\"%s\" jianchu=\"%s\" jixiong=\"%s\" lijue=\"%s\" sanniangsha=\"%s\" yuezhu=\"%s\" shichen=\"%s\" />\n",
+                    printf("cmonthname=\"%s\" cdatename=\"%s\" jianchu=\"%s\" jixiong=\"%s\" lijue=\"%s\" suipo=\"%s\" sanniangsha=\"%s\" yuezhu=\"%s\" shichen=\"%s\" />\n",
                            cmonname, cdayname, JianChuName(jc, nEncoding),
                            JianChuField(1, jc, nEncoding),
                            (lj == 0) ? "" : LiJueName(lj - 1, nEncoding),
+                           (sup == 0) ? "" : SuiPoName(nEncoding),
                            (sns == 0) ? "" : SanNiangShaName(sns - 1, nEncoding),
                            szYue, szShichen);
                 }
@@ -1550,6 +1573,10 @@ void PrintMonthList(short int year, short int month, vdouble& vterms,
                monthly table (no room in a 17-column cell, and it falls on six
                days of every month); shown in the other outputs. */
             int sns = (bJianChu) ? GetSanNiangSha(ldcnt, (int(jdcnt) + 49) % 60) : 0;
+            /* 歲破: 日支 沖 太歲.  Shown in the other outputs only: a 17-column
+               cell has no room for a 4-column marker on 節氣/初一 days (the
+               2-column blank is taken by 四離/四絕). */
+            int sup = (bJianChu) ? IsSuiPo(jdcnt, vterms, year, (int(jdcnt) + 1) % 12) : 0;
             const char *pmk = (lj == 0) ? "" :
                               ((nEncoding == 'a') ? LiJueAscii(lj - 1)
                                                   : LiJueChar(lj - 1, nEncoding));
@@ -1567,6 +1594,8 @@ void PrintMonthList(short int year, short int month, vdouble& vterms,
                            JianChuField(1, jc, nEncoding));
                 if (pmode == PMODE_HTML && bJianChu && lj != 0)
                     printf("<span class=\"lijue\">%s</span>", LiJueName(lj - 1, nEncoding));
+                if (pmode == PMODE_HTML && bJianChu && sup != 0)
+                    printf("<span class=\"suipo\">%s</span>", SuiPoName(nEncoding));
                 if (pmode == PMODE_HTML && bJianChu && sns != 0)
                     printf("<span class=\"sanniangsha\">%s</span>", SanNiangShaName(sns - 1, nEncoding));
             }
@@ -1862,10 +1891,11 @@ void PrintMonthList(short int year, short int month, vdouble& vterms,
                     strcat(szYue, (*CHdizhi)[mbranch]);
                     for (int h = 0; h < 12; h++)
                         strcat(szShichen, ShiChenJixiong(h, db, yb, nEncoding));
-                    printf("cmonthname=\"%s\" cdatename=\"%s\" jianchu=\"%s\" jixiong=\"%s\" lijue=\"%s\" sanniangsha=\"%s\" yuezhu=\"%s\" shichen=\"%s\" />\n",
+                    printf("cmonthname=\"%s\" cdatename=\"%s\" jianchu=\"%s\" jixiong=\"%s\" lijue=\"%s\" suipo=\"%s\" sanniangsha=\"%s\" yuezhu=\"%s\" shichen=\"%s\" />\n",
                            cmonname, cdayname, JianChuName(jc, nEncoding),
                            JianChuField(1, jc, nEncoding),
                            (lj == 0) ? "" : LiJueName(lj - 1, nEncoding),
+                           (sup == 0) ? "" : SuiPoName(nEncoding),
                            (sns == 0) ? "" : SanNiangShaName(sns - 1, nEncoding),
                            szYue, szShichen);
                 }
@@ -2304,6 +2334,7 @@ void PrintICalendar(short int year, short int month, short int day,
             /* 日柱 index (0=甲子): 真三娘煞 and the 干支 line both need it */
             int n = (int(jdcnt) + 49) % 60;
             int sns = GetSanNiangSha(ldcnt, n);
+            int sup = IsSuiPo(jdcnt, vterms, year, (int(jdcnt) + 1) % 12);
             /* SUMMARY: 農曆日 [節氣 HH:MM] [建除] [四離/四絕] [三娘煞] */
             int sl = 0;
             sl += sprintf(szSum + sl, "%s%s", (ldcnt == 1) ? cmonname : "", cdayname);
@@ -2334,6 +2365,8 @@ void PrintICalendar(short int year, short int month, short int day,
                     JieQiMonthLabel(termcnt, 'u', szJQ);
                     sl += sprintf(szSum + sl, " （%s）", szJQ);
                 }
+                if (sup != 0)                 /* 歲破, 建除之后 */
+                    sl += sprintf(szSum + sl, " %s", SuiPoName('u'));
                 if (lj != 0)
                     sl += sprintf(szSum + sl, " %s", LiJueName(lj - 1, 'u'));
             }
@@ -2373,6 +2406,8 @@ void PrintICalendar(short int year, short int month, short int day,
                     JieQiMonthLabel(termcnt, 'u', szJQ);
                     dl += sprintf(szDesc + dl, "節氣月：%s\n", szJQ);
                 }
+                if (sup != 0)                 /* 歲破, 建除之后 */
+                    dl += sprintf(szDesc + dl, "%s（諸事不宜）\n", SuiPoName('u'));
                 if (lj != 0)
                     dl += sprintf(szDesc + dl, "%s（諸事不宜）\n", LiJueName(lj - 1, 'u'));
                 if (sns != 0)
@@ -2501,6 +2536,7 @@ void PrintDayASCII(short int year, short int month, short int day,
     int lj = GetLiJue(jdcnt, vterms);
     int n = (int(jdcnt) + 49) % 60;
     int sns = GetSanNiangSha(ldcnt, n);
+    int sup = IsSuiPo(jdcnt, vterms, year, db);
     int mcnt = moncnt;
     if (ldcnt != 1)
         mcnt--;
@@ -2553,6 +2589,8 @@ void PrintDayASCII(short int year, short int month, short int day,
         printf("JianChu: %s (%s)\n", jcpx[jc], jcjx[jc]);
         if (lj != 0)
             printf("LiJue: %s\n", (lj == 1) ? "SiLi" : "SiJue");
+        if (sup != 0)
+            printf("SuiPo: Sui Po (day branch clashes the year branch)\n");
         if (sns != 0)
             printf("SanNiangSha: %s\n",
                    (sns == 2) ? "Zhen San Niang Sha (avoid marriage)"
@@ -2607,6 +2645,8 @@ void PrintDayASCII(short int year, short int month, short int day,
                JianChuField(1, jc, nEncoding));
         if (lj != 0)
             printf("%s（諸事不宜）\n", LiJueName(lj - 1, nEncoding));
+        if (sup != 0)
+            printf("%s（諸事不宜）\n", SuiPoName(nEncoding));
         if (sns != 0)
             printf("%s（忌嫁娶）\n", SanNiangShaName(sns - 1, nEncoding));
         const char* pyi = JianChuField(3, jc, nEncoding);

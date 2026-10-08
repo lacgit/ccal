@@ -199,6 +199,19 @@ const char* LiJueAscii(int kind)
     return lijue_ascii[kind];
 }
 
+/* ---- 歲破 (歲/岁 + 破) ---- */
+char GBsuipo[8] = "\xcb\xea\xc6\xc6";              /* 岁破 */
+char B5suipo[8] = "\xb7\xb3\xaf\x7d";              /* 歲破 */
+char U8suipo_sim[16] = "\xe5\xb2\x81\xe7\xa0\xb4";  /* 岁破 */
+char U8suipo_tra[16] = "\xe6\xad\xb2\xe7\xa0\xb4";  /* 歲破 */
+
+const char* SuiPoName(int enc)
+{
+    if (enc == 'g') return GBsuipo;
+    if (enc == 'b') return B5suipo;
+    return (bJianChuTrad ? U8suipo_tra : U8suipo_sim);
+}
+
 /* ---- 節 / 氣 (twelve 節 + twelve 中氣) ---- */
 char GBjieqikind[2][4] = {
    "\xbd\xda", "\xc6\xf8"          /* 节 气 */
