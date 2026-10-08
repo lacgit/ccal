@@ -8,6 +8,10 @@
  * The rules are the classical 通書 ones and are checked against the user's
  * 通勝 volumes (webui/attachments/LunarCalendarRecords): their day cells carry
  * the same 神煞 names, so every rule can be verified by grepping them.
+ *
+ * 大耗: 《欽定協紀辨方書》卷四 "厯例曰大耗者正月起申順行十二辰";
+ * 曹震圭 "大耗者月建擊衝破散之辰也,與月破同位" -- the day whose 日支
+ * clashes the 月建 (same position as 月破).
  */
 #include <string.h>
 #include "shensha.h"
@@ -46,6 +50,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xd4\xc2\xc6\xc6", "\xa4\xeb\xaf\x7d",
       "\xe6\x9c\x88\xe7\xa0\xb4",
       "\xe6\x9c\x88\xe7\xa0\xb4" },   /* 月破 */
+    { "DaHao",
+      "\xb4\xf3\xba\xc4", "\xa4\x6a\xaf\xd3",
+      "\xe5\xa4\xa7\xe8\x80\x97",
+      "\xe5\xa4\xa7\xe8\x80\x97" },   /* 大耗 */
     { "ShouSi",
       "\xca\xdc\xcb\xc0", "\xa8\xfc\xa6\xba",
       "\xe5\x8f\x97\xe6\xad\xbb",
@@ -178,6 +186,8 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch)
     case SS_YUEDEHE:
         return ganzhi % 10 == yuedehe_stem(mbranch);
     case SS_YUEPO:
+        return (dbranch + 6) % 12 == mbranch;
+    case SS_DAHAO:
         return (dbranch + 6) % 12 == mbranch;
     case SS_SHOUSI:
         return dbranch == shousi_branch[mm - 1];

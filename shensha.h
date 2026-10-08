@@ -18,6 +18,7 @@ enum {
     SS_YUEDE,           /* 月德   吉 */
     SS_YUEDEHE,         /* 月德合 吉 */
     SS_YUEPO,           /* 月破   凶 */
+    SS_DAHAO,           /* 大耗   凶 */
     SS_SHOUSI,          /* 受死   凶 */
     SS_WANGWANG,        /* 往亡   凶 */
     SS_SIFEI,           /* 四廢   凶 */
