@@ -22,6 +22,14 @@
  * solar-term month (節氣月/月建, same convention as 月破/大耗/災煞):
  *   寅月->戌日, 卯月->酉日, 辰月->申日, 巳月->未日, 午月->午日, 未月->巳日,
  *   申月->辰日, 酉月->卯日, 戌月->寅日, 亥月->丑日, 子月->子日, 丑月->亥日.
+ *
+ * 月刑 (YueXing): the day whose 日支 is punished by the month's build branch
+ * (建刑, three-punishment), keyed to the LUNAR month (lmonth 1..12) — unlike its
+ * siblings which key to the solar-term month.  Cycles yin-si-shen / chou-xu-wei,
+ * mutual zi-mao, self-punishments chen/wu/you/hai:
+   寅->巳(5), 卯->子(0), 辰->辰(4), 巳->申(8),
+   午->午(6), 未->丑(1), 申->寅(2), 酉->酉(9),
+   戌->未(7), 亥->亥(11), 子->卯(3), 丑->戌(10).
  */
 #include <string.h>
 #include "shensha.h"
@@ -100,6 +108,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xd4\xc2\x85\x92", "\xa4\xeb\xb9\xbd",
       "\xe6\x9c\x88\xe5\x8e\x8c",
       "\xe6\x9c\x88\xe5\x8e\xad" },   /* 月厭 */
+    { "YueXing",
+      "\xd4\xc2\xd0\xcc", "\xa4\xeb\xa6\x44",
+      "\xe6\x9c\x88\xe5\x88\x91",
+      "\xe6\x9c\x88\xe5\x88\x91" },   /* 月刑 */
 };
 
 int ShenShaCount(void)
@@ -199,6 +211,13 @@ static const char zai_branch[12] = {6, 3, 0, 9, 6, 3, 0, 9, 6, 3, 0, 9};
      戌(10)->寅(2)  亥(11)->丑(1) 子(0)->子(0)  丑(1)->亥(11) */
 static const char yueyan_branch[12] = {0, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1};
 
+/* 月刑 by lunar month (lmonth 1..12): the day branch punished by that month's
+   build branch (建刑).  Index = lmonth-1, months in order 1st..12th:
+     寅->巳(5), 卯->子(0), 辰->辰(4), 巳->申(8)
+     午->午(6), 未->丑(1), 申->寅(2), 酉->酉(9)
+     戌->未(7), 亥->亥(11), 子->卯(3), 丑->戌(10) */
+static const char yuexing_branch[12] = {5, 0, 4, 8, 6, 1, 2, 9, 7, 11, 3, 10};
+
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch)
 {
     int k, mm = mmonth_of(mbranch);
@@ -251,6 +270,10 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch)
         return dbranch == zai_branch[mbranch];
     case SS_YUEYAN:
         return dbranch == yueyan_branch[mbranch];
+    case SS_YUEXING:
+        if (lmonth < 1 || lmonth > 12)
+            return 0;
+        return dbranch == yuexing_branch[lmonth - 1];
     }
     return 0;
 }

@@ -29,6 +29,7 @@ enum {
     SS_ZHENSANNIANGSHA, /* 真三娘煞 凶 */
     SS_ZAISHA,          /* 災煞   凶 */
     SS_YUEYAN,          /* 月厭   凶 */
+    SS_YUEXING,         /* 月刑   凶 */
     SS_COUNT
 };
 

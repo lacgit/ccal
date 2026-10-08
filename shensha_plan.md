@@ -39,6 +39,7 @@
 | 大耗 | 正月起申順行十二辰,與月破同位(協紀辨方書卷四「大耗者月中虛耗之神」;曹震圭「月建擊衝破散之辰,與月破同位」) | ✅ 四年 30/33 全中;J=3:2 節氣日通勝用舊月建(2025-11-07 立冬、2026-08-07 立秋,見上面 2.)+1 DB 行自標 anchor_conflict(2010-05-26,gz 辛未 vs 實丙子) |
 | 災煞 | 三煞系統(協紀辨方書卷二十月表):按節氣月(月建)之三合局,日支居「胎」位(劫煞前一辰);寅午戌月→子、亥卯未月→酉、巳酉丑月→卯、申子辰月→午 | ✅ 四年通勝印災煞 27 日中 22 日全中;J=5:1 立春節氣日通勝用舊月建(2025-02-03,見上面 2.)、3 日落於同局「養」位(歲煞/月煞)通勝仍標災煞(2010-03-04、2010-05-30、2025-10-23)、1 OCR off-triple(2006-05-05);三線索日 2026-07-01/07-22/12-10 全中 |
 | 月厭 | 正月起戌逆行十二辰(協紀辨方書/通書曆例),按節氣月(月建)——寅月戌日、卯月酉日、辰月申日、巳月未日、午月午日、未月巳日、申月辰日、酉月卯日、戌月寅日、亥月丑日、子月子日、丑月亥日 | ✅ 四年通勝印月厭 22 日中 21 日全中(節氣月 keying:2006-10-16、2025-10-12 兩個跨農曆月日都中);J=1:2026-03-30(癸卯)DB 行 confidence=low + ocr_misread_repaired,該月月厭應在2026-03-24(丁酉,已印);L=88 皆 OCR 未影之月厭日(每月上旬/下旬各一日)
+| 月刑 | day branch = the three-punishment target of that lunar month's build branch (month-build punishment), keyed to the **lunar month (lmonth)** — NOT solar-term/月建 like 月破/大耗/災煞. Mapping (build month -> punished day): 寅->巳(5), 卯->子(0), 辰->辰(4), 巳->申(8), 午->午(6), 未->丑(1), 申->寅(2), 酉->酉(9), 戌->未(7), 亥->亥(11), 子->卯(3), 丑->戌(10) | ✅ of the four 通勝 DBs' 14 printed 月刑 days, 12 match exactly; J=2: 2026-12-07 (10th lunar month's true punishment should fall on 12-03, a 戌 day — printed & matched; this day's 卯 branch is the next month's (子) punishment slot, a lunar/jieqi month boundary), 2025-04-01 (conf=low OCR-repaired row, anchor md_inferred_year; that month's true punishment should fall on 04-05, a 辰 day — printed & matched); L=92 are unphotographed OCR gaps. NOTE: ccal PrintDayASCII (single-day view) mislabels the lunar month for ~53 days after a mid-Gregorian-month new moon (e.g. 2010-10-24 shows 八月 but is really 九月 per DB + list mode), so on those days 月刑 (keyed to lmonth) will not display at runtime — a pre-existing bug, NOT a rule issue. |
 | 受死 | 正月戌 二月辰 三月亥 四月巳 五月子 六月午 七月丑 八月未 九月寅 十月申 十一月卯 十二月酉 | ⚠ 通勝四年都無印;用戶指示保留 |
 | 往亡 | 正月寅 二月巳 三月申 四月亥 五月卯 六月午 七月酉 八月子 九月辰 十月未 十一月戌 十二月丑 | ⚠ OCR 只有 2 次,未核實 |
 | 四廢 | 春庚申辛酉 夏壬子癸亥 秋甲寅乙卯 冬丙午丁巳 | ⚠ 未核實 |
@@ -56,7 +57,7 @@
 | 1 | ~~大耗~~ | 完成:與月破同位(日支沖月建),見已完成表 | done (commit 見 git log) |
 | 2 | ~~災煞~~ | 完成:三煞/胎位,按節氣月(見已完成表) | done (commit 見 git log) |
 | 3 | ~~月厭~~ | 完成:正月起戌逆行十二辰,按節氣月(見已完成表) | done (commit 見 git log) |
-| 4 | 月刑 | 通勝 2026-? | todo |
+| 4 | ~~月刑~~ | done: day branch punished by that lunar month's build branch (three-punishment/建刑), keyed to the **lunar month (lmonth)** — unlike the solar-term-keyed siblings | done (commit see git log) |
 | 5 | 月害 | todo |
 | 6 | 月煞 | todo |
 | 7 | 大時 | todo |
