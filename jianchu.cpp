@@ -169,6 +169,11 @@ void SetJianChuTrad(bool bTrad)
     bJianChuTrad = bTrad;
 }
 
+bool JianChuIsTrad(void)
+{
+    return bJianChuTrad;
+}
+
 const char* JianChuName(int idx, int enc)
 {
     if (idx < 0) idx = 0; if (idx > 11) idx = 11;

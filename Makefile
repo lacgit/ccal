@@ -34,7 +34,8 @@ COMPONENTS= \
 	../novas3/solsys3 \
 	../novas3/readeph0 \
 	yearcache \
-	jianchu
+	jianchu \
+	shensha
 # If you don't want to use the year cache, comment the previous line
 # End of list
 

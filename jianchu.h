@@ -6,6 +6,9 @@
 /* Call once after option parsing: -b -> traditional, otherwise simplified. */
 void SetJianChuTrad(bool bTrad);
 
+/* true when -b selected traditional characters (used by other 神煞 tables). */
+bool JianChuIsTrad(void);
+
 /* The 建除 name character for index idx (0..11).
    enc: 'g' GB2312 (simplified), 'b' Big5 (traditional), 'u' UTF-8. */
 const char* JianChuName(int idx, int enc);

@@ -109,18 +109,33 @@ attribute).  It recurs every twelve days, and on a 節氣 day the seven-column
 text calendar has no spare column for it, which is why the monthly tables leave
 it out.
 .sp
-The 三娘煞 days are shown in the same places except the monthly tables
-(text, HTML): 農曆每月 初三、初七、十三、十八、廿二、廿七 (通勝歌訣
-「上旬初三與初七, 中旬十三二十八當, 下旬廿二與廿七」).  Of those, a day
-whose 日柱 is 庚午 (初三), 辛未 (初七), 戊申 (十三), 己酉 (十八), 丙午
-(廿二) or 丁未 (廿七) is a 真三娘煞 and is labelled 真三娘煞; the other
-三娘煞 days are labelled 三娘煞.  Both are 忌嫁娶 days.  The single-day
-view prints them on their own line (SanNiangSha in ASCII mode), XML day
-elements gain a
-.I sanniangsha
-attribute and HTML gains a
-.I sanniangsha
-span.
+The 神煞 of a day (the 黃曆 markers other than the 建除 officer itself) are
+gathered in a single field so that further 神煞 can be added without touching
+the output code.  The single-day view prints them on one line after the 建除
+as 神煞：月破、三娘煞 (names only, 、-separated; ShenSha in ASCII mode), XML
+day elements gain a
+.I shensha
+attribute, HTML gains a
+.I shensha
+span, and the iCalendar output appends them after the 建除 field and repeats
+them in the description as 神煞：....  The monthly text calendars have no room
+for the field and stay unchanged.
+.sp
+The table lives in
+.I shensha.cpp
+(one entry per 神煞: ASCII, GB2312, Big5, UTF-8 simplified and UTF-8
+traditional name, plus a rule in ShenShaOn()).  It currently holds
+.BR 天赦 ", " 天德 ", " 天德合 ", " 月德 ", " 月德合 " (吉; by 季節/月建), "
+.BR 月破 " (日支 沖 月建), " 受死 ", " 往亡 " (by 月建), " 四廢
+(春庚申辛酉, 夏壬子癸亥, 秋甲寅乙卯, 冬丙午丁巳), " 十惡大敗
+(甲辰 乙巳 丙申 丁亥 戊戌 己丑 庚辰 辛巳 壬申 癸亥), " 楊公忌
+(農曆 正月十三, 二月十一, 三月初九, 四月初七, 五月初五, 六月初三, 七月初一,
+七月廿九, 八月廿七, 九月廿五, 十月廿三, 十一月廿一, 十二月十九) and
+.BR 三娘煞 "/" 真三娘煞
+(農曆每月 初三、初七、十三、十八、廿二、廿七, 通勝歌訣「上旬初三與初七,
+中旬十三二十八當, 下旬廿二與廿七」; a day whose 日柱 is 庚午 (初三), 辛未 (初七),
+戊申 (十三), 己酉 (十八), 丙午 (廿二) or 丁未 (廿七) is a 真三娘煞 and is
+labelled 真三娘煞 alone; both are 忌嫁娶).
 .TP
 .B \-i
 Generates an iCalendar 2.0 (.ics) file on standard output with one
