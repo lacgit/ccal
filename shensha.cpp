@@ -477,6 +477,12 @@
  * 祈福求恩祀神致祭」; 曆例「福生者正月酉二月夘三月戌四月辰五月亥六月巳
  * 七月子八月午九月丑十月未十一月寅十二月申」。
  *
+ *
+* 福德 (FuDe): 建除「滿」日: 日支 = 月建前二辰。
+ * 《欽定協紀辨方書》卷四 義例二 建除同位異名「滿〈福徳 天巫 天狗〉」;
+ * 總要曆「福德者月中福德之神也,其日宜祀神祗求福願修宫室獻封章」,
+ * 曆例「福德常居月建前二辰」; 曹震圭「建前二辰者是月所生之子」。
+ *
  */
 #include <string.h>
 #include "shensha.h"
@@ -839,6 +845,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xb8\xa3\xc9\xfa", "\xba\xd6\xa5\xcd",
       "\xe7\xa6\x8f\xe7\x94\x9f",
       "\xe7\xa6\x8f\xe7\x94\x9f" },   /* 福生 */
+    { "FuDe",
+      "\xb8\xa3\xb5\xc2", "\xba\xd6\xbc\x77",
+      "\xe7\xa6\x8f\xe5\xbe\xb7",
+      "\xe7\xa6\x8f\xe5\xbe\xb7" },   /* 福德 */
 };
 
 int ShenShaCount(void)
@@ -1199,6 +1209,12 @@ static const char yuekong_stem[12] = {2, 0, 8, 6, 2, 0, 8, 6, 2, 0, 8, 6};
  */
 static const char fusheng_branch[12] = {2, 8, 9, 3, 10, 4, 11, 5, 0, 6, 1, 7};
 
+/* 福德 (FuDe): 建除「滿」日: 日支 = 月建前二辰。
+ * 《欽定協紀辨方書》卷四 義例二 建除同位異名「滿〈福徳 天巫 天狗〉」;
+ * 總要曆「福德者月中福德之神也,其日宜祀神祗求福願修宫室獻封章」,
+ * 曆例「福德常居月建前二辰」; 曹震圭「建前二辰者是月所生之子」。
+ */
+
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
               int wday, int suigz)
 {
@@ -1516,6 +1532,9 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
     case SS_FUSHENG:
         /* 福生: 日支 == 該月(節氣月)之福生支 (正月酉, 二月夘 ... 十二月申). */
         return dbranch == fusheng_branch[mbranch];
+    case SS_FUDE:
+        /* 福德: 滿日 = 月建前二辰 (日支 == mbranch + 2). */
+        return dbranch == (mbranch + 2) % 12;
     }
     return 0;
 }

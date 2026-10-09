@@ -101,6 +101,7 @@ enum {
     SS_YINDE,                    /* 陰德   吉 */
     SS_YUEKONG,
     SS_FUSHENG,          /* 福生   吉 */
+    SS_FUDE,             /* 福德   吉 */
     SS_COUNT
 };
 
