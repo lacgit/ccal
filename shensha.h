@@ -77,6 +77,7 @@ enum {
     SS_BANSHA,   /* BanSha   凶 */
     SS_SUIDE,          /* 歲德   吉 */
     SS_SUIDEHE,        /* 歲德合 吉 */
+    SS_SUILU,          /* 歲祿   吉 */
     SS_COUNT
 };
 
