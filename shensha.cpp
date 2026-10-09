@@ -1091,6 +1091,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xb0\xcb\x8c\xa3", "\xa4\x4b\xb1\x4d",
       "\xe5\x85\xab\xe5\xb0\x88",
       "\xe5\x85\xab\xe5\xb0\x88" },   /* 八專 */
+    { "TianFu",
+      "\xcc\xec\xb7\xfb", "\xa4\xd1\xb2\xc5",
+      "\xe5\xa4\xa9\xe7\xac\xa6",
+      "\xe5\xa4\xa9\xe7\xac\xa6" },   /* 天符 */
 };
 
 /* 三合 (SanHe) by 月建: 日支 = 月建三合局之另外兩辰 = {mbranch+4, mbranch+8}. */
@@ -2025,6 +2029,9 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
             if (ganzhi == bazhuan_gz[k])
                 return 1;
         return 0;
+    case SS_TIANFU:
+        /* 天符 = 黃道十二神第 11 神 (黃道吉神, 支 = 青龍支 + 10). */
+        return huangdao_index(mbranch, dbranch) == 10;
     }
     return 0;
 }
