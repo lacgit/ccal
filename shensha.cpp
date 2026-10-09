@@ -313,6 +313,15 @@
  * 「與德合天赦併猶忌」.  孟支 巳→寅→亥→申 逐月逆行:
  *   寅午戌月->巳日, 亥卯未月->寅日, 申子辰月->亥日, 巳酉丑月->申日
  * (index = mbranch 0=子..11=亥; 遊禍 = 劫煞之對衝, 即該局之臨官).
+ *
+ * 招搖 (ZhaoYao): 厭對之別名 -- 日支 = 月厭之對衝辰, 即 正月起辰, 逆行十二辰.
+ * 《欽定協紀辨方書》卷四 義例二 天寶曆曰「厭對者,月厭所衝之辰也,其日忌嫁娶,
+ * 又為招搖,忌乘船渡水」; 厯例「厭對者,正月起辰,逆行十二辰」; 卷五 又曰
+ * 「招搖即六儀,六儀即天罡,隂建之衝也」.  故 招搖 = 月厭之衝:
+ *   月厭 A = (12 - 月建) mod 12, 招搖 = (A + 6) mod 12, 即
+ *   寅月->辰日, 卯月->卯日, 辰月->寅日, 巳月->丑日, 午月->子日, 未月->亥日,
+ *   申月->戌日, 酉月->酉日, 戌月->申日, 亥月->未日, 子月->午日, 丑月->巳日
+ * (index = mbranch 0=子..11=亥).  卷十 宜忌「厭對忌嫁娶,又為招搖忌取魚乘船渡水」.
  */
 #include <string.h>
 #include "shensha.h"
@@ -515,6 +524,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xd3\xce\xbb\xf6", "\xb9\x43\xba\xd7",
       "\xe6\xb8\xb8\xe7\xa5\xb8",
       "\xe9\x81\x8a\xe7\xa6\x8d" },   /* 遊禍 */
+    { "ZhaoYao",
+      "\xd5\xd0\xd2\xa1", "\xa9\xdb\xb7\x6e",
+      "\xe6\x8b\x9b\xe6\x91\x87",
+      "\xe6\x8b\x9b\xe6\x90\x96" },   /* 招搖 */
 };
 
 int ShenShaCount(void)
@@ -783,6 +796,10 @@ static const char jiesha_branch[12] = {5, 2, 11, 8, 5, 2, 11, 8, 5, 2, 11, 8};
    index = mbranch 0=子..11=亥: 子月->亥, 丑月->申, 寅月->巳, 卯月->寅,
    辰月->亥, 巳月->申, 午月->巳, 未月->寅, 申月->亥, 酉月->申, 戌月->巳, 亥月->寅. */
 static const char youhuo_branch[12] = {11, 8, 5, 2, 11, 8, 5, 2, 11, 8, 5, 2};
+/* 招搖 (ZhaoYao) -- see the header comment.  厭對 = 月厭之衝 = (18 - mbranch) mod 12,
+   index = mbranch 0=子..11=亥: 子月->午, 丑月->巳, 寅月->辰, 卯月->卯, 辰月->寅,
+   巳月->丑, 午月->子, 未月->亥, 申月->戌, 酉月->酉, 戌月->申, 亥月->未. */
+static const char zhaoyao_branch[12] = {6, 5, 4, 3, 2, 1, 0, 11, 10, 9, 8, 7};
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
               int wday)
 {
@@ -944,6 +961,9 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
     case SS_YOUHUO:
         /* 遊禍: 日支 == 該月三合局之臨官 (劫煞之對衝). */
         return dbranch == youhuo_branch[mbranch];
+    case SS_ZHAOYAO:
+        /* 招搖 (= 厭對): 日支 == 月厭之對衝辰. */
+        return dbranch == zhaoyao_branch[mbranch];
     }
     return 0;
 }

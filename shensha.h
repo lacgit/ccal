@@ -61,6 +61,7 @@ enum {
     SS_WUXU,            /* 五虛   凶 */
     SS_JIESHA,             /* 劫煞   凶 */
     SS_YOUHUO,             /* 遊禍   凶 */
+    SS_ZHAOYAO,            /* 招搖   凶 */
     SS_COUNT
 };
 
