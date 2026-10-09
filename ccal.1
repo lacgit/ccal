@@ -124,19 +124,24 @@ for the field and stay unchanged.
 The table lives in
 .I shensha.cpp
 (one entry per 神煞: ASCII, GB2312, Big5, UTF-8 simplified and UTF-8
-traditional name, plus a rule in ShenShaOn()).  It currently holds
-.BR 天赦 ", " 天德 ", " 天德合 ", " 月德 ", " 月德合 " (吉; by 季節/月建), "
-.BR 月破 " (日支 沖 月建), " 大耗 " (與月破同位;協紀辨方書「正月起申順行十二辰」), "
-.BR 受死 ", " 往亡 " (by 月建), " 四廢
-(春庚申辛酉, 夏壬子癸亥, 秋甲寅乙卯, 冬丙午丁巳), " 十惡大敗
-(甲辰 乙巳 丙申 丁亥 戊戌 己丑 庚辰 辛巳 壬申 癸亥), " 楊公忌
-(農曆 正月十三, 二月十一, 三月初九, 四月初七, 五月初五, 六月初三, 七月初一,
-七月廿九, 八月廿七, 九月廿五, 十月廿三, 十一月廿一, 十二月十九) and
-.BR 三娘煞 "/" 真三娘煞
-(農曆每月 初三、初七、十三、十八、廿二、廿七, 通勝歌訣「上旬初三與初七,
-中旬十三二十八當, 下旬廿二與廿七」; a day whose 日柱 is 庚午 (初三), 辛未 (初七),
-戊申 (十三), 己酉 (十八), 丙午 (廿二) or 丁未 (廿七) is a 真三娘煞 and is
-labelled 真三娘煞 alone; both are 忌嫁娶).
+traditional name, plus a rule in ShenShaOn()).  It currently holds 131 神煞, listed here in table order (rules in
+ShenShaOn(); most are keyed to the 節氣月/月建, but 楊公忌/三娘煞/真三娘煞/
+短星/月忌/水痕/債不 are keyed to the 農曆 month/day, 反支 to the month's new-moon
+branch, 密日 to the weekday, and 歲德/歲德合/歲祿/歲馬/歲支/歲支德 to the 太歲:
+.sp
+.RS
+天赦、天德、天德合、月德、月德合、月破、大耗、受死、往亡、四廢、十惡大敗、楊公忌、三娘煞、真三娘煞、
+災煞、月厭、月刑、大時、天吏、血忌、血支、五墓、復日、天賊、歸忌、月煞、陽將、短星、
+密日、重日、反支、火星、陰將、五離、小耗、三喪、月忌、土符、月建、死神、土府、俱將、
+死氣、地囊、五虛、劫煞、遊禍、招搖、玄武、勾陳、白虎、朱雀、天刑、天火、四忌、四窮、
+九空、九坎、咸池、班煞、歲德、歲德合、歲祿、歲馬、歲支、歲支德、紅沙、除神、九焦、八風、
+陽錯、天恩、母倉、月恩、四相、時德、天喜、天醫、時陽、生氣、時陰、陽德、陰錯、陰德、
+月空、福生、福德、吉期、官日、守日、相日、民日、王日、臨日、五富、要安、敬安、普護、
+益後、續世、聖心、金堂、青龍、明堂、水痕、金匱、寶光、玉堂、三合、六合、五合、進神、
+解神、不將、八專、天符、天倉、伏斷、驛馬、債不、天后、天罡、天馬、天巫、鳴吠、鳴吠對、
+天願、河魁、寡宿、孤辰、十靈
+.RE
+
 .TP
 .B \-i
 Generates an iCalendar 2.0 (.ics) file on standard output with one
