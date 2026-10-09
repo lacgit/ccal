@@ -414,6 +414,12 @@
  *   「天恩者施德寛下之辰也」+ 曆例「常以甲子至戊辰、己卯至癸未、己酉至癸丑，
  *   凡一十五日」; 卷九 立成「日神取一定干支者」; 卷十 宜忌「天恩 宜覃恩肆赦…」.
  *   日神 (不從月建起義), keyed to 日柱 (ganzhi).
+ * 母倉 (MuCang): 日支 ∈ 該四時所生之辰 -- 春(寅卯辰月)->亥子日,
+ *   夏(巳午未月)->寅卯日, 秋(申酉戌月)->辰戌丑未日, 冬(亥子丑月)->申酉日.
+ *   《欽定協紀辨方書》卷五 義例三 天寶曆「母倉者五行當王所生者為母倉…其日
+ *   宜飬育羣畜栽植種蒔」+ 曆例「春亥子、夏寅卯、秋辰戌丑未、冬申酉、土王後巳午」;
+ *   卷十 宜忌「母倉 宜納財栽種牧養納畜」.  按 節氣月/月建 mbranch keying (同其兄弟).
+ *   (協紀另有「土王後巳午」一說, 四季月下半月, ccal 無此粒度, 未實現.)
  */
 #include <string.h>
 #include "shensha.h"
@@ -719,6 +725,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xcc\xec\xb6\xf7", "\xa4\xd1\xae\xa6",
       "\xe5\xa4\xa9\xe6\x81\xa9",
       "\xe5\xa4\xa9\xe6\x81\xa9" },   /* 天恩 */
+    { "MuCang",
+      "\xc4\xb8\xb2\xd6", "\xa5\xc0\xad\xdc",
+      "\xe6\xaf\x8d\xe4\xbb\x93",
+      "\xe6\xaf\x8d\xe5\x80\x89" },   /* 母倉 */
 };
 
 int ShenShaCount(void)
@@ -1051,6 +1061,11 @@ static const char cuo_gz[12] = {48, 49, 50, 51, 40, 53, 42, 43, 56, 57, 46, 59};
 /* 天恩 日柱 (60-甲子 index): 甲子..戊辰 己卯..癸未 己酉..癸丑 */
 static const char tianen_gz[15] = {0,1,2,3,4,15,16,17,18,19,45,46,47,48,49};
 
+/* 母倉 by 四時 (月建/節氣月): 春(寅卯辰)->亥子, 夏(巳午未)->寅卯,
+   秋(申酉戌)->辰戌丑未, 冬(亥子丑)->申酉. */
+static const char mucang_branch[4][4] = {
+    {11, 0, -1, -1}, {2, 3, -1, -1}, {4, 10, 1, 7}, {8, 9, -1, -1} };
+
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
               int wday, int suigz)
 {
@@ -1314,6 +1329,13 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
         /* 天恩: 日柱 ∈ {甲子..戊辰, 己卯..癸未, 己酉..癸丑} (15 日). 日神, 不從月建. */
         int k;
         for (k = 0; k < 15; k++) if (ganzhi == tianen_gz[k]) return 1;
+        return 0;
+    }
+    case SS_MUCANG:
+    {
+        /* 母倉: 日支 ∈ 該四時所生之辰 (春亥子/夏寅卯/秋辰戌丑未/冬申酉). */
+        int k; const char* t = mucang_branch[season_of(mbranch)];
+        for (k = 0; k < 4; k++) if (t[k] >= 0 && dbranch == t[k]) return 1;
         return 0;
     }
     }
