@@ -510,6 +510,11 @@
  * 《欽定協紀辨方書》卷五 義例三 曆例「相日者春巳夏申秋亥冬寅」
  * (按語「春巳夏申秋亥冬寅,四序之相氣,則自元子以下王侯卿相通用之吉辰也」)。
  *
+ *
+* 民日 (MinRi): 四序當令之真子 (春午 夏酉 秋子 冬卯), 按節氣月所屬季節。
+ * 《欽定協紀辨方書》卷五 義例三 曆例「民日者春午夏酉秋子冬卯」
+ * (按語「午酉子夘則專火專金專水專木,為四序當令之真子,吉莫大焉,故為民日」)。
+ *
  */
 #include <string.h>
 #include "shensha.h"
@@ -892,6 +897,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xcf\xe0\xc8\xd5", "\xac\xdb\xa4\xe9",
       "\xe7\x9b\xb8\xe6\x97\xa5",
       "\xe7\x9b\xb8\xe6\x97\xa5" },   /* 相日 */
+    { "MinRi",
+      "\xc3\xf1\xc8\xd5", "\xa5\xc1\xa4\xe9",
+      "\xe6\xb0\x91\xe6\x97\xa5",
+      "\xe6\xb0\x91\xe6\x97\xa5" },   /* 民日 */
 };
 
 int ShenShaCount(void)
@@ -1288,6 +1297,12 @@ static const char shouri_branch[4] = {4, 7, 10, 1};
  */
 static const char xiangri_branch[4] = {5, 8, 11, 2};
 
+/* 民日 (MinRi): 四序當令之真子 (春午 夏酉 秋子 冬卯), 按節氣月所屬季節。
+ * 《欽定協紀辨方書》卷五 義例三 曆例「民日者春午夏酉秋子冬卯」
+ * (按語「午酉子夘則專火專金專水專木,為四序當令之真子,吉莫大焉,故為民日」)。
+ */
+static const char minri_branch[4] = {6, 9, 0, 3};
+
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
               int wday, int suigz)
 {
@@ -1620,6 +1635,9 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
     case SS_XIANGRI:
         /* 相日: 春巳 夏申 秋亥 冬寅 (season_of(mbranch)). */
         return dbranch == xiangri_branch[season_of(mbranch)];
+    case SS_MINRI:
+        /* 民日: 春午 夏酉 秋子 冬卯 (season_of(mbranch)). */
+        return dbranch == minri_branch[season_of(mbranch)];
     }
     return 0;
 }
