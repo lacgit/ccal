@@ -118,6 +118,7 @@ enum {
     SS_SHENGXIN,         /* 聖心   吉 */
     SS_JINTANG,
     SS_QINGLONG,
+    SS_MINGTANG, /* 明堂 吉 */
     SS_COUNT
 };
 
