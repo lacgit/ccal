@@ -317,14 +317,14 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xb7\xb4\xd6\xa7", "\xa4\xcf\xa4\xe4",
       "\xe5\x8f\x8d\xe6\x94\xaf",
       "\xe5\x8f\x8d\xe6\x94\xaf" },   /* 反支 */
-    { "YinJiang",
-      "\xea\x8e\x8c\xa2", "\xb3\xb1\xb1\x4e",
-      "\xe9\x98\xb4\xe5\xb0\x86",
-      "\xe9\x99\xb0\xe5\xb0\x87" },   /* 陰將 */
     { "HuoXing",
       "\xbb\xf0\xd0\xc7", "\xa4\xf5\xac\x50",
       "\xe7\x81\xab\xe6\x98\x9f",
       "\xe7\x81\xab\xe6\x98\x9f" },   /* 火星 */
+    { "YinJiang",
+      "\xea\x8e\x8c\xa2", "\xb3\xb1\xb1\x4e",
+      "\xe9\x98\xb4\xe5\xb0\x86",
+      "\xe9\x99\xb0\xe5\xb0\x87" },   /* 陰將 */
 };
 
 int ShenShaCount(void)
@@ -540,6 +540,18 @@ static int yinjiang_back6(int mbranch, int br)
     return o >= 0 && o <= 5;
 }
 
+
+/* 陽將 (YangJiang) -- see the header comment.  祿支 of the 日干:
+   甲寅 乙卯 丙巳 丁午 戊丑 己未 庚申 辛酉 壬亥 癸子, index = 干 0=甲..9=癸. */
+static const char yangjiang_lu[10] = {2, 3, 5, 6, 1, 7, 8, 9, 11, 0};
+
+/* 1 when branch br lies in the 前區 of the 月建's 建/厭 pair:
+   月厭 A = (12 - mbranch) mod 12, 前區 = {A+6 .. A+11}. */
+static int yangjiang_front(int mbranch, int br)
+{
+    int a = (12 - mbranch) % 12;
+    return ((br - a + 12) % 12) >= 6;
+}
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
               int wday)
 {
