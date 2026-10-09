@@ -90,7 +90,7 @@ int ShenShaCount(void);
 const char* ShenShaName(int i, int enc);
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
               int wday, int suigz);
-unsigned long long ShenShaMask(int lmonth, int lday, int ganzhi, int mbranch, int dbranch, int wday, int suigz);
-void ShenShaText(unsigned long long mask, int enc, char* buf, int bufsize);
+unsigned __int128 ShenShaMask(int lmonth, int lday, int ganzhi, int mbranch, int dbranch, int wday, int suigz);
+void ShenShaText(unsigned __int128 mask, int enc, char* buf, int bufsize);
 
 #endif /* SHENSHA_H */

@@ -1253,21 +1253,25 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
     return 0;
 }
 
-/* The mask must be wider than int: SS_COUNT now exceeds 32, and `1 << 32` wraps
-   to bit 0 on x86-64 (shift count taken mod 32), which would corrupt 天赦. */
-unsigned long long ShenShaMask(int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
+/* The mask must be wider than 64 bits: SS_COUNT now exceeds 64 and `1ULL << i`
+   for i >= 64 wraps (x86-64 takes the shift count mod 64), so the newest markers
+   silently lit up bit 0/1/2 -- 天赦/天德/天德合.  天赦 was printed on 94 days
+   of 2006 instead of the 25 its rule allows.  unsigned __int128 holds all of
+   them (gcc/clang on 64-bit; the rest of this table already assumes a 64-bit
+   target for `1ULL`). */
+unsigned __int128 ShenShaMask(int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
                                int wday, int suigz)
 {
     int i;
-    unsigned long long mask = 0;
+    unsigned __int128 mask = 0;
     for (i = 0; i < SS_COUNT; i++)
         if (ShenShaOn(i, lmonth, lday, ganzhi, mbranch, dbranch, wday, suigz))
-            mask |= 1ULL << i;
+            mask |= (unsigned __int128)1 << i;
     return mask;
 }
 
 /* Join the names of the set bits with "、", in table order. */
-void ShenShaText(unsigned long long mask, int enc, char* buf, int bufsize)
+void ShenShaText(unsigned __int128 mask, int enc, char* buf, int bufsize)
 {
     const char* sep = (enc == 'a') ? ", " :
                       (enc == 'g') ? "\xa1\xa2" :
@@ -1277,7 +1281,7 @@ void ShenShaText(unsigned long long mask, int enc, char* buf, int bufsize)
     for (i = 0; i < SS_COUNT; i++)
     {
         const char* n;
-        if (!(mask & (1ULL << i)))
+        if (!((mask >> i) & 1))
             continue;
         n = ShenShaName(i, enc);
         if ((int)(strlen(buf) + strlen(n) + strlen(sep) + 1) >= bufsize)
