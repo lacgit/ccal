@@ -296,6 +296,14 @@
  * 天賊/歸忌/五墓/月煞/月害/陽將/陰將:
  *   春(寅卯辰月)->巳酉丑日, 夏(巳午未月)->申子辰日, 秋(申酉戌月)->亥卯未日,
  *   冬(亥子丑月)->寅午戌日.
+ *
+ * 劫煞 (JieSha): 三煞之一 -- 日支 = 月建(節氣月)三合局五行之絕地, 即 災煞前一辰.
+ * 《欽定協紀辨方書》卷六 義例四: 神樞經曰「刼煞者,刼害之辰也,其日忌臨官視事
+ * 納禮成親戰伐行軍出入興販」; 李鼎祚曰「正月起亥,逆行四孟」; 又按
+ * 「月刼煞義與嵗刼煞同」.  卷十 宜忌: 「按三煞為三合敵對,刼煞為絶地,
+ * 災煞為正衝,月煞為盡地」 -- 即該月三合局之絕辰:
+ *   寅午戌月->亥日, 亥卯未月->申日, 申子辰月->巳日, 巳酉丑月->寅日
+ * (index = mbranch 0=子..11=亥; 劫煞 = 災煞 前一辰).
  */
 #include <string.h>
 #include "shensha.h"
@@ -490,6 +498,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xce\xe5\xd0\xe9", "\xa4\xad\xb5\xea",
       "\xe4\xba\x94\xe8\x99\x9a",
       "\xe4\xba\x94\xe8\x99\x9b" },   /* 五虛 */
+    { "JieSha",
+      "\xbd\xd9\xc9\xb7", "\xa7\x54\xb7\xd9",
+      "\xe5\x8a\xab\xe7\x85\x9e",
+      "\xe5\x8a\xab\xe7\x85\x9e" },   /* 劫煞 */
 };
 
 int ShenShaCount(void)
@@ -750,6 +762,10 @@ static const char wuxu_branch[4][3] = {
     { 2, 6, 10}
 };
 
+/* 劫煞 (JieSha) -- see the header comment.  三合局之絕地 (災煞前一辰),
+   index = mbranch 0=子..11=亥: 子月->巳, 丑月->寅, 寅月->亥, 卯月->申,
+   辰月->巳, 巳月->寅, 午月->亥, 未月->申, 申月->巳, 酉月->寅, 戌月->亥, 亥月->申. */
+static const char jiesha_branch[12] = {5, 2, 11, 8, 5, 2, 11, 8, 5, 2, 11, 8};
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
               int wday)
 {
@@ -905,6 +921,9 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
         return dbranch == wuxu_branch[s][0] || dbranch == wuxu_branch[s][1] ||
                dbranch == wuxu_branch[s][2];
     }
+    case SS_JIESHA:
+        /* 劫煞: 日支 == 該月三合局之絕地 (災煞前一辰). */
+        return dbranch == jiesha_branch[mbranch];
     }
     return 0;
 }
