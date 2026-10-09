@@ -88,6 +88,7 @@ enum {
     SS_YANGCUO,   /* YangCuo   凶 */
     SS_TIANEN,                   /* 天恩   吉 */
     SS_MUCANG,                   /* 母倉   吉 */
+    SS_YUEEN,                    /* 月恩   吉 */
     SS_COUNT
 };
 

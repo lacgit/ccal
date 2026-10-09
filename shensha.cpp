@@ -420,6 +420,11 @@
  *   宜飬育羣畜栽植種蒔」+ 曆例「春亥子、夏寅卯、秋辰戌丑未、冬申酉、土王後巳午」;
  *   卷十 宜忌「母倉 宜納財栽種牧養納畜」.  按 節氣月/月建 mbranch keying (同其兄弟).
  *   (協紀另有「土王後巳午」一說, 四季月下半月, ccal 無此粒度, 未實現.)
+ * 月恩 (YueEn): 日干 = 月建所生之干.  《欽定協紀辨方書》卷五 義例三 五行論
+ *   「月恩者陽建所生之干也, 子母相從謂之月恩」+ 曆例「月恩者正月丙、二月丁、
+ *   三月庚、四月己、五月戊、六月辛、七月壬、八月癸、九月庚、十月乙、十一月甲、
+ *   十二月辛」; 卷十 宜忌「月恩 四相 時德 宜祭祀祈福求嗣施恩封拜…」.
+ *   按 節氣月/月建 mbranch keying (同其兄弟 月破/大耗/災煞…).
  */
 #include <string.h>
 #include "shensha.h"
@@ -729,6 +734,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xc4\xb8\xb2\xd6", "\xa5\xc0\xad\xdc",
       "\xe6\xaf\x8d\xe4\xbb\x93",
       "\xe6\xaf\x8d\xe5\x80\x89" },   /* 母倉 */
+    { "YueEn",
+      "\xd4\xc2\xb6\xf7", "\xa4\xeb\xae\xa6",
+      "\xe6\x9c\x88\xe6\x81\xa9",
+      "\xe6\x9c\x88\xe6\x81\xa9" },   /* 月恩 */
 };
 
 int ShenShaCount(void)
@@ -1066,6 +1075,9 @@ static const char tianen_gz[15] = {0,1,2,3,4,15,16,17,18,19,45,46,47,48,49};
 static const char mucang_branch[4][4] = {
     {11, 0, -1, -1}, {2, 3, -1, -1}, {4, 10, 1, 7}, {8, 9, -1, -1} };
 
+/* 月恩 by 月建 (節氣月) -> 日干: 寅丙 卯丁 辰庚 巳己 午戊 未辛 申壬 酉癸 戌庚 亥乙 子甲 丑辛. */
+static const char yueen_stem[12] = {0, 7, 2, 3, 6, 5, 4, 7, 8, 9, 6, 1};
+
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
               int wday, int suigz)
 {
@@ -1338,6 +1350,9 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
         for (k = 0; k < 4; k++) if (t[k] >= 0 && dbranch == t[k]) return 1;
         return 0;
     }
+    case SS_YUEEN:
+        /* 月恩: 日干 = 月建所生之干 (曆例 正月丙 二月丁 …). */
+        return ganzhi % 10 == yueen_stem[mbranch];
     }
     return 0;
 }
