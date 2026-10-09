@@ -568,6 +568,12 @@
  * 睦親族祀神祗求嗣續」; 曆例「續世者正月丑二月未三月寅四月申五月夘六月酉
  * 七月辰八月戌九月巳十月亥十一月午十二月子」; 考原「續世者…常在益後後一辰」。
  *
+ *
+* 聖心 (ShengXin): 日支 = 該月(節氣月)之聖心支。
+ * 《欽定協紀辨方書》卷六 義例四 樞要曆「聖心者月中福神也,其日宜上表章
+ * 行恩澤營百事」; 曆例「聖心者正月亥二月巳三月子四月午五月丑六月未七月寅
+ * 八月申九月夘十月酉十一月辰十二月戌」; 曹震圭「勞而不敢安者聖人之心也」。
+ *
  */
 #include <string.h>
 #include "shensha.h"
@@ -986,6 +992,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xd0\xf8\xca\xc0", "\xc4\xf2\xa5\x40",
       "\xe7\xbb\xad\xe4\xb8\x96",
       "\xe7\xba\x8c\xe4\xb8\x96" },   /* 續世 */
+    { "ShengXin",
+      "\xca\xa5\xd0\xc4", "\xb8\x74\xa4\xdf",
+      "\xe5\x9c\xa3\xe5\xbf\x83",
+      "\xe8\x81\x96\xe5\xbf\x83" },   /* 聖心 */
 };
 
 int ShenShaCount(void)
@@ -1449,6 +1459,13 @@ static const char yihou_branch[12] = {5, 11, 0, 6, 1, 7, 2, 8, 3, 9, 4, 10};
  */
 static const char xushi_branch[12] = {6, 0, 1, 7, 2, 8, 3, 9, 4, 10, 5, 11};
 
+/* 聖心 (ShengXin): 日支 = 該月(節氣月)之聖心支。
+ * 《欽定協紀辨方書》卷六 義例四 樞要曆「聖心者月中福神也,其日宜上表章
+ * 行恩澤營百事」; 曆例「聖心者正月亥二月巳三月子四月午五月丑六月未七月寅
+ * 八月申九月夘十月酉十一月辰十二月戌」; 曹震圭「勞而不敢安者聖人之心也」。
+ */
+static const char shengxin_branch[12] = {4, 10, 11, 5, 0, 6, 1, 7, 2, 8, 3, 9};
+
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
               int wday, int suigz)
 {
@@ -1808,6 +1825,9 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
     case SS_XUSHI:
         /* 續世: 日支 == 該月(節氣月)之續世支 (正月丑, 二月未 ... 十二月子). */
         return dbranch == xushi_branch[mbranch];
+    case SS_SHENGXIN:
+        /* 聖心: 日支 == 該月(節氣月)之聖心支 (正月亥, 二月巳 ... 十二月戌). */
+        return dbranch == shengxin_branch[mbranch];
     }
     return 0;
 }
