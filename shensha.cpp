@@ -257,6 +257,11 @@
  * 考原「厭後幹配厭前枝者為陰陽俱將,陰非其陰陽非其陽,其道相乖也」.  Same 節氣月/月建 keying as its siblings
  * (月厭 A = (12 - 月建) mod 12; 前區 = {A+6 .. A+11}, 後區 = {A .. A+5}).  The 月厭 day
  * itself has 支 ∈ 後區, so it can never be 俱將.
+ *
+ * 死氣 (SiQi): 凶.  日支 = 月建前四辰 = 建除「定」日 (生氣之對衝, 死神後一辰).
+ * 《欽定協紀辨方書》卷四 義例二: 定〈時陰 官符 死氣〉; 卷十 宜忌別列「死氣」為所忌.
+ * 六壬「死氣者,月建向前四位(即生氣對沖為死氣),正月在午、二月在未、三月申…」.
+ * Keyed to the 節氣月/月建 (同其兄弟 月破/大耗/災煞/月厭/月刑/大時/天吏/血忌/死神).
  */
 #include <string.h>
 #include "shensha.h"
@@ -439,6 +444,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xbe\xe3\xbd\xab", "\xad\xd1\xb1\x4e",
       "\xe4\xbf\xb1\xe5\xb0\x86",
       "\xe4\xbf\xb1\xe5\xb0\x87" },   /* 俱將 */
+    { "SiQi",
+      "\xcb\xc0\x9a\xe2", "\xa6\xba\xae\xf0",
+      "\xe6\xad\xbb\xe6\xb0\x94",
+      "\xe6\xad\xbb\xe6\xb0\xa3" },   /* 死氣 */
 };
 
 int ShenShaCount(void)
@@ -816,6 +825,9 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
     case SS_TUFU_MANSION:
         /* 土府 = 月建之日 (建日): 日支等於節氣月之月建支. */
         return dbranch == mbranch;
+    case SS_SIQI:
+        /* 死氣 = 月建前四辰 (建除「定」日). */
+        return dbranch == (mbranch + 4) % 12;
     }
     return 0;
 }
