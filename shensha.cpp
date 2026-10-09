@@ -45,6 +45,14 @@
  * like its siblings 月破/大耗/災煞/月厭/月刑 (寅申巳亥月->危日, 辰戌丑未月->閉日,
  * 子午卯酉月->平日 -- the 建除 officer the rule lands on, also per 卷十):
  *   寅午戌月->酉日, 亥卯未月->午日, 巳酉丑月->子日, 申子辰月->卯日.
+ *
+ * 血忌 (XueJi): the day whose 日支 is the month's 血忌 branch, keyed to the
+ * solar-term month (節氣月/月建/斗建) like its siblings.  《攝生月令》
+ * (雲笈七籤卷三十六) lists all twelve by 斗建:
+ *   斗建寅->丑日, 卯->未日, 辰->寅日, 巳->申日, 午->卯日, 未->酉日,
+ *   申->辰日, 酉->戌日, 戌->巳日, 亥->亥日, 子->午日, 丑->子日,
+ * i.e. the classical 通書 曆例 正月丑 二月未 三月寅 四月申 五月卯 六月酉
+ * 七月辰 八月戌 九月巳 十月亥 十一月午 十二月子.  忌針刺出血之事.
  */
 #include <string.h>
 #include "shensha.h"
@@ -135,6 +143,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xcc\xec\xc0\xf4", "\xa4\xd1\xa6\x4f",
       "\xe5\xa4\xa9\xe5\x90\x8f",
       "\xe5\xa4\xa9\xe5\x90\x8f" },   /* 天吏 */
+    { "XueJi",
+      "\xd1\xaa\xbc\xc9", "\xa6\xe5\xa7\xd2",
+      "\xe8\xa1\x80\xe5\xbf\x8c",
+      "\xe8\xa1\x80\xe5\xbf\x8c" },   /* 血忌 */
 };
 
 int ShenShaCount(void)
@@ -255,6 +267,13 @@ static const char dashi_branch[12] = {9, 6, 3, 0, 9, 6, 3, 0, 9, 6, 3, 0};
      巳酉丑(5,9,1)->子(0)    申子辰(8,0,4)->卯(3) */
 static const char tianli_branch[12] = {3, 0, 9, 6, 3, 0, 9, 6, 3, 0, 9, 6};
 
+/* 血忌 by 月建 (solar-term month), same 斗建 keying as its siblings:
+   《攝生月令》(雲笈七籤卷三十六) "斗建X ... 血忌Y".  Index = mbranch 0=子..11=亥:
+     寅(2)->丑(1)  卯(3)->未(7)  辰(4)->寅(2)  巳(5)->申(8)
+     午(6)->卯(3)  未(7)->酉(9)  申(8)->辰(4)  酉(9)->戌(10)
+     戌(10)->巳(5) 亥(11)->亥(11) 子(0)->午(6) 丑(1)->子(0) */
+static const char xueji_branch[12] = {6, 0, 1, 7, 2, 8, 3, 9, 4, 10, 5, 11};
+
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch)
 {
     int k, mm = mmonth_of(mbranch);
@@ -313,6 +332,8 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch)
         return dbranch == dashi_branch[mbranch];
     case SS_TIANLI:
         return dbranch == tianli_branch[mbranch];
+    case SS_XUEJI:
+        return dbranch == xueji_branch[mbranch];
     }
     return 0;
 }

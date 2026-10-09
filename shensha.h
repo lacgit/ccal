@@ -32,6 +32,7 @@ enum {
     SS_YUEXING,         /* 月刑   凶 */
     SS_DASHI,           /* 大時   凶 */
     SS_TIANLI,          /* 天吏   凶 */
+    SS_XUEJI,           /* 血忌   凶 */
     SS_COUNT
 };
 
