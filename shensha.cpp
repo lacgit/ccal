@@ -536,6 +536,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xb9\xb4\xea\x90", "\xa4\xc4\xb3\xaf",
       "\xe5\x8b\xbe\xe9\x99\x88",
       "\xe5\x8b\xbe\xe9\x99\xb3" },   /* 勾陳 */
+    { "BaiHu",
+      "\xb0\xd7\xbb\xa2", "\xa5\xd5\xaa\xea",
+      "\xe7\x99\xbd\xe8\x99\x8e",
+      "\xe7\x99\xbd\xe8\x99\x8e" },   /* 白虎 */
 };
 
 int ShenShaCount(void)
@@ -992,6 +996,9 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
     case SS_GOUCHEN:
         /* 勾陳 = 黃黑道第 12 神 (黑道), 支 = 青龍+11 */
         return huangdao_index(mbranch, dbranch) == 11;
+    case SS_BAIHU:
+        /* 白虎 = 黃黑道第 7 神 (黑道), 支 = 青龍+6 */
+        return huangdao_index(mbranch, dbranch) == 6;
     }
     return 0;
 }

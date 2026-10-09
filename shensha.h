@@ -64,6 +64,7 @@ enum {
     SS_ZHAOYAO,            /* 招搖   凶 */
     SS_XUANWU,             /* 玄武   凶 */
     SS_GOUCHEN,            /* 勾陳   凶 */
+    SS_BAIHU,              /* 白虎   凶 */
     SS_COUNT
 };
 
