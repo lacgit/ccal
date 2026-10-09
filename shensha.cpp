@@ -456,6 +456,12 @@
  *   建除十二神所合叢辰「定〈時陰 官符 死氣〉」+ 總要曆「時陰者月中陰神也…」+曆例
  *   「常居月建前四辰」; 曹震圭「時陰者月内陰氣之神…其日宜運謀算畫計䇿」;
  *   卷十 宜忌「定日〈時陰〉…又為時陰宜運謀算畫計策」.  按 節氣月/月建 keying.
+ * 陽德 (YangDe) / 陰德 (YinDe): 納甲取乾坤天地生成之義而以月配爻 (卷十 宜忌
+ *   「阳德隂德…為乾坤納甲取天地生成之義而以月配爻」).  月建 -> 日支 (正月寅起):
+ *   陽德 正月戌、二月子、三月寅、四月辰、五月午、六月申、七月戌… 六辰循環
+ *   (即 日支 = (2*月建 + 6) mod 12); 陰德 正月酉、二月未、三月巳、四月卯、
+ *   五月丑、六月亥、七月酉… (即 日支 = (13 - 2*月建) mod 12).  卷十 宜忌「陽德 陰德
+ *   宜施恩惠恤孤惸行惠愛雪寃枉緩刑獄」.  按 節氣月/月建 mbranch keying.
  */
 #include <string.h>
 #include "shensha.h"
@@ -797,6 +803,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xca\xb1\xd2\xf5", "\xae\xc9\xb3\xb1",
       "\xe6\x97\xb6\xe9\x98\xb4",
       "\xe6\x99\x82\xe9\x99\xb0" },   /* 時陰 */
+    { "YangDe",
+      "\xd1\xf4\xb5\xc2", "\xb6\xa7\xbc\x77",
+      "\xe9\x98\xb3\xe5\xbe\xb7",
+      "\xe9\x99\xbd\xe5\xbe\xb7" },   /* 陽德 */
 };
 
 int ShenShaCount(void)
@@ -1443,6 +1453,9 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
     case SS_SHIYIN:
         /* 時陰: 日支 = 月建前四辰 (= 建除 定日, 死氣同位). */
         return dbranch == (mbranch + 4) % 12;
+    case SS_YANGDE:
+        /* 陽德: 日支 = (2*月建 + 6) mod 12 (納甲天地生成; 正月戌 順行六辰循環). */
+        return dbranch == (2 * mbranch + 6) % 12;
     }
     return 0;
 }
