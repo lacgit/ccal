@@ -136,6 +136,7 @@ enum {
     SS_FUDUAN,          /* 伏斷   凶 */
     SS_YIMA, /* 驛馬 吉 */
     SS_ZHAIBU,   /* ZhaiBu   凶 */
+    SS_TIANHOU, /* 天后 吉 */
     SS_COUNT
 };
 

@@ -1119,6 +1119,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xb6\xc5\xa4\xa3",
       "\xe5\x80\xba\xe4\xb8\x8d",
       "\xe5\x82\xb5\xe4\xb8\x8d" },   /* ZhaiBu */
+    { "TianHou",
+      "\xcc\xec\xba\xf3", "\xa4\xd1\xa6\x5a",
+      "\xe5\xa4\xa9\xe5\x90\x8e",
+      "\xe5\xa4\xa9\xe5\x90\x8e" },   /* 天后 */
 };
 
 /* 三合 (SanHe) by 月建: 日支 = 月建三合局之另外兩辰 = {mbranch+4, mbranch+8}. */
@@ -1649,6 +1653,8 @@ static const char yima_branch[12] = {2, 11, 8, 5, 2, 11, 8, 5, 2, 11, 8, 5};
    日而互斥, 通勝只印與月長相符之一組).  大月/小月 以 mlendays 定之. */
 static const char zhaibu_big[4] = {3, 11, 19, 27};
 static const char zhaibu_small[4] = {2, 10, 18, 26};
+/* 天后: 與驛馬同位 -- 《欽定協紀辨方書》卷六 義例四 總要曆「天后者月中福神也,其日宜
+   求醫療病祈福禮神」; 曆例「天后與驛馬同位」; 曹震圭「天后者驛馬也…天后主生育萬物為萬物之母」. */
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
               int wday, int suigz, int mlendays)
 {
@@ -2105,6 +2111,9 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
                 return 1;
         return 0;
     }
+    case SS_TIANHOU:
+        /* 天后 = 驛馬同位 (曆例「天后與驛馬同位」). */
+        return dbranch == yima_branch[mbranch];
     }
     return 0;
 }
