@@ -528,6 +528,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xd5\xd0\xd2\xa1", "\xa9\xdb\xb7\x6e",
       "\xe6\x8b\x9b\xe6\x91\x87",
       "\xe6\x8b\x9b\xe6\x90\x96" },   /* 招搖 */
+    { "XuanWu",
+      "\xd0\xfe\xce\xe4", "\xa5\xc8\xaa\x5a",
+      "\xe7\x8e\x84\xe6\xad\xa6",
+      "\xe7\x8e\x84\xe6\xad\xa6" },   /* 玄武 */
 };
 
 int ShenShaCount(void)
@@ -800,6 +804,20 @@ static const char youhuo_branch[12] = {11, 8, 5, 2, 11, 8, 5, 2, 11, 8, 5, 2};
    index = mbranch 0=子..11=亥: 子月->午, 丑月->巳, 寅月->辰, 卯月->卯, 辰月->寅,
    巳月->丑, 午月->子, 未月->亥, 申月->戌, 酉月->酉, 戌月->申, 亥月->未. */
 static const char zhaoyao_branch[12] = {6, 5, 4, 3, 2, 1, 0, 11, 10, 9, 8, 7};
+
+/* 黃黑道十二神 (日家值日神) -- 《欽定協紀辨方書》卷七 義例五 「黃道黑道」:
+   神樞經「青龍明堂金匱天德玉堂司命皆月内天黄道之神也…天刑朱雀白虎天牢元武勾陳者月中黑道也」;
+   御定星曆考原「黃黑二道者,黃道六黑道六共十有二,以配十有二辰: 一青龍 二明堂 三天刑 四朱雀
+   五金匱 六天德 七白虎 八玉堂 九天牢 十元武 十一司命 十二勾陳; 其法則寅申青龍起子, 卯酉起寅,
+   辰戌起辰, 巳亥起午, 子午起申, 丑未起戌, 順行十二辰; 月起日, 則建寅之月子日為青龍, 丑日為明堂」.
+   即 青龍 支 = 2*((月建-2) mod 6); 第 i 神 (0-based: 0青龍 1明堂 2天刑 3朱雀 4金匱 5天德
+   6白虎 7玉堂 8天牢 9元武 10司命 11勾陳) 值日 ⇔ 日支 = 青龍 + i (mod 12).
+   按 節氣月/月建 mbranch 與 日支 dbranch keyed, 同 月破/大耗/災煞/月厭/月刑/大時/天吏/血忌/血支. */
+static int huangdao_index(int mbranch, int dbranch)
+{
+    return ((dbranch - 2 * ((mbranch - 2 + 6) % 6)) % 12 + 12) % 12;
+}
+
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
               int wday)
 {
@@ -964,6 +982,9 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
     case SS_ZHAOYAO:
         /* 招搖 (= 厭對): 日支 == 月厭之對衝辰. */
         return dbranch == zhaoyao_branch[mbranch];
+    case SS_XUANWU:
+        /* 元武/玄武 = 黃黑道第 10 神 (黑道), 支 = 青龍+9 */
+        return huangdao_index(mbranch, dbranch) == 9;
     }
     return 0;
 }
