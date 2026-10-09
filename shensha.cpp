@@ -179,6 +179,14 @@
  * 以通書為準.  Index = mbranch % 3 (0 = 四仲月, 1 = 四季月, 2 = 四孟月); every
  * listed 干支 has 序號 % 9 = 0 (仲) / 8 (季) / 1 (孟), i.e.
   hx_off[mbranch 子..亥] = {0, 8, 1, 0, 8, 1, 0, 8, 1, 0, 8, 1}.
+ *
+ * 五離 (WuLi): 凶.  日支 = 申 或 酉 -- 日神取一定干支者, 不從月建, 亦不論天干
+ * (與五合「寅卯」對衝).  《欽定協紀辨方書》卷五 義例三「五離〈除神〉」:
+ * 樞要曆「五離者,月中離神也,其日忌結婚姻、會親友、作交關、立契券」; 曆例
+ * 「五離者,申酉日是也」; 曹震圭「五離者是陰陽重會之辰,再合則離也」; 考原
+ * 「按通書以申酉日為除神,與五合對衝之日也,宜沐浴祓除災眚」.  卷九 立成
+ * 「日神取一定干支者」: 五合 寅卯 / 除神〈五離〉申酉 / 重日 己亥.
+ * → 日支 ∈ {申(8), 酉(9)}, 不論天干、不論月建 (同其兄弟 重日 之 keying).
  */
 #include <string.h>
 #include "shensha.h"
@@ -325,6 +333,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xea\x8e\x8c\xa2", "\xb3\xb1\xb1\x4e",
       "\xe9\x98\xb4\xe5\xb0\x86",
       "\xe9\x99\xb0\xe5\xb0\x87" },   /* 陰將 */
+    { "WuLi",
+      "\xce\xe5\xeb\x78", "\xa4\xad\xc2\xf7",
+      "\xe4\xba\x94\xe7\xa6\xbb",
+      "\xe4\xba\x94\xe9\x9b\xa2" },   /* 五離 */
 };
 
 int ShenShaCount(void)
@@ -660,6 +672,9 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
             if (ganzhi == huoxing_gz[mbranch % 3][k])
                 return 1;
         return 0;
+    case SS_WULI:
+        /* 五離 = 除神: 日支 申/酉 (協紀卷五 義例三, 協紀卷九 立成). */
+        return dbranch == 8 || dbranch == 9;
     }
     return 0;
 }
