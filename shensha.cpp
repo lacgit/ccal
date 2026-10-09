@@ -642,6 +642,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xcb\xea\xb5\xc2", "\xb7\xb3\xbc\x77",
       "\xe5\xb2\x81\xe5\xbe\xb7",
       "\xe6\xad\xb2\xe5\xbe\xb7" },   /* 歲德   吉 */
+    { "SuiDeHe",
+      "\xcb\xea\xb5\xc2\xba\xcf", "\xb7\xb3\xbc\x77\xa6\x58",
+      "\xe5\xb2\x81\xe5\xbe\xb7\xe5\x90\x88",
+      "\xe6\xad\xb2\xe5\xbe\xb7\xe5\x90\x88" },   /* 歲德合 吉 */
 };
 
 int ShenShaCount(void)
@@ -1171,6 +1175,9 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
     case SS_SUIDE:
         /* 歲德: 日干 = 太歲干之德 (甲甲 乙庚 丙丙 丁壬 戊戊 己甲 庚庚 辛丙 壬壬 癸戊). */
         return (ganzhi % 10) == suide_stem[suigz % 10];
+    case SS_SUIDEHE:
+        /* 歲德合: 日干 = 歲德干之五合 (甲己 乙庚 丙辛 丁壬 戊癸). */
+        return (ganzhi % 10) == (suide_stem[suigz % 10] + 5) % 10;
     }
     return 0;
 }
