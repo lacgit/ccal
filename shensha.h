@@ -123,6 +123,7 @@ enum {
     SS_SHUIHEN,   /* ShuiHen   凶 */
     SS_JINKUI, /* 金匱 吉 */
     SS_BAOGUANG, /* 寶光 吉 */
+    SS_YUTANG, /* 玉堂 吉 */
     SS_COUNT
 };
 
