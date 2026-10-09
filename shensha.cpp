@@ -522,6 +522,13 @@
  * 「王日向為寅巳申亥…今悉刪去…帝居帝位官居官位皆臨官也」-- 採 寅巳申亥。
  * 異文: 通書有把 王日/官日 互易者(見官日條); 四年通勝 DB 印 寅巳申亥。
  *
+ *
+* 臨日 (LinRi): 日支 = 該月(節氣月)之臨日支。
+ * 《欽定協紀辨方書》卷六 義例四 樞要曆「臨日者上臨下之義也,其日忌臨民訴訟」;
+ * 曆例「臨日者正月午二月亥三月申四月丑五月戌六月夘七月子八月巳九月寅
+ * 十月未十一月辰十二月酉」; 曹震圭「建陽之月在三合前辰…建隂之月在三合後辰」
+ * (即 陽月取 定日/官符、陰月取 成日/白虎 之位)。
+ *
  */
 #include <string.h>
 #include "shensha.h"
@@ -912,6 +919,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xcd\xf5\xc8\xd5", "\xa4\xfd\xa4\xe9",
       "\xe7\x8e\x8b\xe6\x97\xa5",
       "\xe7\x8e\x8b\xe6\x97\xa5" },   /* 王日 */
+    { "LinRi",
+      "\xc1\xd9\xc8\xd5", "\xc1\x7b\xa4\xe9",
+      "\xe4\xb8\xb4\xe6\x97\xa5",
+      "\xe8\x87\xa8\xe6\x97\xa5" },   /* 臨日 */
 };
 
 int ShenShaCount(void)
@@ -1322,6 +1333,14 @@ static const char minri_branch[4] = {6, 9, 0, 3};
  */
 static const char wangri_branch[4] = {2, 5, 8, 11};
 
+/* 臨日 (LinRi): 日支 = 該月(節氣月)之臨日支。
+ * 《欽定協紀辨方書》卷六 義例四 樞要曆「臨日者上臨下之義也,其日忌臨民訴訟」;
+ * 曆例「臨日者正月午二月亥三月申四月丑五月戌六月夘七月子八月巳九月寅
+ * 十月未十一月辰十二月酉」; 曹震圭「建陽之月在三合前辰…建隂之月在三合後辰」
+ * (即 陽月取 定日/官符、陰月取 成日/白虎 之位)。
+ */
+static const char linri_branch[12] = {4, 9, 6, 11, 8, 1, 10, 3, 0, 5, 2, 7};
+
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
               int wday, int suigz)
 {
@@ -1660,6 +1679,9 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
     case SS_WANGRI:
         /* 王日: 春寅 夏巳 秋申 冬亥 (season_of(mbranch)). */
         return dbranch == wangri_branch[season_of(mbranch)];
+    case SS_LINRI:
+        /* 臨日: 日支 == 該月(節氣月)之臨日支 (正月午, 二月亥 ... 十二月酉). */
+        return dbranch == linri_branch[mbranch];
     }
     return 0;
 }
