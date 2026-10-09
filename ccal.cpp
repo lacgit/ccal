@@ -284,7 +284,8 @@ static int ShenShaEnc(int nEncoding)
 static int ShenShaOfDay(vdouble& vterms, int lmonth, int lday, int jd)
 {
     return ShenShaMask(lmonth, lday, (int(jd) + 49) % 60,
-                       GetMonthBranch(jd, vterms), (int(jd) + 1) % 12);
+                       GetMonthBranch(jd, vterms), (int(jd) + 1) % 12,
+                       (int(jd) + 1) % 7);
 }
 
 /* Lunar month number (1..12, leap months keep their number) of a day in the

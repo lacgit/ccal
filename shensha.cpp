@@ -106,6 +106,18 @@
  * like its siblings 月破/大耗/災煞/月厭/月刑:
  *   寅月->丑日, 卯月->戌日, 辰月->未日, 巳月->辰日, 午月->丑日, 未月->戌日,
  *   申月->未日, 酉月->辰日, 戌月->丑日, 亥月->戌日, 子月->未日, 丑月->辰日.
+ *
+ * 密日 (MiRi): the day whose 值宿 is one of the four 日曜 mansions 房/虛/昴/星
+ * (房日兔、虛日鼠、昴日雞、星日馬) -- the 日曜日, i.e. a Sunday.
+ * 《欽定協紀辨方書》卷三十六 辨譌: "伏斷日密日裁衣日皆以值宿起算, 查二十八宿選擇
+ * 之法來自西域 ... 密日者乃房虛星昴四宿, 七政屬日, 西語曰密, 彼地以為主喜事,
+ * 而中國遂以其日忌安葬啟攢凶事"; 同卷又列 密日 為奏准刪去之造葬條.
+ * The 二十八宿 cycle is 28 = 4x7 days, so the four 日曜 mansions always land on
+ * the same weekday; in all four oracle 通勝 volumes (2006/2010/2025/2026) the day
+ * whose own 值宿 column reads 房/虛/昴/星 is the Sunday -- their 值宿 column fits
+ * (jdn - 17) % 28 for 97% of rows and every one of those 密日 days is a Sunday.
+ * 其日忌安葬、啟攢 (凶).  This is the only marker keyed to the weekday, hence the
+ * extra wday input (0 = Sunday .. 6 = Saturday).
  */
 #include <string.h>
 #include "shensha.h"
@@ -224,6 +236,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xd4\xc2\xc9\xb7", "\xa4\xeb\xb7\xd9",
       "\xe6\x9c\x88\xe7\x85\x9e",
       "\xe6\x9c\x88\xe7\x85\x9e" },   /* 月煞 */
+    { "MiRi",
+      "\xc3\xdc\xc8\xd5", "\xb1\x4b\xa4\xe9",
+      "\xe5\xaf\x86\xe6\x97\xa5",
+      "\xe5\xaf\x86\xe6\x97\xa5" },   /* 密日 */
 };
 
 int ShenShaCount(void)
@@ -398,7 +414,8 @@ static const char guiji_branch[12] = {2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1};
      申(8)->未(7)  酉(9)->辰(4)  戌(10)->丑(1) 亥(11)->戌(10) */
 static const char yuesha_branch[12] = {7, 4, 1, 10, 7, 4, 1, 10, 7, 4, 1, 10};
 
-int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch)
+int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
+              int wday)
 {
     int k, mm = mmonth_of(mbranch);
     switch (i)
@@ -470,15 +487,17 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch)
         return dbranch == guiji_branch[mbranch];
     case SS_YUESHA:
         return dbranch == yuesha_branch[mbranch];
+    case SS_MIRI:
+        return wday == 0;   /* 房/虛/昴/星 = 日曜 = 星期日 */
     }
     return 0;
 }
 
-int ShenShaMask(int lmonth, int lday, int ganzhi, int mbranch, int dbranch)
+int ShenShaMask(int lmonth, int lday, int ganzhi, int mbranch, int dbranch, int wday)
 {
     int i, mask = 0;
     for (i = 0; i < SS_COUNT; i++)
-        if (ShenShaOn(i, lmonth, lday, ganzhi, mbranch, dbranch))
+        if (ShenShaOn(i, lmonth, lday, ganzhi, mbranch, dbranch, wday))
             mask |= 1 << i;
     return mask;
 }
