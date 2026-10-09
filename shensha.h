@@ -52,6 +52,7 @@ enum {
     SS_SANSANG,        /* 三喪   凶 */
     SS_YUEJI,           /* 月忌   凶 */
     SS_TUFU,            /* 土符   凶 */
+    SS_YUEJIAN,         /* 月建   凶 */
     SS_COUNT
 };
 

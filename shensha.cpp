@@ -225,6 +225,13 @@
  *   各配 丑寅卯辰 / 巳午未申 / 酉戌亥子 三支而正之).  Map (mbranch 0=子..11=亥):
  *   寅月->丑日, 卯月->巳日, 辰月->酉日, 巳月->寅日, 午月->午日, 未月->戌日,
  *   申月->卯日, 酉月->未日, 戌月->亥日, 亥月->辰日, 子月->申日, 丑月->子日.
+ *
+ * 月建 (YueJian): the 建除 「建」 day -- the day whose 日支 equals the 節氣月/月建
+ * branch.  《欽定協紀辨方書》卷四 義例二 建除同位異名「建〈兵福、小時、土府〉」,
+ * so the 通書 prints the 建日 凶煞 as 「土府／月建」 (also 「火星月建」「三喪月建」
+ * 「重日月建」 ...); 卷四 又「建為歲君為元神,為吉凶眾神之主帥」.  Keyed to the
+ * 節氣月/月建 like its siblings:
+ *   建日 -> 日支 == 月建支 (寅月寅日, 卯月卯日 ... 丑月丑日).
  */
 #include <string.h>
 #include "shensha.h"
@@ -391,6 +398,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xcd\xc1\xb7\xfb", "\xa4\x67\xb2\xc5",
       "\xe5\x9c\x9f\xe7\xac\xa6",
       "\xe5\x9c\x9f\xe7\xac\xa6" },   /* 土符 */
+    { "YueJian",
+      "\xd4\xc2\xbd\xa8", "\xa4\xeb\xab\xd8",
+      "\xe6\x9c\x88\xe5\xbb\xba",
+      "\xe6\x9c\x88\xe5\xbb\xba" },   /* 月建 */
 };
 
 int ShenShaCount(void)
@@ -754,6 +765,9 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
     case SS_TUFU:
         /* 土符: 日支 = 月建對應之土符支 (正月丑 二月巳 三月酉 四月寅 ...). */
         return dbranch == tufu_branch[mbranch];
+    case SS_YUEJIAN:
+        /* 月建: 日支 == 月建支 (建日; 通書 作 土府月建). */
+        return dbranch == mbranch;
     }
     return 0;
 }
