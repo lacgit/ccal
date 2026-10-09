@@ -143,6 +143,7 @@ enum {
     SS_MINGFEI, /* 鳴吠 吉 */
     SS_MINGFEIDUI, /* 鳴吠對 吉 */
     SS_TIANYUAN, /* 天願 吉 */
+    SS_HEKUI,           /* 河魁   凶 */
     SS_COUNT
 };
 

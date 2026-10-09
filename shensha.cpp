@@ -1147,6 +1147,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xcc\xec\xd4\xb8", "\xa4\xd1\xc4\x40",
       "\xe5\xa4\xa9\xe6\x84\xbf",
       "\xe5\xa4\xa9\xe9\xa1\x98" },   /* 天願 */
+    { "HeKui",
+      "\xba\xd3\xbf\xfd", "\xaa\x65\xbb\xed",
+      "\xe6\xb2\xb3\xe9\xad\x81",
+      "\xe6\xb2\xb3\xe9\xad\x81" },   /* 河魁 */
 };
 
 /* 三合 (SanHe) by 月建: 日支 = 月建三合局之另外兩辰 = {mbranch+4, mbranch+8}. */
@@ -2187,6 +2191,10 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
     case SS_TIANYUAN:
         /* 天願: 日柱 == 該月(節氣月)天願日 (正月甲午 二月甲戌 …). */
         return ganzhi == tianyuan_gz[mbranch];
+    case SS_HEKUI:
+        /* 河魁 (HeKui): 天罡之對衝 (卷七 義例「辰者天罡戌者河魁」; 戌為河魁).
+           陽月(子寅辰午申戌)取月建後(逆)三辰, 陰月取月建前(順)三辰. */
+        return dbranch == ((mbranch % 2) ? (mbranch + 3) % 12 : (mbranch + 9) % 12);
     }
     return 0;
 }
