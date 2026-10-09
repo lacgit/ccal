@@ -99,6 +99,11 @@
  * 遠行、歸家及徙也」.  Index = mbranch 0=子..11=亥:
  *   四孟(寅巳申亥)->丑日, 四仲(子卯午酉)->寅日, 四季(辰未戌丑)->子日.
  *
+ * 月害 (YueHai): the day whose 日支 sits on "正月起巳逆行十二辰",
+ * keyed to the solar-term month (節氣月/月建, same convention as siblings
+ * 月破/大耗/災煞/月厭/月刑) -- the month branch's six harms:
+   子->未(7), 丑->午(6), 寅->巳(5), 卯->辰(4), 辰->卯(3), 巳->寅(2),
+   午->丑(1), 未->子(0), 申->亥(11), 酉->戌(10), 戌->酉(9), 亥->申(8).
  * 月煞 (YueSha): 《欽定協紀辨方書》 廣聖曆「月殺者,月內之殺神也,其日忌停賓客,
  * 興穿掘,營種殖,納群畜」; 曆例「月煞者,正月起丑, 逆行四季」, 按「在歲為歲煞,
  * 在月為月煞, 無二義也」 -- 即月建三合局之養位 (三煞之歲煞; 《三命通會》「月煞:
@@ -733,6 +738,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xb9\xe9\xbc\xc9", "\xc2\x6b\xa7\xd2",
       "\xe5\xbd\x92\xe5\xbf\x8c",
       "\xe6\xad\xb8\xe5\xbf\x8c" },   /* 歸忌 */
+    { "YueHai",
+      "\xd4\xc2\xba\xa6", "\xa4\xeb\xae\x60",
+      "\xe6\x9c\x88\xe5\xae\xb3",
+      "\xe6\x9c\x88\xe5\xae\xb3" },   /* 月害 */
     { "YueSha",
       "\xd4\xc2\xc9\xb7", "\xa4\xeb\xb7\xd9",
       "\xe6\x9c\x88\xe7\x85\x9e",
@@ -1346,6 +1355,12 @@ static const char tianzei_branch[12] = {3, 2, 1, 0, 11, 10, 9, 8, 7, 6, 5, 4};
      申(8)->丑(1)  酉(9)->寅(2)  戌(10)->子(0) 亥(11)->丑(1) */
 static const char guiji_branch[12] = {2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1};
 
+/* 月害 by 月建 (solar-term month): "正月起巳逆行十二辰" on the day branch.
+   Index = mbranch 0=子..11=亥:
+   子->未(7), 丑->午(6), 寅->巳(5), 卯->辰(4), 辰->卯(3), 巳->寅(2),
+   午->丑(1), 未->子(0), 申->亥(11), 酉->戌(10), 戌->酉(9), 亥->申(8). */
+static const char yuehai_branch[12] = {7, 6, 5, 4, 3, 2, 1, 0, 11, 10, 9, 8};
+
 /* 月煞 by 月建 (solar-term month): "正月起丑逆行四季" (丑戌未辰 cycle) on the day
    branch, i.e. the 養 position of the month's 三合局 (= the 歲煞 position applied to
    the 月建).  Index = mbranch 0=子..11=亥:
@@ -1798,6 +1813,8 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
         return dbranch == tianzei_branch[mbranch];
     case SS_GUIJI:
         return dbranch == guiji_branch[mbranch];
+    case SS_YUEHAI:
+        return dbranch == yuehai_branch[mbranch];
     case SS_YUESHA:
         return dbranch == yuesha_branch[mbranch];
     case SS_YANGJIANG:
