@@ -212,6 +212,19 @@
  * 初五十四二十三,年年月月在人間」.  Keyed to the 農曆 day (lmonth/lday),
  * like 短星/楊公忌/三娘煞 (NOT the 節氣月/月建):
  *   農曆 初五(5) 十四(14) 廿三(23) 日 -> 月忌 (閏月亦照該月之農曆日).
+ *
+ * 土符 (TuFu): 日支 = 月建所屬之土符支, keyed to the 節氣月/月建 like its siblings
+ * 月破/大耗/災煞/月厭/月刑/大時/天吏/血忌/血支.  The only 協紀 曆例 that lists all
+ * twelve months and is confirmed by 曹震圭's seasonal grouping:
+ *   《欽定協紀辨方書》卷六 義例四 總要曆「土符土神也, 其日忌破土穿井開渠築墻」;
+ *   曆例「土符者 正月丑 二月巳 三月酉 四月寅 五月午 六月戌 七月卯 八月未
+ *   九月亥 十月辰 十一月申 十二月子」; 曹震圭「春木旺土受其尅, 故托子金以制之,
+ *   是春三月歷巳酉丑也; 夏火旺土休, 頼火為母以飬之, 故夏三月歷寅午戌也;
+ *   秋金旺土相, 不畏木制, 故秋三月歷亥卯未也; 冬水旺土亦剛堅, 頼水以柔和之,
+ *   故冬三月歷申子辰也」(按語以 寅巳申亥長生 / 子卯午酉帝旺 / 辰未戌丑收藏 三組
+ *   各配 丑寅卯辰 / 巳午未申 / 酉戌亥子 三支而正之).  Map (mbranch 0=子..11=亥):
+ *   寅月->丑日, 卯月->巳日, 辰月->酉日, 巳月->寅日, 午月->午日, 未月->戌日,
+ *   申月->卯日, 酉月->未日, 戌月->亥日, 亥月->辰日, 子月->申日, 丑月->子日.
  */
 #include <string.h>
 #include "shensha.h"
@@ -374,6 +387,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xd4\xc2\xbc\xc9", "\xa4\xeb\xa7\xd2",
       "\xe6\x9c\x88\xe5\xbf\x8c",
       "\xe6\x9c\x88\xe5\xbf\x8c" },   /* 月忌 */
+    { "TuFu",
+      "\xcd\xc1\xb7\xfb", "\xa4\x67\xb2\xc5",
+      "\xe5\x9c\x9f\xe7\xac\xa6",
+      "\xe5\x9c\x9f\xe7\xac\xa6" },   /* 土符 */
 };
 
 int ShenShaCount(void)
@@ -608,6 +625,10 @@ static const char sansang_branch[4] = {4, 7, 10, 1};
 /* 月忌 by 農曆 day: 每月 初五、十四、廿三 (see the header comment). */
 static const char yueji_day[3] = { 5, 14, 23 };
 
+/* 土符 by 月建 (solar-term month): the 曆例 branch of each of the twelve
+   months, index = mbranch 0=子 .. 11=亥 (see the header comment). */
+static const char tufu_branch[12] = {8, 0, 1, 5, 9, 2, 6, 10, 3, 7, 11, 4};
+
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
               int wday)
 {
@@ -730,6 +751,9 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
             if (lday == yueji_day[k])
                 return 1;
         return 0;
+    case SS_TUFU:
+        /* 土符: 日支 = 月建對應之土符支 (正月丑 二月巳 三月酉 四月寅 ...). */
+        return dbranch == tufu_branch[mbranch];
     }
     return 0;
 }
