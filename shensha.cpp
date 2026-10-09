@@ -505,6 +505,11 @@
  * 異文: 曆例 守日 = 春酉夏子秋卯冬午; 四年通勝 DB 印 辰未戌丑 之日,
  * 與 協紀 改正本相合 (亦即 三喪 之辰位)。
  *
+ *
+* 相日 (XiangRi): 四時相氣之辰 (春巳 夏申 秋亥 冬寅), 按節氣月所屬季節。
+ * 《欽定協紀辨方書》卷五 義例三 曆例「相日者春巳夏申秋亥冬寅」
+ * (按語「春巳夏申秋亥冬寅,四序之相氣,則自元子以下王侯卿相通用之吉辰也」)。
+ *
  */
 #include <string.h>
 #include "shensha.h"
@@ -883,6 +888,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xca\xd8\xc8\xd5", "\xa6\x75\xa4\xe9",
       "\xe5\xae\x88\xe6\x97\xa5",
       "\xe5\xae\x88\xe6\x97\xa5" },   /* 守日 */
+    { "XiangRi",
+      "\xcf\xe0\xc8\xd5", "\xac\xdb\xa4\xe9",
+      "\xe7\x9b\xb8\xe6\x97\xa5",
+      "\xe7\x9b\xb8\xe6\x97\xa5" },   /* 相日 */
 };
 
 int ShenShaCount(void)
@@ -1273,6 +1282,12 @@ static const char guanri_branch[4] = {3, 6, 9, 0};
  */
 static const char shouri_branch[4] = {4, 7, 10, 1};
 
+/* 相日 (XiangRi): 四時相氣之辰 (春巳 夏申 秋亥 冬寅), 按節氣月所屬季節。
+ * 《欽定協紀辨方書》卷五 義例三 曆例「相日者春巳夏申秋亥冬寅」
+ * (按語「春巳夏申秋亥冬寅,四序之相氣,則自元子以下王侯卿相通用之吉辰也」)。
+ */
+static const char xiangri_branch[4] = {5, 8, 11, 2};
+
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
               int wday, int suigz)
 {
@@ -1602,6 +1617,9 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
     case SS_SHOURI:
         /* 守日: 春辰 夏未 秋戌 冬丑 (協紀改正本; season_of(mbranch)). */
         return dbranch == shouri_branch[season_of(mbranch)];
+    case SS_XIANGRI:
+        /* 相日: 春巳 夏申 秋亥 冬寅 (season_of(mbranch)). */
+        return dbranch == xiangri_branch[season_of(mbranch)];
     }
     return 0;
 }

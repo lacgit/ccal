@@ -105,6 +105,7 @@ enum {
     SS_JIQI,             /* 吉期   吉 */
     SS_GUANRI,           /* 官日   吉 */
     SS_SHOURI,           /* 守日   吉 */
+    SS_XIANGRI,          /* 相日   吉 */
     SS_COUNT
 };
 
