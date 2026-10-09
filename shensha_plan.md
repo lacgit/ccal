@@ -4,6 +4,7 @@
 表一行(ASCII / GB2312 / Big5 / UTF-8簡 / UTF-8繁 名) + `ShenShaOn()` 一個 case。
 做法同陷阱: skill `ccal-almanac-dev` → `references/almanac-markers.md`。
 > ⚠ **框架變更 (火星卡)**: `SS_COUNT` 已 >32，神煞 mask 由 `int` 改為 `unsigned long long`（`ShenShaMask` / `ShenShaText` / `ccal.cpp` 之 `ss`／`ShenShaOfDay`）。原本 `1 << 32` 在 x86-64 會 wrap 成 bit 0，令最尾一個神煞誤亮「天赦」位；日後加神煞請留意 mask 已夠寬，但 `(1 << i)` 寫法要繼續用 `1ULL << i`。
+> ⚠ **框架變更 (歲神卡 t_1232bd08 續 — mask 越過 64 bit)**: `SS_COUNT` 於 歲支／歲支德／紅沙／除神（index 64/65/66/67）越過 64，x86-64 之 shift count 取 mod 64，所以 `1ULL << 64` 又 wrap 成 bit 0：令 歲支 之日誤亮「天赦」、歲支德→「天德」、紅沙→「天德合」、除神→「月德」，而該四個神煞本身幾乎唔出（HTML/XML/`-c` 日格全錯）。已將 mask 型別改為 `unsigned __int128`（`ShenShaMask`／`ShenShaText`／`ccal.cpp` 之 `ss`／`ShenShaOfDay`），移位寫法必須用 `(unsigned __int128)1 << i`（唔可以再用 `1ULL << i`）；日後再加神煞仍須留意位寬（>128 要再擴）。四年 sweep 覆核：文字月曆表(全編碼)、`-l`／`-j`／`-t`／`-x`(無 `-c`)、`-p`(除 CreationDate) 與未改前 byte-identical，`-t -c`／`-x -c`／`-i` 之差異只多 歲德／歲德合／歲祿／歲馬／歲支／歲支德／紅沙／除神 八個名，冇任何 天赦/天德/天德合/月德 誤亮。
 
 > ⚠ **框架變更 (歲神卡 t_1232bd08)**: 加 太歲(年)-keyed 吉神群 (歲德/歲德合/歲祿/歲馬/歲支/歲支德) 後, `ShenShaMask()` / `ShenShaOn()` 多一個 `int suigz` 入參 (太歲 60-甲子 index, 0=甲子), `ShenShaOfDay()` 多一個 `int year`; `ccal.cpp` 新增 `GetSuiGanzhi(jd, vterms, year)` (年界用 **立春** 換歲, 同 `IsSuiPo`)。日後加神煞如需年干支, 直接讀 `suigz` (不再只限 月建/日柱/農曆日/星期 keying)。
 
