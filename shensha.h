@@ -81,6 +81,7 @@ enum {
     SS_SUIMA,          /* 歲馬   吉 */
     SS_SUIZHI,         /* 歲支   吉 */
     SS_SUIZHIDE,       /* 歲支德 吉 */
+    SS_HONGSHA,          /* 紅沙   凶 */
     SS_COUNT
 };
 

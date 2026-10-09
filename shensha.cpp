@@ -382,6 +382,18 @@
  * 以上六神皆以 太歲 (干支年, 立春換歲) keying -- 唯一非月建/非日柱/
  * 非晚朝 keying 之一組, 故 ShenShaMask()/ShenShaOn() 多一個 suigz 入參 (太歲
  * 60-甲子 index, ccal.cpp 之 GetSuiGanzhi()).
+ * 紅沙 (HongSha): 三煞/破碎 之一 -- 三合局之三煞辰 (巳/酉/丑) 之中一支,
+ * 取該月代表的一支.  口訣「四孟金雞四仲蛇,四季丑日是紅沙」:
+ *   四孟月 (寅巳申亥) -> 酉日, 四仲月 (子卯午酉) -> 巳日,
+ *   四季月 (辰未戌丑) -> 丑日.
+ * 即 子月->巳, 丑月->丑, 寅月->酉, 卯月->巳, 辰月->丑, 巳月->酉, 午月->巳,
+ *   未月->丑, 申月->酉, 酉月->巳, 戌月->丑, 亥月->酉
+ * (index = mbranch 0=子..11=亥; i.e. mbranch%3: 0->巳(5), 1->丑(1), 2->酉(9)).
+ * 日支恒為 巳/酉/丑 -- 《欽定協紀辨方書》卷五 義例
+ * 「巳酉丑謂之三煞,又謂之破碎,又謂之紅沙」, 即通書一系之紅沙日;
+ * 卷十 宜忌亦列紅沙為嫁娶之忌.  按 節氣月/月建 mbranch keyed,
+ * 同 月破/大耗/災煞/月厭/月刑/大時/天吏/血忌/血支 等.  四年通勝 DB 無任何
+ * 「紅沙/紅紗/破碎」印記, 故無 oracle 可核, 依曆例 (同 受死/五墓).
  */
 #include <string.h>
 #include "shensha.h"
@@ -662,6 +674,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xcb\xea\xd6\xa7\xb5\xc2", "\xb7\xb3\xa4\xe4\xbc\x77",
       "\xe5\xb2\x81\xe6\x94\xaf\xe5\xbe\xb7",
       "\xe6\xad\xb2\xe6\x94\xaf\xe5\xbe\xb7" },   /* 歲支德 吉 */
+    { "HongSha",
+      "\xba\xec\xc9\xb3", "\xac\xf5\xa8\x46",
+      "\xe7\xba\xa2\xe6\xb2\x99",
+      "\xe7\xb4\x85\xe6\xb2\x99" },   /* 紅沙 */
 };
 
 int ShenShaCount(void)
@@ -977,6 +993,12 @@ static const char suilu_branch[10] = {2, 3, 5, 6, 5, 6, 8, 9, 11, 0};
    index = 年支 0=子..11=亥. */
 static const char suima_branch[12] = {2, 11, 8, 5, 2, 11, 8, 5, 2, 11, 8, 5};
 
+
+/* 紅沙 by 月建 (solar-term month): 「四孟金雞四仲蛇,四季丑日是紅沙」 on the day branch.
+   Index = mbranch 0=子..11=亥: 子(0)->巳(5), 丑(1)->丑(1), 寅(2)->酉(9), 卯(3)->巳(5),
+   辰(4)->丑(1), 巳(5)->酉(9), 午(6)->巳(5), 未(7)->丑(1), 申(8)->酉(9), 酉(9)->巳(5),
+   戌(10)->丑(1), 亥(11)->酉(9)  (孟月->酉, 仲月->巳, 季月->丑). */
+static const char hongsha_branch[12] = {5, 1, 9, 5, 1, 9, 5, 1, 9, 5, 1, 9};
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
               int wday, int suigz)
 {
@@ -1211,6 +1233,9 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
     case SS_SUIZHIDE:
         /* 歲支德 (協紀 作 歲枝德): 日支 = 太歲支前五辰 (通勝 印作 「歲支德日」). */
         return dbranch == (suigz % 12 + 5) % 12;
+    case SS_HONGSHA:
+        /* 紅沙: 日支 == 該月(節氣月)三煞/破碎之紅沙辰 -- 孟月酉日/仲月巳日/季月丑日. */
+        return dbranch == hongsha_branch[mbranch];
     }
     return 0;
 }
