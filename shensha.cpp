@@ -556,6 +556,12 @@
  * 八月巳九月子十月午十一月丑十二月未」; 曹震圭「普䕶者乃月中普䕶萬物無偏私
  * 之神也,常與要安相對」。
  *
+ *
+* 益後 (YiHou): 日支 = 該月(節氣月)之益後支。
+ * 《欽定協紀辨方書》卷六 義例四 樞要曆「益後者月中福神也,所值之日宜造宅舍
+ * 築垣墻行嫁娶安産室」; 曆例「益後者正月子二月午三月丑四月未五月寅六月申
+ * 七月夘八月酉九月辰十月戌十一月巳十二月亥」; 曹震圭「益後者於子嗣有補益之神也」。
+ *
  */
 #include <string.h>
 #include "shensha.h"
@@ -966,6 +972,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xc6\xd5\xbb\xa4", "\xb4\xb6\xc5\x40",
       "\xe6\x99\xae\xe6\x8a\xa4",
       "\xe6\x99\xae\xe8\xad\xb7" },   /* 普護 */
+    { "YiHou",
+      "\xd2\xe6\xba\xf3", "\xaf\x71\xab\xe1",
+      "\xe7\x9b\x8a\xe5\x90\x8e",
+      "\xe7\x9b\x8a\xe5\xbe\x8c" },   /* 益後 */
 };
 
 int ShenShaCount(void)
@@ -1415,6 +1425,13 @@ static const char jingan_branch[12] = {0, 6, 7, 1, 8, 2, 9, 3, 10, 4, 11, 5};
  */
 static const char puhu_branch[12] = {1, 7, 8, 2, 9, 3, 10, 4, 11, 5, 0, 6};
 
+/* 益後 (YiHou): 日支 = 該月(節氣月)之益後支。
+ * 《欽定協紀辨方書》卷六 義例四 樞要曆「益後者月中福神也,所值之日宜造宅舍
+ * 築垣墻行嫁娶安産室」; 曆例「益後者正月子二月午三月丑四月未五月寅六月申
+ * 七月夘八月酉九月辰十月戌十一月巳十二月亥」; 曹震圭「益後者於子嗣有補益之神也」。
+ */
+static const char yihou_branch[12] = {5, 11, 0, 6, 1, 7, 2, 8, 3, 9, 4, 10};
+
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
               int wday, int suigz)
 {
@@ -1768,6 +1785,9 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
     case SS_PUHU:
         /* 普護: 日支 == 該月(節氣月)之普護支 (正月申, 二月寅 ... 十二月未). */
         return dbranch == puhu_branch[mbranch];
+    case SS_YIHOU:
+        /* 益後: 日支 == 該月(節氣月)之益後支 (正月子, 二月午 ... 十二月亥). */
+        return dbranch == yihou_branch[mbranch];
     }
     return 0;
 }
