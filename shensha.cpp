@@ -580,6 +580,13 @@
  * 小月 初三、初七、十二、廿六 (玉匣記原文併載 大月/小月 兩表; 行船 忌日 亦引之).
  * Keyed to the 農曆月/日 (lmonth/lday) 同其兄弟 月忌/短星/楊公忌/三娘煞, 但多一層
  * 大月/小月 (該農曆月 29 or 30 日, 即 ShenShaOn/ShenShaMask 之 mlendays 參數).
+ *
+ * 三合 (SanHe): 日支 = 月建(節氣月)三合局中除月建自身外之兩辰.  《欽定協紀辨方書》卷六 義例四
+ * 曾門經「三合者異位而同氣也,寅午戌火之三合,巳酉丑金之三合,申子辰水之三合,亥卯未木之三合,其日宜結會親姻和合交易…」
+ * 曆例「正月在午戌 二月在未亥 三月在子申 四月在丑酉 五月在寅戌 六月在卯亥 七月在子辰 八月在丑巳 九月在寅午
+ * 十月在卯未 十一月在辰申 十二月在丑巳」考原「三合者各與其月建會成三合局也」.  通勝吉神欄之「三合」印於此;
+ * 另有「歲支三合」(日支與太歲成三合, 見 SS_SUIZHI) 亦印「三合」二字.
+ *
  */
 #include <string.h>
 #include "shensha.h"
@@ -1031,7 +1038,17 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xd3\xf1\xcc\xc3", "\xa5\xc9\xb0\xf3",
       "\xe7\x8e\x89\xe5\xa0\x82",
       "\xe7\x8e\x89\xe5\xa0\x82" },   /* 玉堂 */
+    { "SanHe",
+      "\xc8\xfd\xba\xcf", "\xa4\x54\xa6\x58",
+      "\xe4\xb8\x89\xe5\x90\x88",
+      "\xe4\xb8\x89\xe5\x90\x88" },   /* 三合   吉 */
 };
+
+/* 三合 (SanHe) by 月建: 日支 = 月建三合局之另外兩辰 = {mbranch+4, mbranch+8}. */
+static int sanhe_branch(int mbranch, int br)
+{
+    return br == (mbranch + 4) % 12 || br == (mbranch + 8) % 12;
+}
 
 int ShenShaCount(void)
 {
@@ -1914,6 +1931,9 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
     case SS_YUTANG:
         /* 玉堂 = 黃道十二神第 8 神 (黃道吉神, 支 = 青龍支 + 7). */
         return huangdao_index(mbranch, dbranch) == 7;
+    case SS_SANHE:
+        /* 三合: 日支 = 月建三合局之另外兩辰 (見檔頭 三合). */
+        return sanhe_branch(mbranch, dbranch);
     }
     return 0;
 }
