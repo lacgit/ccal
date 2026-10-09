@@ -53,6 +53,15 @@
  *   申->辰日, 酉->戌日, 戌->巳日, 亥->亥日, 子->午日, 丑->子日,
  * i.e. the classical 通書 曆例 正月丑 二月未 三月寅 四月申 五月卯 六月酉
  * 七月辰 八月戌 九月巳 十月亥 十一月午 十二月子.  忌針刺出血之事.
+ *
+ * 血支 (XueZhi): the day whose 日支 is the month-build's previous branch
+ * (月建前一位), i.e. the 建除 "閉" day, keyed to the solar-term month
+ * (節氣月/月建) like its siblings 月破/大耗/災煞/月厭/月刑/大時/天吏/血忌.
+ * 《星歷考原》歷例「血支者，正月在丑，順行十二辰」 -> 正月(寅月)丑日,
+ * 卯月寅日, 辰月卯日 ... 丑月子日; 《欽定協紀辨方書》義例 equates 閉 with
+ * 血支 (「閉之為血忌...閉又為血支」/「閉在十二辰,猶小冬也」), 其日忌針刺出血:
+ *   寅月->丑日, 卯月->寅日, 辰月->卯日, 巳月->辰日, 午月->巳日, 未月->午日,
+ *   申月->未日, 酉月->申日, 戌月->酉日, 亥月->戌日, 子月->亥日, 丑月->子日.
  */
 #include <string.h>
 #include "shensha.h"
@@ -147,6 +156,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xd1\xaa\xbc\xc9", "\xa6\xe5\xa7\xd2",
       "\xe8\xa1\x80\xe5\xbf\x8c",
       "\xe8\xa1\x80\xe5\xbf\x8c" },   /* 血忌 */
+    { "XueZhi",
+      "\xd1\xaa\xd6\xa7", "\xa6\xe5\xa4\xe4",
+      "\xe8\xa1\x80\xe6\x94\xaf",
+      "\xe8\xa1\x80\xe6\x94\xaf" },   /* 血支 */
 };
 
 int ShenShaCount(void)
@@ -274,6 +287,13 @@ static const char tianli_branch[12] = {3, 0, 9, 6, 3, 0, 9, 6, 3, 0, 9, 6};
      戌(10)->巳(5) 亥(11)->亥(11) 子(0)->午(6) 丑(1)->子(0) */
 static const char xueji_branch[12] = {6, 0, 1, 7, 2, 8, 3, 9, 4, 10, 5, 11};
 
+/* 血支 by 月建 (solar-term month): the 建除 "閉" position = 月建前一位
+   (《星歷考原》歷例「血支者正月在丑順行十二辰」).  Index = mbranch 0=子..11=亥:
+     子(0)->亥(11) 丑(1)->子(0)  寅(2)->丑(1)  卯(3)->寅(2)
+     辰(4)->卯(3)  巳(5)->辰(4)  午(6)->巳(5)  未(7)->午(6)
+     申(8)->未(7)  酉(9)->申(8)  戌(10)->酉(9) 亥(11)->戌(10) */
+static const char xuezhi_branch[12] = {11, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch)
 {
     int k, mm = mmonth_of(mbranch);
@@ -334,6 +354,8 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch)
         return dbranch == tianli_branch[mbranch];
     case SS_XUEJI:
         return dbranch == xueji_branch[mbranch];
+    case SS_XUEZHI:
+        return dbranch == xuezhi_branch[mbranch];
     }
     return 0;
 }
