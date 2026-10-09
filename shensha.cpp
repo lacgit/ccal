@@ -691,6 +691,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xbe\xc5\xbd\xb9", "\xa4\x45\xb5\x4a",
       "\xe4\xb9\x9d\xe7\x84\xa6",
       "\xe4\xb9\x9d\xe7\x84\xa6" },   /* 九焦 */
+    { "BaFeng",
+      "\xb0\xcb\xef\x4c", "\xa4\x4b\xad\xb7",
+      "\xe5\x85\xab\xe9\xa2\xa8",
+      "\xe5\x85\xab\xe9\xa2\xa8" },   /* 八風 */
 };
 
 int ShenShaCount(void)
@@ -1012,6 +1016,9 @@ static const char suima_branch[12] = {2, 11, 8, 5, 2, 11, 8, 5, 2, 11, 8, 5};
    辰(4)->丑(1), 巳(5)->酉(9), 午(6)->巳(5), 未(7)->丑(1), 申(8)->酉(9), 酉(9)->巳(5),
    戌(10)->丑(1), 亥(11)->酉(9)  (孟月->酉, 仲月->巳, 季月->丑). */
 static const char hongsha_branch[12] = {5, 1, 9, 5, 1, 9, 5, 1, 9, 5, 1, 9};
+/* 八風: 春丁丑丁巳 夏甲申甲辰 秋丁未丁亥 冬甲戌甲寅 (協紀卷五 樞要曆 + 按語所正). */
+static const char bafeng_gz[4][2] = {{13, 53}, {20, 40}, {43, 23}, {10, 50}};
+
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
               int wday, int suigz)
 {
@@ -1258,6 +1265,13 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
            其日忌爐冶鑄造種植修築園圃」+ 曆例與九坎同 (正月在辰逆行四季、五月在卯
            逆行四仲、九月在寅逆行四孟); 曹震圭「坎者陷也險也不平也,義與九焦同」. */
         return dbranch == jiukan_branch[mbranch];
+    case SS_BAFENG:
+        /* 八風 (BaFeng): 《欽定協紀辨方書》卷五 義例三 樞要曆「咸池招搖八風觸水龍所值
+           之日忌乘船渡水涉江河」+ 卷首 奏議「八風乃取四時對衝三合之辰以木火二干配之…
+           春衝酉用丁丑丁巳日, 夏衝子用甲申甲辰日, 秋衝卯用丁亥丁未日, 冬衝午用甲寅
+           甲戌日」-- 即五虛之三支去其正位, 配丁/甲. Keyed to the season (節氣月). */
+        return ganzhi == bafeng_gz[season_of(mbranch)][0] ||
+               ganzhi == bafeng_gz[season_of(mbranch)][1];
     }
     return 0;
 }
