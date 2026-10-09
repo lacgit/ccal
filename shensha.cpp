@@ -247,6 +247,16 @@
  *   日支 == mbranch  ->  土府 (建日); 其日忌動土、修築垣牆.
  * (The 通勝 cells agree: of the four volumes' 土府 prints, 60 are 建日 and 4 more
  * are the 建日 of the OLD 月建 on a 節氣 day.)
+ *
+ * 俱將 (JuJiang -- 陰陽俱將): the 4th and last member of the
+ * 陰陽不將 (不將) family -- the day whose 日干's 祿支 and whose 日支
+ * fall in OPPOSITE 區s: 祿(日干) ∈ 後區 AND 日支 ∈ 前區.
+ * 《欽定協紀辨方書》卷四 義例二 天寶曆「陰陽不將者,以月建為陽謂之陽建(正月起寅順行十二辰),月厭為陰謂之陰建(正月起戌逆行十二辰);
+ * 分於卯酉,會於子午。厭前枝幹自相配者為陽將,厭後枝幹自相配者為陰將;厭後幹配厭前枝者為陰陽俱將,
+ * 厭前幹配厭後枝者為陰陽不將也。陽將傷夫,陰將傷婦」+ 「陰陽俱將夫婦俱傷」;
+ * 考原「厭後幹配厭前枝者為陰陽俱將,陰非其陰陽非其陽,其道相乖也」.  Same 節氣月/月建 keying as its siblings
+ * (月厭 A = (12 - 月建) mod 12; 前區 = {A+6 .. A+11}, 後區 = {A .. A+5}).  The 月厭 day
+ * itself has 支 ∈ 後區, so it can never be 俱將.
  */
 #include <string.h>
 #include "shensha.h"
@@ -425,6 +435,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xcd\xc1\xb8\xae", "\xa4\x67\xa9\xb2",
       "\xe5\x9c\x9f\xe5\xba\x9c",
       "\xe5\x9c\x9f\xe5\xba\x9c" },   /* 土府 */
+    { "JuJiang",
+      "\xbe\xe3\xbd\xab", "\xad\xd1\xb1\x4e",
+      "\xe4\xbf\xb1\xe5\xb0\x86",
+      "\xe4\xbf\xb1\xe5\xb0\x87" },   /* 俱將 */
 };
 
 int ShenShaCount(void)
@@ -744,6 +758,11 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
             if (lmonth == duanxing_mon[k] && lday == duanxing_day[k])
                 return 1;
         return 0;
+    case SS_JUJIANG:
+        /* 陰陽俱將 = 厭後幹配厭前枝: 祿(日干) ∈ 後區 且 日支 ∈ 前區
+           (卷四 義例二 天寶曆「厭後幹配厭前枝者為陰陽俱將…夫婦俱傷」; 考原「陰非其陰,陽非其陽」). */
+        return yangjiang_front(mbranch, dbranch) &&
+               !yangjiang_front(mbranch, yangjiang_lu[ganzhi % 10]);
     case SS_CHONGRI:
         /* 歷例「重日者,己亥二日也」 -> 日支 巳/亥, 不論天干與月建. */
         return dbranch == 5 || dbranch == 11;

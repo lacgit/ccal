@@ -55,6 +55,7 @@ enum {
     SS_YUEJIAN,         /* 月建   凶 */
     SS_SISHEN,         /* 死神   凶 */
     SS_TUFU_MANSION,    /* 土府   凶 */
+    SS_JUJIANG,         /* 俱將   凶 */
     SS_COUNT
 };
 
