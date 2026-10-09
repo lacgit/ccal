@@ -126,6 +126,19 @@
  * 曹震圭「亥為陰極之位, 坤辟在焉; 巳為陽極之位, 乾辟在焉,
  * 是陽中陽而陰中陰也, 故曰重」 -- 不論天干, 亦不論月建:
  *   日支 巳(5) 或 亥(11) -> 重日.
+ *
+ * 短星 (DuanXing): 時憲書/通書 之日神煞, 按 **農曆月/日** keying（非其兄弟神煞所用之
+ *  節氣月/月建）, 即每月固定一日、八月九月各二日, 無論月之大小有閏無閏每年皆然:
+ *   正月廿一、二月十九、三月十六、四月廿五、五月廿五、六月二十、七月廿二、
+ *   八月十八/十九、九月十六/十七、十月十四、十一月廿二、十二月廿五.
+ *  《欽定協紀辨方書》卷九 立成「短星 正月〈二十一日〉二月〈十九日〉三月〈十六日〉
+ *  四月〈二十五日〉五月〈二十五日〉六月〈二十日〉七月〈二十二日〉八月〈十八…」;
+ *  御定星曆考原「短星者,正月二十一,二月十九,三月十六,四月二十五,五月二十五,
+ *  六月二十,七月二十二,八月十八、十九,九月十六、十七,十月十四,十一月二十二,
+ *  十二月二十五日是也」.  曹震圭 以 長星為金、短星為火;
+ *  《協紀辨方書》卷三十六 辨訛 引時憲書「長星短星每月各一日八九月各二日
+ *  無論月之大小有閏無閏每年皆然」, 謂其日只忌 裁衣、開市、立券、交易、納財.
+
  */
 #include <string.h>
 #include "shensha.h"
@@ -244,6 +257,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xd4\xc2\xc9\xb7", "\xa4\xeb\xb7\xd9",
       "\xe6\x9c\x88\xe7\x85\x9e",
       "\xe6\x9c\x88\xe7\x85\x9e" },   /* 月煞 */
+    { "DuanXing",
+      "\xb6\xcc\xd0\xc7", "\xb5\x75\xac\x50",
+      "\xe7\x9f\xad\xe6\x98\x9f",
+      "\xe7\x9f\xad\xe6\x98\x9f" },   /* 短星 */
     { "MiRi",
       "\xc3\xdc\xc8\xd5", "\xb1\x4b\xa4\xe9",
       "\xe5\xaf\x86\xe6\x97\xa5",
@@ -425,6 +442,14 @@ static const char guiji_branch[12] = {2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1};
      辰(4)->未(7)  巳(5)->辰(4)  午(6)->丑(1)  未(7)->戌(10)
      申(8)->未(7)  酉(9)->辰(4)  戌(10)->丑(1) 亥(11)->戌(10) */
 static const char yuesha_branch[12] = {7, 4, 1, 10, 7, 4, 1, 10, 7, 4, 1, 10};
+/* 短星 by 農曆 month/day (NOT the 節氣月/月建 keying of its 月-keyed siblings):
+   《欽定協紀辨方書》卷九 立成「短星 正月〈二十一日〉二月〈十九日〉…八月〈十八…」;
+   御定星曆考原「短星者,正月二十一,二月十九,三月十六,四月二十五,五月二十五,六月二十,
+   七月二十二,八月十八、十九,九月十六、十七,十月十四,十一月二十二,十二月二十五日是也」.
+   One fixed 農曆 date per lunar month; the 8th and 9th months have two.
+   Index = 農曆 month 1..12 (lmonth), value = 農曆 day. */
+static const char duanxing_mon[14] = {1, 2, 3, 4, 5, 6, 7, 8, 8, 9, 9, 10, 11, 12};
+static const char duanxing_day[14] = {21, 19, 16, 25, 25, 20, 22, 18, 19, 16, 17, 14, 22, 25};
 
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
               int wday)
@@ -499,6 +524,11 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
         return dbranch == guiji_branch[mbranch];
     case SS_YUESHA:
         return dbranch == yuesha_branch[mbranch];
+    case SS_DUANXING:
+        for (k = 0; k < 14; k++)
+            if (lmonth == duanxing_mon[k] && lday == duanxing_day[k])
+                return 1;
+        return 0;
     case SS_CHONGRI:
         /* 歷例「重日者,己亥二日也」 -> 日支 巳/亥, 不論天干與月建. */
         return dbranch == 5 || dbranch == 11;
