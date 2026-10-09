@@ -146,6 +146,7 @@ enum {
     SS_HEKUI,           /* 河魁   凶 */
     SS_GUASU,           /* 寡宿   凶 */
     SS_GUCHEN,          /* 孤辰   凶 */
+    SS_SHILING,          /* 十靈   吉 */
     SS_COUNT
 };
 

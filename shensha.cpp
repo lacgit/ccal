@@ -1159,6 +1159,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xb9\xc2\xb3\xbd", "\xa9\x74\xa8\xb0",
       "\xe5\xad\xa4\xe8\xbe\xb0",
       "\xe5\xad\xa4\xe8\xbe\xb0" },   /* 孤辰 */
+    { "ShiLing",
+      "\xca\xae\xc1\xe9", "\xa4\x51\xc6\x46",
+      "\xe5\x8d\x81\xe7\x81\xb5",
+      "\xe5\x8d\x81\xe9\x9d\x88" },   /* 十靈 */
 };
 
 /* 三合 (SanHe) by 月建: 日支 = 月建三合局之另外兩辰 = {mbranch+4, mbranch+8}. */
@@ -1717,6 +1721,12 @@ static const char guasu_branch[4] = {1, 4, 7, 10};
 /* 孤辰: 令前一辰 -- 春巳 夏申 秋亥 冬寅 (協紀卷三十六 辨譌). */
 static const char guchen_branch[4] = {5, 8, 11, 2};
 
+/* 十靈日: 日柱 ∈ 10 日 -- 甲辰 乙亥 丙辰 丁酉 戊午 庚戌 庚寅 辛亥 壬寅 癸未. 通書「十靈日」
+   (主靈慧聰明): 《玉匣記》民俗吉凶日篇、星平會海「五行絕處即是胎元, 生日逢之名曰受氣」;
+   《欽定協紀辨方書》卷01-10 無此日神, 屬通書曆注之神. 日神, 不從月建. 四年通勝 DB 逐日核:
+   通勝吉神欄印「十靈」91 日, 其中 90 日落在此 10 柱內 (唯一例外 2006-03-01 己丑, 屬欄位串位;
+   翌日 2006-03-02 庚寅 正為十靈日). */
+static const char shiling_gz[10] = {40, 11, 52, 33, 54, 46, 26, 47, 38, 19};
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
               int wday, int suigz, int mlendays)
 {
@@ -2219,6 +2229,13 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
            春令,巳為孤辰」-- 春(寅卯辰月)巳日、夏(巳午未月)申日、秋(申酉戌月)亥日、
            冬(亥子丑月)寅日 (＝該季之絶辰). Keyed to the 節氣月. */
         return dbranch == guchen_branch[season_of(mbranch)];
+    case SS_SHILING:
+    {
+        /* 十靈 (ShiLing): 日柱 ∈ 甲辰 乙亥 丙辰 丁酉 戊午 庚戌 庚寅 辛亥 壬寅 癸未 (十日, 日神不從月建). */
+        int k;
+        for (k = 0; k < 10; k++) if (ganzhi == shiling_gz[k]) return 1;
+        return 0;
+    }
     }
     return 0;
 }
