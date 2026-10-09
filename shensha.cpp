@@ -595,6 +595,11 @@
  * 樞要曆「五合者月內良日也,其日宜結婚姻會親友立劵交易」曆例「五合者寅卯日也」; 卷九 立成
  * 「日神取一定干支者: 五合 寅夘 / 除神〈五離〉申酉 / 重日 己亥」; 考原「寅卯為春和會之氣也,
  * 故為五合; 申酉為秋清肅之氣也,故宜解除」.
+ * 進神 (JinShen): 日柱 ∈ {甲子, 己卯, 甲午, 己酉} -- 六十甲子中每十五日一見之四柱.
+ * 《三命通會》卷二 閻東叟「以十干為四候,十五日為一候,十二日為進神候,外三日為交退伏神候;
+ * 故甲子為第一進神,則丙子丁丑戊寅為交退伏神; 己卯為第二進神…甲午為第三進神…己酉為第四進神…」;
+ * 其對衝之四柱(丁丑丁未壬辰壬戌)為退神.  《欽定協紀辨方書》無此條, 以通書/《三命通會》為準
+ * (通書另有逐月「進神 午午午酉酉酉子子子卯卯卯」一表, 核四年通勝 DB 不合, 故取干支四柱之说).
  *
  */
 #include <string.h>
@@ -1059,6 +1064,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xce\xe5\xba\xcf", "\xa4\xad\xa6\x58",
       "\xe4\xba\x94\xe5\x90\x88",
       "\xe4\xba\x94\xe5\x90\x88" },   /* 五合   吉 */
+    { "JinShen",
+      "\xbd\xf8\xc9\xf1", "\xb6\x69\xaf\xab",
+      "\xe8\xbf\x9b\xe7\xa5\x9e",
+      "\xe9\x80\xb2\xe7\xa5\x9e" },   /* 進神   吉 */
 };
 
 /* 三合 (SanHe) by 月建: 日支 = 月建三合局之另外兩辰 = {mbranch+4, mbranch+8}. */
@@ -1070,6 +1079,9 @@ static int sanhe_branch(int mbranch, int br)
 /* 六合 (LiuHe) by 月建: 日支 = 月建之六合 = (1 - mbranch) mod 12.
    Index = mbranch 子..亥 -> 丑子亥戌酉申未午巳辰卯寅. */
 static const char liuhe_branch[12] = { 1, 0, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2 };
+
+/* 進神 (JinShen): 日柱 ∈ {甲子(0), 己卯(15), 甲午(30), 己酉(45)}. */
+static const char jinshen_gz[4] = { 0, 15, 30, 45 };
 
 int ShenShaCount(void)
 {
@@ -1961,6 +1973,12 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
     case SS_WUHE:
         /* 五合: 日支 寅/卯 (日神一定干支, 不從月建; 見檔頭 五合). */
         return dbranch == 2 || dbranch == 3;
+    case SS_JINSHEN:
+        /* 進神: 日柱 ∈ {甲子 己卯 甲午 己酉} (見檔頭 進神). */
+        for (k = 0; k < 4; k++)
+            if (ganzhi == jinshen_gz[k])
+                return 1;
+        return 0;
     }
     return 0;
 }

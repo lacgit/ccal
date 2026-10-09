@@ -127,6 +127,7 @@ enum {
     SS_SANHE,            /* 三合   吉 */
     SS_LIUHE,            /* 六合   吉 */
     SS_WUHE,            /* 五合   吉 */
+    SS_JINSHEN,          /* 進神   吉 */
     SS_COUNT
 };
 
