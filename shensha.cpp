@@ -462,6 +462,15 @@
  *   (即 日支 = (2*月建 + 6) mod 12); 陰德 正月酉、二月未、三月巳、四月卯、
  *   五月丑、六月亥、七月酉… (即 日支 = (13 - 2*月建) mod 12).  卷十 宜忌「陽德 陰德
  *   宜施恩惠恤孤惸行惠愛雪寃枉緩刑獄」.  按 節氣月/月建 mbranch keying.
+ *
+ * 陰錯 (YinCuo): 凶.  同 卷四 義例二 堪輿經 陰錯 條「以陰建之支配當方之干…如正月
+ * 陰建於戌, 近於庚, 支干相配為庚戌日, 戌衝辰…為陰錯; 二月陰建於酉…辛酉日;
+ * 三月陰建在申…庚申日…; 唯五月十一月陰陽二建會於子午, 故無陰錯陽錯」.  即
+ * 陰錯 = 日柱 為 月厭之支 配其當方之干 (與 陽錯 共用同一張 支->干 表 cuo_gz):
+ *   寅月->庚戌日, 卯月->辛酉日, 辰月->庚申日, 巳月->丁未日, 未月->丁巳日,
+ *   申月->甲辰日, 酉月->乙卯日, 戌月->甲寅日, 亥月->癸丑日, 丑月->癸亥日;
+ *   午月/子月 (陰陽二建同辰) 無 陰錯陽錯 (該日為 陰陽俱錯: 五月丙午、十一月壬子).
+ * Keyed to the 節氣月/月建 (mbranch, 經 月厭) 與 日柱 (ganzhi).
  */
 #include <string.h>
 #include "shensha.h"
@@ -807,6 +816,11 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xd1\xf4\xb5\xc2", "\xb6\xa7\xbc\x77",
       "\xe9\x98\xb3\xe5\xbe\xb7",
       "\xe9\x99\xbd\xe5\xbe\xb7" },   /* 陽德 */
+    { "YinCuo",
+      "\xd2\xf5\xb4\xed",
+      "\xb3\xb1\xbf\xf9",
+      "\xe9\x98\xb4\xe9\x94\x99",
+      "\xe9\x99\xb0\xe9\x8c\xaf" },   /* YinCuo */
 };
 
 int ShenShaCount(void)
@@ -1153,6 +1167,9 @@ static const char sixiang_stem[4][2] = {{2, 3}, {4, 5}, {8, 9}, {0, 1}};
 /* 時德 by 四時 (月建) -> 日支: 春午 夏辰 秋子 冬寅. */
 static const char shide_branch[4] = {6, 4, 0, 2};
 
+/* 陰錯 (YinCuo) -- 見檔頭 陽錯 條: 同一張支干表, 但鍵於 陰建 (月厭) 之支
+   (月厭 = (12 - 月建) mod 12, 即 `yueyan_branch`), 而非 月建. */
+
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
               int wday, int suigz)
 {
@@ -1456,6 +1473,11 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
     case SS_YANGDE:
         /* 陽德: 日支 = (2*月建 + 6) mod 12 (納甲天地生成; 正月戌 順行六辰循環). */
         return dbranch == (2 * mbranch + 6) % 12;
+    case SS_YINCUO:
+        /* 陰錯: 日柱 == 陰建(月厭)之支所配之干 (五月/十一月陰陽同建, 無). */
+        if (mbranch == 0 || mbranch == 6)
+            return 0;
+        return ganzhi == cuo_gz[yueyan_branch[mbranch]];
     }
     return 0;
 }
