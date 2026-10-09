@@ -1139,6 +1139,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xc3\xf9\xb7\xcd", "\xbb\xef\xa7\x70",
       "\xe9\xb8\xa3\xe5\x90\xa0",
       "\xe9\xb3\xb4\xe5\x90\xa0" },   /* 鳴吠 */
+    { "MingFeiDui",
+      "\xc3\xf9\xb7\xcd\xb6\xd4", "\xbb\xef\xa7\x70\xb9\xef",
+      "\xe9\xb8\xa3\xe5\x90\xa0\xe5\xaf\xb9",
+      "\xe9\xb3\xb4\xe5\x90\xa0\xe5\xb0\x8d" },   /* 鳴吠對 */
 };
 
 /* 三合 (SanHe) by 月建: 日支 = 月建三合局之另外兩辰 = {mbranch+4, mbranch+8}. */
@@ -1682,6 +1686,10 @@ static const char tianma_branch[12] = {2, 4, 6, 8, 10, 0, 2, 4, 6, 8, 10, 0};
    用之者得金雞鳴玉犬吠上下相呼亡靈安穩子孫富昌」; 鳴吠日者 庚午 壬申 癸酉 壬午 甲申 乙酉
    庚寅 丙申 丁酉 壬寅 丙午 己酉 庚申 辛酉 (十四日). 日神, 不從月建. */
 static const char mingfei_gz[14] = {6, 8, 9, 18, 20, 21, 26, 32, 33, 38, 42, 45, 56, 57};
+/* 鳴吠對日: 日柱 ∈ 10 日 -- 《欽定協紀辨方書》卷五 義例三 一行經「鳴吠對日者用之
+   破土斬草也」; 鳴吠對日者 丙寅 丁卯 丙子 辛卯 甲午 庚子 癸卯 壬子 甲寅 乙卯 (十日,
+   考原「鳴吠對者乃與鳴吠對衝之日」). 日神, 不從月建. */
+static const char mingfeidui_gz[10] = {2, 3, 12, 27, 30, 36, 39, 48, 50, 51};
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
               int wday, int suigz, int mlendays)
 {
@@ -2158,6 +2166,13 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
         /* 鳴吠日: 日柱 ∈ 庚午 壬申 癸酉 壬午 甲申 乙酉 庚寅 丙申 丁酉 壬寅 丙午 己酉 庚申 辛酉. */
         int k;
         for (k = 0; k < 14; k++) if (ganzhi == mingfei_gz[k]) return 1;
+        return 0;
+    }
+    case SS_MINGFEIDUI:
+    {
+        /* 鳴吠對日: 日柱 ∈ 丙寅 丁卯 丙子 辛卯 甲午 庚子 癸卯 壬子 甲寅 乙卯. */
+        int k;
+        for (k = 0; k < 10; k++) if (ganzhi == mingfeidui_gz[k]) return 1;
         return 0;
     }
     }
