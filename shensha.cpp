@@ -591,6 +591,10 @@
  * (寅月->亥, 卯月->戌, 辰月->酉, 巳月->申, 午月->未, 未月->午, 申月->巳, 酉月->辰, 戌月->卯, 亥月->寅,
  * 子月->丑, 丑月->子)考原「六合者月建與月將相合也」.  通勝吉神欄之「六合」印於此;
  * 「歲支六合」(日支與太歲六合, 見 SS_SUIZHI) 亦印之.
+ * 五合 (WuHe): 日支 寅/卯 (日神取一定干支者, 不從月建起義).  《欽定協紀辨方書》卷五 義例三
+ * 樞要曆「五合者月內良日也,其日宜結婚姻會親友立劵交易」曆例「五合者寅卯日也」; 卷九 立成
+ * 「日神取一定干支者: 五合 寅夘 / 除神〈五離〉申酉 / 重日 己亥」; 考原「寅卯為春和會之氣也,
+ * 故為五合; 申酉為秋清肅之氣也,故宜解除」.
  *
  */
 #include <string.h>
@@ -1051,6 +1055,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xc1\xf9\xba\xcf", "\xa4\xbb\xa6\x58",
       "\xe5\x85\xad\xe5\x90\x88",
       "\xe5\x85\xad\xe5\x90\x88" },   /* 六合   吉 */
+    { "WuHe",
+      "\xce\xe5\xba\xcf", "\xa4\xad\xa6\x58",
+      "\xe4\xba\x94\xe5\x90\x88",
+      "\xe4\xba\x94\xe5\x90\x88" },   /* 五合   吉 */
 };
 
 /* 三合 (SanHe) by 月建: 日支 = 月建三合局之另外兩辰 = {mbranch+4, mbranch+8}. */
@@ -1950,6 +1958,9 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
     case SS_LIUHE:
         /* 六合: 日支 = 月建之六合 (見檔頭 六合). */
         return dbranch == liuhe_branch[mbranch];
+    case SS_WUHE:
+        /* 五合: 日支 寅/卯 (日神一定干支, 不從月建; 見檔頭 五合). */
+        return dbranch == 2 || dbranch == 3;
     }
     return 0;
 }
