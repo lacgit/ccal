@@ -95,6 +95,7 @@ enum {
     SS_TIANYI,                   /* 天醫   吉 */
     SS_SHIYANG,                  /* 時陽   吉 */
     SS_SHENGQI,                  /* 生氣   吉 */
+    SS_SHIYIN,                   /* 時陰   吉 */
     SS_COUNT
 };
 

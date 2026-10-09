@@ -452,6 +452,10 @@
  *   辨方書》卷四 建除十二神所合叢辰「開〈時陽 生氣〉」+ 五行論「生氣者極福之神也…」
  *   + 曆例「生氣者常居月建後二辰」; 卷十 宜忌「開日一陽始生故又為時陽又為生氣其日最吉」.
  *   按 節氣月/月建 mbranch keying.
+ * 時陰 (ShiYin): 日支 = 月建前四辰, 即建除之「定」日.  《欽定協紀辨方書》卷四
+ *   建除十二神所合叢辰「定〈時陰 官符 死氣〉」+ 總要曆「時陰者月中陰神也…」+曆例
+ *   「常居月建前四辰」; 曹震圭「時陰者月内陰氣之神…其日宜運謀算畫計䇿」;
+ *   卷十 宜忌「定日〈時陰〉…又為時陰宜運謀算畫計策」.  按 節氣月/月建 keying.
  */
 #include <string.h>
 #include "shensha.h"
@@ -789,6 +793,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xc9\xfa\xc6\xf8", "\xa5\xcd\xae\xf0",
       "\xe7\x94\x9f\xe6\xb0\x94",
       "\xe7\x94\x9f\xe6\xb0\xa3" },   /* 生氣 */
+    { "ShiYin",
+      "\xca\xb1\xd2\xf5", "\xae\xc9\xb3\xb1",
+      "\xe6\x97\xb6\xe9\x98\xb4",
+      "\xe6\x99\x82\xe9\x99\xb0" },   /* 時陰 */
 };
 
 int ShenShaCount(void)
@@ -1432,6 +1440,9 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
     case SS_SHENGQI:
         /* 生氣: 日支 = 月建後二辰 (= 建除 開日). */
         return dbranch == (mbranch + 10) % 12;
+    case SS_SHIYIN:
+        /* 時陰: 日支 = 月建前四辰 (= 建除 定日, 死氣同位). */
+        return dbranch == (mbranch + 4) % 12;
     }
     return 0;
 }
