@@ -552,6 +552,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xcc\xec\xbb\xf0", "\xa4\xd1\xa4\xf5",
       "\xe5\xa4\xa9\xe7\x81\xab",
       "\xe5\xa4\xa9\xe7\x81\xab" },   /* 天火 */
+    { "SiJi",
+      "\xcb\xc4\xbc\xc9", "\xa5\x7c\xa7\xd2",
+      "\xe5\x9b\x9b\xe5\xbf\x8c",
+      "\xe5\x9b\x9b\xe5\xbf\x8c" },   /* 四忌 */
 };
 
 int ShenShaCount(void)
@@ -838,6 +842,9 @@ static int huangdao_index(int mbranch, int dbranch)
     return ((dbranch - 2 * ((mbranch - 2 + 6) % 6)) % 12 + 12) % 12;
 }
 
+/* 四忌: 春甲子 夏丙子 秋庚子 冬壬子 (協紀卷五 義例三 神煞起例). */
+static const char siji_gz[4] = {0, 12, 36, 48};
+
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
               int wday)
 {
@@ -1022,6 +1029,10 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
            垣牆振旅興師會親娶婦」; 曆例「天火者正月在子順行四仲」, 而卷内按語「是故天火亦應逆行
            四仲」⇒ 與 災煞 同支 (正月在子, 逆行四仲). */
         return dbranch == zai_branch[mbranch];
+    case SS_SIJI:
+        /* 四忌 (SiJi): 《欽定協紀辨方書》卷五 義例三 神煞起例「四忌 春甲子 夏丙子
+           秋庚子 冬壬子」-- 本令陽干加於辰首(子), keyed to the season (節氣月). */
+        return ganzhi == siji_gz[season_of(mbranch)];
     }
     return 0;
 }
