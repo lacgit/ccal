@@ -63,6 +63,14 @@
  *   寅月->丑日, 卯月->寅日, 辰月->卯日, 巳月->辰日, 午月->巳日, 未月->午日,
  *   申月->未日, 酉月->申日, 戌月->酉日, 亥月->戌日, 子月->亥日, 丑月->子日.
  *
+ * 五墓 (WuMu): the day whose 日柱 is the 墓辰 of that month's 旺干, per
+ * 《欽定協紀辨方書》卷五 義例三 (廣聖曆 "五墓者,四旺之墓辰也,其日忌營造起土
+ * 嫁娶出軍"; 曆例 "五墓者正二月乙未、四五月丙戌、七八月辛丑、十月十一月
+ * 壬辰、四季月戊辰也"; 曹震圭 "五墓者五行旺干自臨墓辰也").  Keyed to the
+ * 節氣月/月建 like its siblings 月破/大耗/災煞/月厭/月刑:
+ *   寅月/卯月->乙未日, 巳月/午月->丙戌日, 申月/酉月->辛丑日,
+ *   亥月/子月->壬辰日, 辰月/未月/戌月/丑月(四季月)->戊辰日.
+ *
  * 復日 (FuRi): the day whose 日干 repeats the intrinsic (本氣) stem of the 月建
  * branch, keyed to the solar-term month (節氣月/月建) like its siblings
  * 月破/大耗/災煞/月厭/月刑/大時/天吏/血忌/血支/五墓.  《欽定協紀辨方書》卷五 義例三:
@@ -188,6 +196,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xd1\xaa\xd6\xa7", "\xa6\xe5\xa4\xe4",
       "\xe8\xa1\x80\xe6\x94\xaf",
       "\xe8\xa1\x80\xe6\x94\xaf" },   /* 血支 */
+    { "WuMu",
+      "\xce\xe5\xc4\xb9", "\xa4\xad\xb9\xd3",
+      "\xe4\xba\x94\xe5\xa2\x93",
+      "\xe4\xba\x94\xe5\xa2\x93" },   /* 五墓 */
     { "FuRi",
       "\x8f\xcd\xc8\xd5", "\xb4\x5f\xa4\xe9",
       "\xe5\xa4\x8d\xe6\x97\xa5",
@@ -334,6 +346,17 @@ static const char xueji_branch[12] = {6, 0, 1, 7, 2, 8, 3, 9, 4, 10, 5, 11};
      申(8)->未(7)  酉(9)->申(8)  戌(10)->酉(9) 亥(11)->戌(10) */
 static const char xuezhi_branch[12] = {11, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 
+/* 五墓 by 月建 (solar-term month).  《欽定協紀辨方書》卷五 義例三:
+   廣聖曆曰"五墓者,四旺之墓辰也,其日忌營造起土嫁娶出軍"; 曆例曰"五墓者
+   正二月乙未、四五月丙戌、七八月辛丑、十月十一月壬辰、四季月戊辰也";
+   曹震圭曰"五墓者,五行旺干自臨墓辰也" (木旺于正二月墓未, 火旺于四五月墓戌,
+   金旺于七八月墓丑, 水旺于十月十一月墓辰, 土旺于四季月墓辰).  The day's
+   日柱 (ganzhi index 0=甲子) for each 月建, index = mbranch 0=子..11=亥:
+     子(0)->壬辰(28) 丑(1)->戊辰(4)  寅(2)->乙未(31) 卯(3)->乙未(31)
+     辰(4)->戊辰(4)  巳(5)->丙戌(22) 午(6)->丙戌(22) 未(7)->戊辰(4)
+     申(8)->辛丑(37) 酉(9)->辛丑(37) 戌(10)->戊辰(4) 亥(11)->壬辰(28) */
+static const char wumu_gz[12] = {28, 4, 31, 31, 4, 22, 22, 4, 37, 37, 4, 28};
+
 /* 復日 by 月建 (solar-term month): 日干 == 本氣干 of the 月建 branch
    (曹震圭 「本建之辰與所遇之干同」).  Index = mbranch 0=子..11=亥:
      子->癸(9)  丑->己(5)  寅->甲(0)  卯->乙(1)  辰->戊(4)  巳->丙(2)
@@ -417,6 +440,8 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch)
         return dbranch == xueji_branch[mbranch];
     case SS_XUEZHI:
         return dbranch == xuezhi_branch[mbranch];
+    case SS_WUMU:
+        return ganzhi == wumu_gz[mbranch];
     case SS_FURI:
         return (ganzhi % 10) == furi_stem[mbranch];
     case SS_TIANZEI:

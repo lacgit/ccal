@@ -34,6 +34,7 @@ enum {
     SS_TIANLI,          /* 天吏   凶 */
     SS_XUEJI,           /* 血忌   凶 */
     SS_XUEZHI,          /* 血支   凶 */
+    SS_WUMU,            /* 五墓   凶 */
     SS_FURI,            /* 復日   凶 */
     SS_TIANZEI,         /* 天賊   凶 */
     SS_GUIJI,           /* 歸忌   凶 */
