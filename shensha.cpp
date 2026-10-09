@@ -24,8 +24,8 @@
  *   申月->辰日, 酉月->卯日, 戌月->寅日, 亥月->丑日, 子月->子日, 丑月->亥日.
  *
  * 月刑 (YueXing): the day whose 日支 is punished by the month's build branch
- * (建刑, three-punishment), keyed to the LUNAR month (lmonth 1..12) — unlike its
- * siblings which key to the solar-term month.  Cycles yin-si-shen / chou-xu-wei,
+ * (月建之刑, three-punishment / 建刑), keyed to the solar-term month (節氣月/月建)
+ * like its siblings 月破/大耗/災煞/月厭.  Cycles yin-si-shen / chou-xu-wei,
  * mutual zi-mao, self-punishments chen/wu/you/hai:
    寅->巳(5), 卯->子(0), 辰->辰(4), 巳->申(8),
    午->午(6), 未->丑(1), 申->寅(2), 酉->酉(9),
@@ -211,12 +211,12 @@ static const char zai_branch[12] = {6, 3, 0, 9, 6, 3, 0, 9, 6, 3, 0, 9};
      戌(10)->寅(2)  亥(11)->丑(1) 子(0)->子(0)  丑(1)->亥(11) */
 static const char yueyan_branch[12] = {0, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1};
 
-/* 月刑 by lunar month (lmonth 1..12): the day branch punished by that month's
-   build branch (建刑).  Index = lmonth-1, months in order 1st..12th:
-     寅->巳(5), 卯->子(0), 辰->辰(4), 巳->申(8)
-     午->午(6), 未->丑(1), 申->寅(2), 酉->酉(9)
-     戌->未(7), 亥->亥(11), 子->卯(3), 丑->戌(10) */
-static const char yuexing_branch[12] = {5, 0, 4, 8, 6, 1, 2, 9, 7, 11, 3, 10};
+/* 月刑 by 月建 (solar-term month): the day branch punished by that month's
+   build branch (月建之刑).  Index = mbranch 0=子..11=亥:
+     子->卯(3), 丑->戌(10), 寅->巳(5), 卯->子(0)
+     辰->辰(4), 巳->申(8), 午->午(6), 未->丑(1)
+     申->寅(2), 酉->酉(9), 戌->未(7), 亥->亥(11) */
+static const char yuexing_branch[12] = {3, 10, 5, 0, 4, 8, 6, 1, 2, 9, 7, 11};
 
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch)
 {
@@ -271,9 +271,7 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch)
     case SS_YUEYAN:
         return dbranch == yueyan_branch[mbranch];
     case SS_YUEXING:
-        if (lmonth < 1 || lmonth > 12)
-            return 0;
-        return dbranch == yuexing_branch[lmonth - 1];
+        return dbranch == yuexing_branch[mbranch];
     }
     return 0;
 }
