@@ -339,6 +339,49 @@
  * 秋(申酉戌月)午日、冬(亥子丑月)酉日.  Keyed to the 節氣月/月建 (mbranch) 與
  * 日支 (dbranch), 同其兄弟 月破/大耗/災煞/月厭/月刑.  四本通勝印 班煞 的 49 日 中
  * 46 日 全中 (其餘 3 日皆 DB 行 conf=low 之錯錨行).
+ *
+ * 歲德 (SuiDe): the day whose 日干 is the 德 of the 太歲 干 -- a 太歲-keyed
+ * 吉神 (not the 節氣月).  《欽定協紀辨方書》卷三 義例一: 曾門經曰「歲德者
+ * 歲中德神也, 十干之中五為陽五為陰, 陽者君道也, 陰者臣道也, 君德自處, 臣德從君也,
+ * 所理之地萬福咸集, 眾殃自避」; 廣聖曆曰「甲德在甲, 乙德在庚, 丙德在丙, 丁德在壬,
+ * 戊德在戊, 己德在甲, 庚德在庚, 辛德在丙, 壬德在壬, 癸德在戊」; 考原曰「五陽干
+ * 當位自得, 五陰干則取其合」 (陽以自得為德, 陰以從陽為德).  即 日干 = 德(年干):
+ *   甲年->甲日, 乙年->庚日, 丙年->丙日, 丁年->壬日, 戊年->戊日, 己年->甲日,
+ *   庚年->庚日, 辛年->丙日, 壬年->壬日, 癸年->戊日.
+ * 用戶 通勝 (2006 丙戌 / 2010 庚寅 / 2025 乙巳 / 2026 丙午) 印「歲德」於 丙/庚/庚/丙 日,
+ * 即本規則; 年界用立春換歲 (干支年).
+ *
+ * 歲德合 (SuiDeHe): 歲德之五合干.  同卷 考原曰「歲德合者, 歲德五合之干是也 --
+ * 甲年在己, 乙年在乙, 丙年在辛, 丁年在丁, 戊年在癸, 己年在己, 庚年在乙,
+ * 辛年在辛, 壬年在丁, 癸年在癸, 故歲德屬陽, 歲德合屬陰」.  即 日干 = 五合(德(年干)):
+ *   甲年->己日, 乙年->乙日, 丙年->辛日, 丁年->丁日, 戊年->癸日, 己年->己日,
+ *   庚年->乙日, 辛年->辛日, 壬年->丁日, 癸年->癸日.  (通勝 印作「歲德合日」,
+ *   即 歲德 + 合日 兩欄; 同卷 並記 歲干合 = 年干之五合, 與 歲德/歲德合 恆為同一干,
+ *   故 通書 只印其一 -- 乙年 印「歲干」於庚日.)
+ *
+ * 歲祿 (SuiLu): the day whose 日支 is the 臨官 (祿) of the 太歲 干 -- 十干祿
+ * 甲寅 乙卯 丙巳 丁午 戊巳 己午 庚申 辛酉 壬亥 癸子.  通勝 印「歲祿」於:
+ *   2006 丙戌年 巳日, 2010 庚寅年 申日, 2025 乙巳年 卯日, 2026 丙午年 午日.
+ *
+ * 歲馬 (SuiMa): the day whose 日支 is the 驛馬 (三合 長生之沖) of the 太歲 支:
+ *   寅午戌年->申日, 申子辰年->寅日, 巳酉丑年->亥日, 亥卯未年->巳日.
+ *   (2006 丙戌年 落申日, 2010 庚寅年 與 歲祿 同落申日, 2025 乙巳年 落亥日.)
+ *
+ * 歲支 (SuiZhi): the day whose 日支 forms 三合 or 六合 with the 太歲 支 (the 太歲
+ * 支 itself excluded) -- 通書 印作「歲支三合」/「歲支六合」, 即
+ * 日支 ∈ {年支+4, 年支+8, 六合(年支)}:  戌年->寅/午/卯日,
+ * 寅年->午/戌/亥日, 巳年->酉/丑/申日, 午年->戌/寅/未日.
+ *
+ * 歲支德 (SuiZhiDe): 協紀 作「歲枝德」 -- 日支 = 太歲 支前五辰 (通勝 印作
+ * 「歲支德日」, 故與 歲支 共用同一欄名。  《欽定協紀辨方書》卷三 義例一:
+ * 神樞經曰「歲枝德者歲中德神也, 德者得也, 得福之謂也, 主救危而濟弱」;
+ * 李鼎祚曰「常居歲前五辰」; 曹震圭曰「枝德者從太歲向前五合之边辰也」.  即
+ * 日支 = (年支+5) mod 12:  戌年->卯日, 寅年->未日, 巳年->戌日, 午年->亥日.
+ * (協紀 按語「其辰又為死符又為小耗」.)
+ *
+ * 以上六神皆以 太歲 (干支年, 立春換歲) keying -- 唯一非月建/非日柱/
+ * 非晚朝 keying 之一組, 故 ShenShaMask()/ShenShaOn() 多一個 suigz 入參 (太歲
+ * 60-甲子 index, ccal.cpp 之 GetSuiGanzhi()).
  */
 #include <string.h>
 #include "shensha.h"
@@ -595,6 +638,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xaf\x5a\xb7\xd9",
       "\xe7\x8f\xad\xe7\x85\x9e",
       "\xe7\x8f\xad\xe7\x85\x9e" },   /* BanSha */
+    { "SuiDe",
+      "\xcb\xea\xb5\xc2", "\xb7\xb3\xbc\x77",
+      "\xe5\xb2\x81\xe5\xbe\xb7",
+      "\xe6\xad\xb2\xe5\xbe\xb7" },   /* 歲德   吉 */
 };
 
 int ShenShaCount(void)
@@ -898,8 +945,20 @@ static const char jiukan_branch[12] = {8, 5, 4, 1, 10, 7, 3, 0, 9, 6, 2, 11};
    秋(申酉戌月)->午日, 冬(亥子丑月)->酉日 (取四正之氣為地師之煞).
    Index = season_of(mbranch) 0春1夏2秋3冬. */
 static const char bansha_branch[4] = {0, 3, 6, 9};
+/* 太歲 (歲) keyed 吉神 -- see the header comment.  suigz = 太歲 60-甲子 index
+   (0 = 甲子, from ccal's GetSuiGanzhi(): the 干支年 turns at 立春). */
+/* 歲德: 德干 of each 年干 (廣聖曆 甲德在甲 乙德在庚 丙德在丙 丁德在壬 戊德在戊
+   己德在甲 庚德在庚 辛德在丙 壬德在壬 癸德在戊).  index = 年干 0=甲..9=癸. */
+static const char suide_stem[10] = {0, 6, 2, 8, 4, 0, 6, 2, 8, 4};
+/* 歲祿: the 十干祿 branch -- 甲寅 乙卯 丙巳 丁午 戊巳 己午 庚申 辛酉 壬亥 癸子.
+   index = 年干 0=甲..9=癸. */
+static const char suilu_branch[10] = {2, 3, 5, 6, 5, 6, 8, 9, 11, 0};
+/* 歲馬: the 驛馬 branch -- 寅午戌->申, 申子辰->寅, 巳酉丑->亥, 亥卯未->巳.
+   index = 年支 0=子..11=亥. */
+static const char suima_branch[12] = {2, 11, 8, 5, 2, 11, 8, 5, 2, 11, 8, 5};
+
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
-              int wday)
+              int wday, int suigz)
 {
     int k, mm = mmonth_of(mbranch);
     switch (i)
@@ -1109,6 +1168,9 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
     case SS_BANSHA:
         /* 班煞 (魯班煞/殺師日): 日支 == 該季節之四正 (見檔頭). */
         return dbranch == bansha_branch[season_of(mbranch)];
+    case SS_SUIDE:
+        /* 歲德: 日干 = 太歲干之德 (甲甲 乙庚 丙丙 丁壬 戊戊 己甲 庚庚 辛丙 壬壬 癸戊). */
+        return (ganzhi % 10) == suide_stem[suigz % 10];
     }
     return 0;
 }
@@ -1116,12 +1178,12 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
 /* The mask must be wider than int: SS_COUNT now exceeds 32, and `1 << 32` wraps
    to bit 0 on x86-64 (shift count taken mod 32), which would corrupt 天赦. */
 unsigned long long ShenShaMask(int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
-                               int wday)
+                               int wday, int suigz)
 {
     int i;
     unsigned long long mask = 0;
     for (i = 0; i < SS_COUNT; i++)
-        if (ShenShaOn(i, lmonth, lday, ganzhi, mbranch, dbranch, wday))
+        if (ShenShaOn(i, lmonth, lday, ganzhi, mbranch, dbranch, wday, suigz))
             mask |= 1ULL << i;
     return mask;
 }

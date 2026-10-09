@@ -133,6 +133,17 @@ int IsSuiPo(double jd, vdouble& vterms, int year, int daybranch)
     return ((daybranch + 6) % 12 == yb) ? 1 : 0;
 }
 
+/* 太歲 干支 (60-甲子 index, 0 = 甲子) of the 節氣年: the 干支年 turns at 立春
+   (vterms[2]), so a day before 立春 belongs to the previous 干支年.  Feeds
+   the 歲-keyed 吉神 in shensha.cpp (歲德/歲德合/歲祿/歲馬/歲支/歲支德). */
+static int GetSuiGanzhi(double jd, vdouble& vterms, int year)
+{
+    int y = year;
+    if (int(vterms.size()) > 2 && int(jd) < int(vterms[2]))
+        y--;
+    return ((y - 1984) % 60 + 60) % 60;
+}
+
 /* 三娘煞: 農曆每月 初三、初七、十三、十八、廿二、廿七 (通勝歌訣: 上旬初三與
    初七, 中旬十三二十八當, 下旬廿二與廿七).
    真三娘煞: 這六日之中日柱干支相合者 —— 初三逢庚午、初七逢辛未、十三逢戊申、
@@ -281,11 +292,12 @@ static int ShenShaEnc(int nEncoding)
 }
 
 /* 神煞 bitmask of a day (see shensha.cpp for the table). */
-static unsigned long long ShenShaOfDay(vdouble& vterms, int lmonth, int lday, int jd)
+static unsigned long long ShenShaOfDay(vdouble& vterms, int lmonth, int lday, int jd,
+                                        int year)
 {
     return ShenShaMask(lmonth, lday, (int(jd) + 49) % 60,
                        GetMonthBranch(jd, vterms), (int(jd) + 1) % 12,
-                       (int(jd) + 1) % 7);
+                       (int(jd) + 1) % 7, GetSuiGanzhi(jd, vterms, year));
 }
 
 /* Lunar month number (1..12, leap months keep their number) of a day in the
@@ -951,7 +963,7 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
                room for them, the HTML and XML month tables carry them. */
             unsigned long long ss = (bJianChu)
                      ? ShenShaOfDay(vterms, LunarMonthOfDay(vmonth, lastmon, moncnt, ldcnt),
-                                    ldcnt, jdcnt)
+                                    ldcnt, jdcnt, year)
                      : 0;
             char szSS[128];
             szSS[0] = 0;
@@ -1609,7 +1621,7 @@ void PrintMonthList(short int year, short int month, vdouble& vterms,
                room for them, the HTML and XML month tables carry them. */
             unsigned long long ss = (bJianChu)
                      ? ShenShaOfDay(vterms, LunarMonthOfDay(vmonth, lastmon, moncnt, ldcnt),
-                                    ldcnt, jdcnt)
+                                    ldcnt, jdcnt, year)
                      : 0;
             char szSS[128];
             szSS[0] = 0;
@@ -2376,7 +2388,7 @@ void PrintICalendar(short int year, short int month, short int day,
             /* 日柱 index (0=甲子): 真三娘煞 and the 干支 line both need it */
             int n = (int(jdcnt) + 49) % 60;
             int sup = IsSuiPo(jdcnt, vterms, year, (int(jdcnt) + 1) % 12);
-            unsigned long long ss = ShenShaOfDay(vterms, cmonth, ldcnt, jdcnt);
+            unsigned long long ss = ShenShaOfDay(vterms, cmonth, ldcnt, jdcnt, year);
             char szSS[128];
             szSS[0] = 0;
             if (ss != 0)
@@ -2589,7 +2601,7 @@ void PrintDayASCII(short int year, short int month, short int day,
     short int cmonth;
     char leap[2] = {0x00, 0x00};
     GetMonthNumber(mnum, cmonth, leap);
-    unsigned long long ss = ShenShaOfDay(vterms, cmonth, ldcnt, jdcnt);
+    unsigned long long ss = ShenShaOfDay(vterms, cmonth, ldcnt, jdcnt, year);
     char szSS[128];
     szSS[0] = 0;
     if (ss != 0)

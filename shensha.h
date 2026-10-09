@@ -11,6 +11,7 @@
      mbranch 月建 branch 0=子..11=亥  (ccal: GetMonthBranch(jd, vterms))
      dbranch 日支 0=子..11=亥         (ccal: (int(jdcnt) + 1) % 12)
      wday    weekday 0=Sunday..6=Saturday (ccal: (int(jdcnt) + 1) % 7)
+     suigz   太歲 60-甲子 index 0=甲子 (干支年: ccal GetSuiGanzhi(), 立春換歲)
    enc: 'a' ASCII, 'g' GB/GBK ('GB2312' plus a few GBK-extension
  *   characters such as the 厭 in 月厭), 'b' Big5, 'u' UTF-8. */
 enum {
@@ -74,14 +75,15 @@ enum {
     SS_JIUKAN,          /* 九坎   凶 */
     SS_XIANCHI,   /* XianChi   凶 */
     SS_BANSHA,   /* BanSha   凶 */
+    SS_SUIDE,          /* 歲德   吉 */
     SS_COUNT
 };
 
 int ShenShaCount(void);
 const char* ShenShaName(int i, int enc);
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
-              int wday);
-unsigned long long ShenShaMask(int lmonth, int lday, int ganzhi, int mbranch, int dbranch, int wday);
+              int wday, int suigz);
+unsigned long long ShenShaMask(int lmonth, int lday, int ganzhi, int mbranch, int dbranch, int wday, int suigz);
 void ShenShaText(unsigned long long mask, int enc, char* buf, int bufsize);
 
 #endif /* SHENSHA_H */
