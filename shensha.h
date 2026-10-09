@@ -73,6 +73,7 @@ enum {
     SS_JIUKONG,         /* 九空   凶 */
     SS_JIUKAN,          /* 九坎   凶 */
     SS_XIANCHI,   /* XianChi   凶 */
+    SS_BANSHA,   /* BanSha   凶 */
     SS_COUNT
 };
 

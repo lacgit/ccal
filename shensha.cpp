@@ -332,6 +332,13 @@
  * 巳酉丑月->午日.  Keyed to the 節氣月/月建 (mbranch) 與 日支 (dbranch),
  * 同其兄弟 大時/月破/大耗/災煞/月厭/月刑.  四本通勝 兩名並用: 印 咸池 的 31 日 中
  * 27 日 同時 (或另日) 見 大時 之名.
+ *
+ * 班煞 (BanSha): 凶.  通勝凶星欄之「班煞」-- 「班」指魯班 (公輸班), 即沖尅魯班
+ * 先師之煞, 俗稱「殺師日」, 營造、造葬之家所忌.  其口訣為「春子秋午, 夏卯冬酉」
+ * (取天地四正子午卯酉剛強之氣為地師之煞), 即 春(寅卯辰月)子日、夏(巳午未月)卯日、
+ * 秋(申酉戌月)午日、冬(亥子丑月)酉日.  Keyed to the 節氣月/月建 (mbranch) 與
+ * 日支 (dbranch), 同其兄弟 月破/大耗/災煞/月厭/月刑.  四本通勝印 班煞 的 49 日 中
+ * 46 日 全中 (其餘 3 日皆 DB 行 conf=low 之錯錨行).
  */
 #include <string.h>
 #include "shensha.h"
@@ -583,6 +590,11 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xab\x77\xa6\xc0",
       "\xe5\x92\xb8\xe6\xb1\xa0",
       "\xe5\x92\xb8\xe6\xb1\xa0" },   /* XianChi */
+    { "BanSha",
+      "\xb0\xe0\xc9\xb7",
+      "\xaf\x5a\xb7\xd9",
+      "\xe7\x8f\xad\xe7\x85\x9e",
+      "\xe7\x8f\xad\xe7\x85\x9e" },   /* BanSha */
 };
 
 int ShenShaCount(void)
@@ -882,6 +894,10 @@ static const char jiukong_branch[12] = {10, 7, 4, 1, 10, 7, 4, 1, 10, 7, 4, 1};
 static const char jiukan_branch[12] = {8, 5, 4, 1, 10, 7, 3, 0, 9, 6, 2, 11};
 
 /* 咸池 (XianChi) -- 見檔頭: 與 大時 同辰 (月建三合局之沐浴位), 即 `dashi_branch`. */
+/* 班煞 (BanSha) -- 見檔頭: 春(寅卯辰月)->子日, 夏(巳午未月)->卯日,
+   秋(申酉戌月)->午日, 冬(亥子丑月)->酉日 (取四正之氣為地師之煞).
+   Index = season_of(mbranch) 0春1夏2秋3冬. */
+static const char bansha_branch[4] = {0, 3, 6, 9};
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
               int wday)
 {
@@ -1090,6 +1106,9 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
     case SS_XIANCHI:
         /* 咸池 = 大時: 日支 == 月建三合局之沐浴位 (協紀卷五 "大時者咸池也"). */
         return dbranch == dashi_branch[mbranch];
+    case SS_BANSHA:
+        /* 班煞 (魯班煞/殺師日): 日支 == 該季節之四正 (見檔頭). */
+        return dbranch == bansha_branch[season_of(mbranch)];
     }
     return 0;
 }
