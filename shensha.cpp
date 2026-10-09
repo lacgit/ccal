@@ -82,6 +82,14 @@
  * (月厭 正月起戌逆行, 天賊 正月在丑):
  *   寅月->丑日, 卯月->子日, 辰月->亥日, 巳月->戌日, 午月->酉日, 未月->申日,
  *   申月->未日, 酉月->午日, 戌月->巳日, 亥月->辰日, 子月->卯日, 丑月->寅日.
+ *
+ * 歸忌 (GuiJi): the day whose 日支 is the 歸忌 branch of the month, keyed to the
+ * 節氣月/月建 like its siblings 月破/大耗/災煞/月厭/月刑/大時/天吏/血忌/血支.
+ * 《欽定協紀辨方書》義例「孟月丑,仲月寅,季月子」, 考原 曰「孟月忌丑、仲月忌寅、
+ * 季月忌子者,皆忌退後一辰,所謂歸忌也」 (六壬 "章光日,孟月乙丑,仲月丙寅,季月
+ * 甲子,即歸忌煞也"); 陰陽書曆法 「歸忌日,四孟在丑,四仲在寅,四季在子,其日不可
+ * 遠行、歸家及徙也」.  Index = mbranch 0=子..11=亥:
+ *   四孟(寅巳申亥)->丑日, 四仲(子卯午酉)->寅日, 四季(辰未戌丑)->子日.
  */
 #include <string.h>
 #include "shensha.h"
@@ -188,6 +196,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xcc\xec\xd4\xf4", "\xa4\xd1\xb8\xe9",
       "\xe5\xa4\xa9\xe8\xb4\xbc",
       "\xe5\xa4\xa9\xe8\xb3\x8a" },   /* 天賊 */
+    { "GuiJi",
+      "\x9a\x77\xbc\xc9", "\xc2\x6b\xa7\xd2",
+      "\xe5\xbd\x92\xe5\xbf\x8c",
+      "\xe6\xad\xb8\xe5\xbf\x8c" },   /* 歸忌 */
 };
 
 int ShenShaCount(void)
@@ -335,6 +347,14 @@ static const char furi_stem[12] = {9, 5, 0, 1, 4, 2, 3, 5, 6, 7, 4, 8};
      申(8)->未(7)  酉(9)->午(6)  戌(10)->巳(5) 亥(11)->辰(4) */
 static const char tianzei_branch[12] = {3, 2, 1, 0, 11, 10, 9, 8, 7, 6, 5, 4};
 
+/* 歸忌 by 月建 (solar-term month): 《欽定協紀辨方書》/考原「孟月丑、仲月寅、季月子」
+   -- 四孟(寅巳申亥)丑日, 四仲(子卯午酉)寅日, 四季(辰未戌丑)子日.  Index = mbranch
+   0=子..11=亥:
+     子(0)->寅(2)  丑(1)->子(0)  寅(2)->丑(1)  卯(3)->寅(2)
+     辰(4)->子(0)  巳(5)->丑(1)  午(6)->寅(2)  未(7)->子(0)
+     申(8)->丑(1)  酉(9)->寅(2)  戌(10)->子(0) 亥(11)->丑(1) */
+static const char guiji_branch[12] = {2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1};
+
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch)
 {
     int k, mm = mmonth_of(mbranch);
@@ -401,6 +421,8 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch)
         return (ganzhi % 10) == furi_stem[mbranch];
     case SS_TIANZEI:
         return dbranch == tianzei_branch[mbranch];
+    case SS_GUIJI:
+        return dbranch == guiji_branch[mbranch];
     }
     return 0;
 }
