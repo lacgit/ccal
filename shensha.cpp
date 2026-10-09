@@ -1172,6 +1172,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xca\xae\xc1\xe9", "\xa4\x51\xc6\x46",
       "\xe5\x8d\x81\xe7\x81\xb5",
       "\xe5\x8d\x81\xe9\x9d\x88" },   /* 十靈 */
+    { "ShangShuo",
+      "\xc9\xcf\xcb\xb7", "\xa4\x57\xae\xd2",
+      "\xe4\xb8\x8a\xe6\x9c\x94",
+      "\xe4\xb8\x8a\xe6\x9c\x94" },   /* 上朔 */
 };
 
 /* 三合 (SanHe) by 月建: 日支 = 月建三合局之另外兩辰 = {mbranch+4, mbranch+8}. */
@@ -1742,6 +1746,14 @@ static const char guchen_branch[4] = {5, 8, 11, 2};
    通勝吉神欄印「十靈」91 日, 其中 90 日落在此 10 柱內 (唯一例外 2006-03-01 己丑, 屬欄位串位;
    翌日 2006-03-02 庚寅 正為十靈日). */
 static const char shiling_gz[10] = {40, 11, 52, 33, 54, 46, 26, 47, 38, 19};
+
+/* 上朔 (ShangShuo) by 干支年 (立春換歲, ccal GetSuiGanzhi()):
+   《欽定協紀辨方書》卷六 義例四 「上朔日忌宴會嫁娶遠行上官○
+   歷例曰：陽年以年干加寅順數至亥，陰年以年干加丑順數至巳也」;
+   立成 卷九 上朔：甲年癸亥 乙年己巳 丙年乙亥 丁年辛巳 戊年丁亥
+   己年癸巳 庚年己亥 辛年乙巳 壬年辛亥 癸年丁巳 -- 即日柱 60 甲子 index
+   = (59 + 6 * 年干) mod 60.  Index = 年干 0=甲..9=癸 (suigz % 10). */
+static const char shangshuo_gz[10] = {59, 5, 11, 17, 23, 29, 35, 41, 47, 53};
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
               int wday, int suigz, int mlendays)
 {
@@ -2253,6 +2265,8 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
         for (k = 0; k < 10; k++) if (ganzhi == shiling_gz[k]) return 1;
         return 0;
     }
+    case SS_SHANGSHUO:
+        return ganzhi == shangshuo_gz[suigz % 10];
     }
     return 0;
 }
