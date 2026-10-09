@@ -137,6 +137,7 @@ enum {
     SS_YIMA, /* 驛馬 吉 */
     SS_ZHAIBU,   /* ZhaiBu   凶 */
     SS_TIANHOU, /* 天后 吉 */
+    SS_TIANGANG,        /* 天罡   凶 */
     SS_COUNT
 };
 

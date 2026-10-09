@@ -1123,6 +1123,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xcc\xec\xba\xf3", "\xa4\xd1\xa6\x5a",
       "\xe5\xa4\xa9\xe5\x90\x8e",
       "\xe5\xa4\xa9\xe5\x90\x8e" },   /* 天后 */
+    { "TianGang",
+      "\xcc\xec\xee\xb8", "\xa4\xd1\xd3\x5c",
+      "\xe5\xa4\xa9\xe7\xbd\xa1",
+      "\xe5\xa4\xa9\xe7\xbd\xa1" },   /* 天罡 */
 };
 
 /* 三合 (SanHe) by 月建: 日支 = 月建三合局之另外兩辰 = {mbranch+4, mbranch+8}. */
@@ -2114,6 +2118,12 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
     case SS_TIANHOU:
         /* 天后 = 驛馬同位 (曆例「天后與驛馬同位」). */
         return dbranch == yima_branch[mbranch];
+    case SS_TIANGANG:
+        /* 天罡 (TianGang): 月建三合局之天罡位 -- 陽月(子寅辰午申戌)取月建前(順)三辰,
+           陰月(丑卯巳未酉亥)取月建後(逆)三辰: 寅月巳 卯月子 辰月未 巳月寅 午月酉 未月辰
+           申月亥 酉月午 戌月丑 亥月申 子月卯 丑月戌 (河魁即其對衝, 見 卷七 義例「辰者
+           天罡戌者河魁」; 通書以戌為河魁, 正月戌 對 河魁). Keyed to the 節氣月/月建. */
+        return dbranch == ((mbranch % 2) ? (mbranch + 9) % 12 : (mbranch + 3) % 12);
     }
     return 0;
 }
