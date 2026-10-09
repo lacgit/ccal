@@ -605,6 +605,12 @@
  * 九十月辰 十一月十二月午」曹震圭「解神者月中奏對直諫之臣也,常居與月建相對之陽辰」; 按語
  * 「解神於六陽辰即用衝神,於六隂辰則用前一陽辰之衝神」 (寅卯月->申, 辰巳月->戌, 午未月->子,
  * 申酉月->寅, 戌亥月->辰, 子丑月->午).
+ * 不將 (BuJiang, 陰陽不將): 日支 ∈ 月厭之後區(月厭+1..+5) 且 日干之祿支 ∈ 月厭之前區(月厭+6..+11).
+ * 《欽定協紀辨方書》卷四 義例二 天寶曆「陰陽不將者,以月建為陽謂之陽建(正月起寅順行十二辰),月厭為陰
+ * 謂之陰建(正月起戌逆行十二辰);分於卯酉,會於子午. 厭前枝幹自相配者為陽將,厭後枝幹自相配者為陰將;
+ * 厭後幹配厭前枝者為陰陽俱將,厭前幹配厭後枝者為陰陽不將也. 陽將傷夫,陰將傷婦,陰陽俱將夫婦俱傷,
+ * 陰陽不將夫婦榮昌」+考原「幹為陽當居於前,枝為陰當從其後,是夫唱婦隨之理,故厭前幹配厭後枝為陰陽不將也」.
+ * 即 陽將/陰將/俱將 之外之第四格 (陽將=枝前幹前, 陰將=枝後幹後, 俱將=枝前幹後, 不將=枝後幹前).
  *
  */
 #include <string.h>
@@ -1077,6 +1083,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xbd\xe2\xc9\xf1", "\xb8\xd1\xaf\xab",
       "\xe8\xa7\xa3\xe7\xa5\x9e",
       "\xe8\xa7\xa3\xe7\xa5\x9e" },   /* 解神   吉 */
+    { "BuJiang",
+      "\xb2\xbb\xbd\xab", "\xa4\xa3\xb1\x4e",
+      "\xe4\xb8\x8d\xe5\xb0\x86",
+      "\xe4\xb8\x8d\xe5\xb0\x87" },   /* 不將   吉 */
 };
 
 /* 三合 (SanHe) by 月建: 日支 = 月建三合局之另外兩辰 = {mbranch+4, mbranch+8}. */
@@ -1995,6 +2005,10 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
     case SS_JIESHEN:
         /* 解神: 日支 = 月建相對之陽辰之衝 (見檔頭 解神). */
         return dbranch == jieshen_branch[mbranch];
+    case SS_BUJIANG:
+        /* 不將: 日支 ∈ 月厭後區(+1..+5) 且 祿(日干) ∈ 月厭前區(+6..+11) (見檔頭 不將). */
+        return yinjiang_back5(mbranch, dbranch) &&
+               yangjiang_front(mbranch, yangjiang_lu[ganzhi % 10]);
     }
     return 0;
 }
