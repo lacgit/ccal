@@ -548,6 +548,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xcc\xec\xd0\xcc", "\xa4\xd1\xa6\x44",
       "\xe5\xa4\xa9\xe5\x88\x91",
       "\xe5\xa4\xa9\xe5\x88\x91" },   /* 天刑 */
+    { "TianHuo",
+      "\xcc\xec\xbb\xf0", "\xa4\xd1\xa4\xf5",
+      "\xe5\xa4\xa9\xe7\x81\xab",
+      "\xe5\xa4\xa9\xe7\x81\xab" },   /* 天火 */
 };
 
 int ShenShaCount(void)
@@ -1013,6 +1017,11 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
     case SS_TIANXING:
         /* 天刑 = 黃黑道第 3 神 (黑道), 支 = 青龍+2 */
         return huangdao_index(mbranch, dbranch) == 2;
+    case SS_TIANHUO:
+        /* 天火: 逆行四仲 -- 《欽定協紀辨方書》卷六 義例四 玉帳經「天火者月中凶神也,其日忌苫蓋築壘
+           垣牆振旅興師會親娶婦」; 曆例「天火者正月在子順行四仲」, 而卷内按語「是故天火亦應逆行
+           四仲」⇒ 與 災煞 同支 (正月在子, 逆行四仲). */
+        return dbranch == zai_branch[mbranch];
     }
     return 0;
 }
