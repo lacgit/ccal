@@ -1151,6 +1151,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xba\xd3\xbf\xfd", "\xaa\x65\xbb\xed",
       "\xe6\xb2\xb3\xe9\xad\x81",
       "\xe6\xb2\xb3\xe9\xad\x81" },   /* 河魁 */
+    { "GuaSu",
+      "\xb9\xd1\xcb\xde", "\xb9\xe8\xb1\x4a",
+      "\xe5\xaf\xa1\xe5\xae\xbf",
+      "\xe5\xaf\xa1\xe5\xae\xbf" },   /* 寡宿 */
 };
 
 /* 三合 (SanHe) by 月建: 日支 = 月建三合局之另外兩辰 = {mbranch+4, mbranch+8}. */
@@ -1703,6 +1707,9 @@ static const char mingfeidui_gz[10] = {2, 3, 12, 27, 30, 36, 39, 48, 50, 51};
    六月戊午 七月甲寅 八月丙辰 九月辛卯 十月戊辰 十一月甲子 十二月癸未」; 曹震圭「天願者
    乃月建枝徳合神也」. */
 static const char tianyuan_gz[12] = {0, 19, 30, 10, 21, 12, 13, 54, 50, 52, 27, 4};
+/* 寡宿: 令後一辰 -- 春丑 夏辰 秋未 冬戌 (協紀卷三十六 辨譌). */
+static const char guasu_branch[4] = {1, 4, 7, 10};
+
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
               int wday, int suigz, int mlendays)
 {
@@ -2195,6 +2202,11 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
         /* 河魁 (HeKui): 天罡之對衝 (卷七 義例「辰者天罡戌者河魁」; 戌為河魁).
            陽月(子寅辰午申戌)取月建後(逆)三辰, 陰月取月建前(順)三辰. */
         return dbranch == ((mbranch % 2) ? (mbranch + 3) % 12 : (mbranch + 9) % 12);
+    case SS_GUASU:
+        /* 寡宿 (GuaSu): 《欽定協紀辨方書》卷三十六 辨譌「通書有孤辰寡宿日,以令前一辰為
+           孤辰、令後一辰為寡宿,如寅夘辰春令,巳為孤辰,丑為寡宿」-- 春(寅卯辰月)丑日、
+           夏(巳午未月)辰日、秋(申酉戌月)未日、冬(亥子丑月)戌日. Keyed to the 節氣月. */
+        return dbranch == guasu_branch[season_of(mbranch)];
     }
     return 0;
 }
