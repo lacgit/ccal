@@ -1127,6 +1127,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xcc\xec\xee\xb8", "\xa4\xd1\xd3\x5c",
       "\xe5\xa4\xa9\xe7\xbd\xa1",
       "\xe5\xa4\xa9\xe7\xbd\xa1" },   /* 天罡 */
+    { "TianMa",
+      "\xcc\xec\xc2\xed", "\xa4\xd1\xb0\xa8",
+      "\xe5\xa4\xa9\xe9\xa9\xac",
+      "\xe5\xa4\xa9\xe9\xa6\xac" },   /* 天馬 */
 };
 
 /* 三合 (SanHe) by 月建: 日支 = 月建三合局之另外兩辰 = {mbranch+4, mbranch+8}. */
@@ -1659,6 +1663,10 @@ static const char zhaibu_big[4] = {3, 11, 19, 27};
 static const char zhaibu_small[4] = {2, 10, 18, 26};
 /* 天后: 與驛馬同位 -- 《欽定協紀辨方書》卷六 義例四 總要曆「天后者月中福神也,其日宜
    求醫療病祈福禮神」; 曆例「天后與驛馬同位」; 曹震圭「天后者驛馬也…天后主生育萬物為萬物之母」. */
+/* 天馬: 日支 == 該月天馬辰 (正月起午, 順行六陽辰: 午申戌子寅辰). 《欽定協紀辨方書》
+   卷六 義例四 神樞經「天馬者天之驛騎也,其日宜拜公卿擇賢良宣布政事遠行出征」;
+   李鼎祚「天馬者正月起午順行六陽辰」. */
+static const char tianma_branch[12] = {2, 4, 6, 8, 10, 0, 2, 4, 6, 8, 10, 0};
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
               int wday, int suigz, int mlendays)
 {
@@ -2124,6 +2132,9 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
            申月亥 酉月午 戌月丑 亥月申 子月卯 丑月戌 (河魁即其對衝, 見 卷七 義例「辰者
            天罡戌者河魁」; 通書以戌為河魁, 正月戌 對 河魁). Keyed to the 節氣月/月建. */
         return dbranch == ((mbranch % 2) ? (mbranch + 9) % 12 : (mbranch + 3) % 12);
+    case SS_TIANMA:
+        /* 天馬: 日支 == 該月天馬辰 (正月午, 順行六陽辰). */
+        return dbranch == tianma_branch[mbranch];
     }
     return 0;
 }
