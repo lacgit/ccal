@@ -650,6 +650,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xcb\xea\xc2\xbb", "\xb7\xb3\xb8\x53",
       "\xe5\xb2\x81\xe7\xa6\x84",
       "\xe6\xad\xb2\xe7\xa5\xbf" },   /* 歲祿   吉 */
+    { "SuiMa",
+      "\xcb\xea\xc2\xed", "\xb7\xb3\xb0\xa8",
+      "\xe5\xb2\x81\xe9\xa9\xac",
+      "\xe6\xad\xb2\xe9\xa6\xac" },   /* 歲馬   吉 */
 };
 
 int ShenShaCount(void)
@@ -1185,6 +1189,9 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
     case SS_SUILU:
         /* 歲祿: 日支 = 太歲干之祿 (甲寅 乙卯 丙巳 丁午 戊巳 己午 庚申 辛酉 壬亥 癸子). */
         return dbranch == suilu_branch[suigz % 10];
+    case SS_SUIMA:
+        /* 歲馬: 日支 = 太歲支之驛馬 (寅午戌->申, 申子辰->寅, 巳酉丑->亥, 亥卯未->巳). */
+        return dbranch == suima_branch[suigz % 12];
     }
     return 0;
 }
