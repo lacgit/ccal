@@ -996,6 +996,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xca\xa5\xd0\xc4", "\xb8\x74\xa4\xdf",
       "\xe5\x9c\xa3\xe5\xbf\x83",
       "\xe8\x81\x96\xe5\xbf\x83" },   /* 聖心 */
+    { "JinTang",
+      "\xbd\xf0\xcc\xc3", "\xaa\xf7\xb0\xf3",
+      "\xe9\x87\x91\xe5\xa0\x82",
+      "\xe9\x87\x91\xe5\xa0\x82" },   /* 金堂 */
 };
 
 int ShenShaCount(void)
@@ -1466,6 +1470,10 @@ static const char xushi_branch[12] = {6, 0, 1, 7, 2, 8, 3, 9, 4, 10, 5, 11};
  */
 static const char shengxin_branch[12] = {4, 10, 11, 5, 0, 6, 1, 7, 2, 8, 3, 9};
 
+/* 金堂 (九神之三) -- 《欽定協紀辨方書》卷六 義例四 樞要曆「金堂者月中善神也,所値之日
+   宜營建宫室興造修築」; 曆例「正月辰 二月戌 三月巳 四月亥 五月午 六月子 七月未 八月丑
+   九月申 十月寅 十一月酉 十二月卯」; 曹震圭「金堂者建神安樂之堂也,常在玉宇之前」. */
+static const char jintang_branch[12] = {9, 3, 4, 10, 5, 11, 6, 0, 7, 1, 8, 2};
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
               int wday, int suigz)
 {
@@ -1828,6 +1836,9 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
     case SS_SHENGXIN:
         /* 聖心: 日支 == 該月(節氣月)之聖心支 (正月亥, 二月巳 ... 十二月戌). */
         return dbranch == shengxin_branch[mbranch];
+    case SS_JINTANG:
+        /* 金堂: 日支 == 該月(節氣月)金堂辰 (正月辰 二月戌 三月巳 …). */
+        return dbranch == jintang_branch[mbranch];
     }
     return 0;
 }

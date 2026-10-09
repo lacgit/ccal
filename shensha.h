@@ -116,6 +116,7 @@ enum {
     SS_YIHOU,            /* 益後   吉 */
     SS_XUSHI,            /* 續世   吉 */
     SS_SHENGXIN,         /* 聖心   吉 */
+    SS_JINTANG,
     SS_COUNT
 };
 
