@@ -98,6 +98,14 @@
  * 甲子,即歸忌煞也"); 陰陽書曆法 「歸忌日,四孟在丑,四仲在寅,四季在子,其日不可
  * 遠行、歸家及徙也」.  Index = mbranch 0=子..11=亥:
  *   四孟(寅巳申亥)->丑日, 四仲(子卯午酉)->寅日, 四季(辰未戌丑)->子日.
+ *
+ * 月煞 (YueSha): 《欽定協紀辨方書》 廣聖曆「月殺者,月內之殺神也,其日忌停賓客,
+ * 興穿掘,營種殖,納群畜」; 曆例「月煞者,正月起丑, 逆行四季」, 按「在歲為歲煞,
+ * 在月為月煞, 無二義也」 -- 即月建三合局之養位 (三煞之歲煞; 《三命通會》「月煞:
+ * 寅午戌月丑, 亥卯未月戌, 申子辰月未, 巳酉丑月辰」).  Keyed to the 節氣月/月建
+ * like its siblings 月破/大耗/災煞/月厭/月刑:
+ *   寅月->丑日, 卯月->戌日, 辰月->未日, 巳月->辰日, 午月->丑日, 未月->戌日,
+ *   申月->未日, 酉月->辰日, 戌月->丑日, 亥月->戌日, 子月->未日, 丑月->辰日.
  */
 #include <string.h>
 #include "shensha.h"
@@ -212,6 +220,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\x9a\x77\xbc\xc9", "\xc2\x6b\xa7\xd2",
       "\xe5\xbd\x92\xe5\xbf\x8c",
       "\xe6\xad\xb8\xe5\xbf\x8c" },   /* 歸忌 */
+    { "YueSha",
+      "\xd4\xc2\xc9\xb7", "\xa4\xeb\xb7\xd9",
+      "\xe6\x9c\x88\xe7\x85\x9e",
+      "\xe6\x9c\x88\xe7\x85\x9e" },   /* 月煞 */
 };
 
 int ShenShaCount(void)
@@ -378,6 +390,14 @@ static const char tianzei_branch[12] = {3, 2, 1, 0, 11, 10, 9, 8, 7, 6, 5, 4};
      申(8)->丑(1)  酉(9)->寅(2)  戌(10)->子(0) 亥(11)->丑(1) */
 static const char guiji_branch[12] = {2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1};
 
+/* 月煞 by 月建 (solar-term month): "正月起丑逆行四季" (丑戌未辰 cycle) on the day
+   branch, i.e. the 養 position of the month's 三合局 (= the 歲煞 position applied to
+   the 月建).  Index = mbranch 0=子..11=亥:
+     子(0)->未(7)  丑(1)->辰(4)  寅(2)->丑(1)  卯(3)->戌(10)
+     辰(4)->未(7)  巳(5)->辰(4)  午(6)->丑(1)  未(7)->戌(10)
+     申(8)->未(7)  酉(9)->辰(4)  戌(10)->丑(1) 亥(11)->戌(10) */
+static const char yuesha_branch[12] = {7, 4, 1, 10, 7, 4, 1, 10, 7, 4, 1, 10};
+
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch)
 {
     int k, mm = mmonth_of(mbranch);
@@ -448,6 +468,8 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch)
         return dbranch == tianzei_branch[mbranch];
     case SS_GUIJI:
         return dbranch == guiji_branch[mbranch];
+    case SS_YUESHA:
+        return dbranch == yuesha_branch[mbranch];
     }
     return 0;
 }
