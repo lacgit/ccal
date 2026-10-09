@@ -409,6 +409,11 @@
  *   寅月->甲寅日, 卯月->乙卯日, 辰月->甲辰日, 巳月->丁巳日, 午月->丙午日,
  *   未月->丁未日, 申月->庚申日, 酉月->辛酉日, 戌月->庚戌日, 亥月->癸亥日,
  *   子月->壬子日, 丑月->癸丑日.  Keyed to the 節氣月/月建 (mbranch) 與 日柱 (ganzhi).
+ * 天恩 (TianEn): 日柱 ∈ {甲子,乙丑,丙寅,丁卯,戊辰, 己卯,庚辰,辛巳,壬午,癸未,
+ *   己酉,庚戌,辛亥,壬子,癸丑} (15 日).  《欽定協紀辨方書》卷五 義例三 天寶曆
+ *   「天恩者施德寛下之辰也」+ 曆例「常以甲子至戊辰、己卯至癸未、己酉至癸丑，
+ *   凡一十五日」; 卷九 立成「日神取一定干支者」; 卷十 宜忌「天恩 宜覃恩肆赦…」.
+ *   日神 (不從月建起義), keyed to 日柱 (ganzhi).
  */
 #include <string.h>
 #include "shensha.h"
@@ -710,6 +715,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xb6\xa7\xbf\xf9",
       "\xe9\x98\xb3\xe9\x94\x99",
       "\xe9\x99\xbd\xe9\x8c\xaf" },   /* YangCuo */
+    { "TianEn",
+      "\xcc\xec\xb6\xf7", "\xa4\xd1\xae\xa6",
+      "\xe5\xa4\xa9\xe6\x81\xa9",
+      "\xe5\xa4\xa9\xe6\x81\xa9" },   /* 天恩 */
 };
 
 int ShenShaCount(void)
@@ -1039,6 +1048,9 @@ static const char bafeng_gz[4][2] = {{13, 53}, {20, 40}, {43, 23}, {10, 50}};
    寅甲寅 卯乙卯 辰甲辰 巳丁巳 午丙午 未丁未 申庚申 酉辛酉 戌庚戌 亥癸亥 子壬子 丑癸丑.
    Index = 支 0=子..11=亥; 五月(午月)/十一月(子月) 陰陽二建同辰 -> 無 陰錯陽錯. */
 static const char cuo_gz[12] = {48, 49, 50, 51, 40, 53, 42, 43, 56, 57, 46, 59};
+/* 天恩 日柱 (60-甲子 index): 甲子..戊辰 己卯..癸未 己酉..癸丑 */
+static const char tianen_gz[15] = {0,1,2,3,4,15,16,17,18,19,45,46,47,48,49};
+
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
               int wday, int suigz)
 {
@@ -1297,6 +1309,13 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
         if (mbranch == 0 || mbranch == 6)
             return 0;
         return ganzhi == cuo_gz[mbranch];
+    case SS_TIANEN:
+    {
+        /* 天恩: 日柱 ∈ {甲子..戊辰, 己卯..癸未, 己酉..癸丑} (15 日). 日神, 不從月建. */
+        int k;
+        for (k = 0; k < 15; k++) if (ganzhi == tianen_gz[k]) return 1;
+        return 0;
+    }
     }
     return 0;
 }

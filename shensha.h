@@ -86,6 +86,7 @@ enum {
     SS_JIUJIAO,         /* 九焦   凶 */
     SS_BAFENG,          /* 八風   凶 */
     SS_YANGCUO,   /* YangCuo   凶 */
+    SS_TIANEN,                   /* 天恩   吉 */
     SS_COUNT
 };
 
