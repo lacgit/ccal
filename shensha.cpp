@@ -1103,6 +1103,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xb7\xfc\x94\xe0", "\xa5\xf1\xc2\x5f",
       "\xe4\xbc\x8f\xe6\x96\xb7",
       "\xe4\xbc\x8f\xe6\x96\xb7" },   /* 伏斷 */
+    { "YiMa",
+      "\xe6\xe4\xc2\xed", "\xc5\xe6\xb0\xa8",
+      "\xe9\xa9\xbf\xe9\xa9\xac",
+      "\xe9\xa9\x9b\xe9\xa6\xac" },   /* 驛馬 */
 };
 
 /* 三合 (SanHe) by 月建: 日支 = 月建三合局之另外兩辰 = {mbranch+4, mbranch+8}. */
@@ -1624,6 +1628,10 @@ static const char fuduan_su[7][12] = {
    卯值女為傳寫之誤之訂正): 子虛 丑斗 寅室 卯女 辰箕 巳房 午角 未張 申鬼 酉觜 戌胃 亥壁. */
 static const char fuduan_branch[12] = {10, 7, 12, 9, 6, 3, 0, 25, 22, 19, 16, 13};
 
+/* 驛馬: 日支 == 該月三合局之驛馬辰 (寅午戌→申, 亥卯未→巳, 申子辰→寅, 巳酉丑→亥).
+   《欽定協紀辨方書》卷六 義例四 神樞經「驛馬者驛騎也,其日宜封贈官爵詔命公卿遠行赴任移徙遷居」;
+   李鼎祚「驛馬者正月起申逆行四孟」. 協紀按語「驛馬有從年支取者有從日支取者其義例皆與月同」. */
+static const char yima_branch[12] = {2, 11, 8, 5, 2, 11, 8, 5, 2, 11, 8, 5};
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
               int wday, int suigz, int mlendays)
 {
@@ -2066,6 +2074,9 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
            日支所配之宿 (戌胃酉觜申鬼未張午角巳房辰箕卯女寅室丑斗子虛亥壁), 八十四日
            (＝3×28＝7×12) 而一周. 值宿 = (jdn-17) mod 28; 由 (日支,星期) 唯一決定. */
         return fuduan_su[wday][dbranch] == fuduan_branch[dbranch];
+    case SS_YIMA:
+        /* 驛馬: 日支 == 該月三合之驛馬 (正月在申, 逆行四孟). */
+        return dbranch == yima_branch[mbranch];
     }
     return 0;
 }

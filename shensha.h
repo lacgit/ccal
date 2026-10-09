@@ -134,6 +134,7 @@ enum {
     SS_TIANFU, /* 天符 吉 */
     SS_TIANCANG, /* 天倉 吉 */
     SS_FUDUAN,          /* 伏斷   凶 */
+    SS_YIMA, /* 驛馬 吉 */
     SS_COUNT
 };
 
