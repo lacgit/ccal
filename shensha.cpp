@@ -1143,6 +1143,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xc3\xf9\xb7\xcd\xb6\xd4", "\xbb\xef\xa7\x70\xb9\xef",
       "\xe9\xb8\xa3\xe5\x90\xa0\xe5\xaf\xb9",
       "\xe9\xb3\xb4\xe5\x90\xa0\xe5\xb0\x8d" },   /* 鳴吠對 */
+    { "TianYuan",
+      "\xcc\xec\xd4\xb8", "\xa4\xd1\xc4\x40",
+      "\xe5\xa4\xa9\xe6\x84\xbf",
+      "\xe5\xa4\xa9\xe9\xa1\x98" },   /* 天願 */
 };
 
 /* 三合 (SanHe) by 月建: 日支 = 月建三合局之另外兩辰 = {mbranch+4, mbranch+8}. */
@@ -1690,6 +1694,11 @@ static const char mingfei_gz[14] = {6, 8, 9, 18, 20, 21, 26, 32, 33, 38, 42, 45,
    破土斬草也」; 鳴吠對日者 丙寅 丁卯 丙子 辛卯 甲午 庚子 癸卯 壬子 甲寅 乙卯 (十日,
    考原「鳴吠對者乃與鳴吠對衝之日」). 日神, 不從月建. */
 static const char mingfeidui_gz[10] = {2, 3, 12, 27, 30, 36, 39, 48, 50, 51};
+/* 天願: 日柱 == 該月天願日 -- 《欽定協紀辨方書》卷五 義例三 總要歴「天願者月中善神也,
+   所値之日宜嫁娶納財敦睦親族」; 曆例「正月甲午 二月甲戌 三月乙酉 四月丙子 五月丁丑
+   六月戊午 七月甲寅 八月丙辰 九月辛卯 十月戊辰 十一月甲子 十二月癸未」; 曹震圭「天願者
+   乃月建枝徳合神也」. */
+static const char tianyuan_gz[12] = {0, 19, 30, 10, 21, 12, 13, 54, 50, 52, 27, 4};
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
               int wday, int suigz, int mlendays)
 {
@@ -2175,6 +2184,9 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
         for (k = 0; k < 10; k++) if (ganzhi == mingfeidui_gz[k]) return 1;
         return 0;
     }
+    case SS_TIANYUAN:
+        /* 天願: 日柱 == 該月(節氣月)天願日 (正月甲午 二月甲戌 …). */
+        return ganzhi == tianyuan_gz[mbranch];
     }
     return 0;
 }
