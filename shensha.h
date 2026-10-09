@@ -121,6 +121,7 @@ enum {
     SS_QINGLONG,
     SS_MINGTANG, /* 明堂 吉 */
     SS_SHUIHEN,   /* ShuiHen   凶 */
+    SS_JINKUI, /* 金匱 吉 */
     SS_COUNT
 };
 

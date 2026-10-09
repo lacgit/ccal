@@ -1019,6 +1019,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xa4\xf4\xb2\xaa",
       "\xe6\xb0\xb4\xe7\x97\x95",
       "\xe6\xb0\xb4\xe7\x97\x95" },   /* ShuiHen */
+    { "JinKui",
+      "\xbd\xf0\xd8\xd1", "\xaa\xf7\xb9\xbc",
+      "\xe9\x87\x91\xe5\x8c\xae",
+      "\xe9\x87\x91\xe5\x8c\xb1" },   /* 金匱 */
 };
 
 int ShenShaCount(void)
@@ -1893,6 +1897,9 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
         }
         return 0;
     }
+    case SS_JINKUI:
+        /* 金匱 = 黃道十二神第 5 神 (黃道吉神, 支 = 青龍支 + 4). */
+        return huangdao_index(mbranch, dbranch) == 4;
     }
     return 0;
 }
