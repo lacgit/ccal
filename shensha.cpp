@@ -435,6 +435,11 @@
  *   辨方書》卷五 義例三 總要曆「四時天德者四序中德神也…亦名時德」+ 曆例
  *   「春午、夏辰、秋子、冬寅」; 曹震圭「子寅辰午乃東方生育之陽辰…」; 按
  *   「時德與四相同義, 春木生午火…四相取天干時德取地支」.  按節氣月/月建 keying.
+ * 天喜 (TianXi): 日支 = 月建後… = 月建+8, 即建除之「成」日.  《欽定協紀辨方書》
+ *   卷四 建除十二神所合叢辰「成〈天醫 天喜〉」+ 卷五/四 選擇宗鏡「天喜者正月戌、
+ *   二月亥、三月子、四月丑順輪十二月, 乃日支與月建三合故曰天喜…與成日同位」;
+ *   協紀 按「今通書與宗鏡皆以成日為天喜…故改從畫一」; 卷十 宜忌「成日〈天喜 天醫〉」.
+ *   按 節氣月/月建 mbranch keying.
  */
 #include <string.h>
 #include "shensha.h"
@@ -756,6 +761,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xca\xb1\xb5\xc2", "\xae\xc9\xbc\x77",
       "\xe6\x97\xb6\xe5\xbe\xb7",
       "\xe6\x99\x82\xe5\xbe\xb7" },   /* 時德 */
+    { "TianXi",
+      "\xcc\xec\xcf\xb2", "\xa4\xd1\xb3\xdf",
+      "\xe5\xa4\xa9\xe5\x96\x9c",
+      "\xe5\xa4\xa9\xe5\x96\x9c" },   /* 天喜 */
 };
 
 int ShenShaCount(void)
@@ -1387,6 +1396,9 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
     case SS_SHIDE:
         /* 時德: 日支 = 該四時所生之陽辰 (春午/夏辰/秋子/冬寅). */
         return dbranch == shide_branch[season_of(mbranch)];
+    case SS_TIANXI:
+        /* 天喜: 日支 = 月建+8 (= 建除 成日; 選擇宗鏡「與成日同位」, 協紀改從成日). */
+        return dbranch == (mbranch + 8) % 12;
     }
     return 0;
 }
