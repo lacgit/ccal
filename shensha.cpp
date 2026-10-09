@@ -118,6 +118,14 @@
  * (jdn - 17) % 28 for 97% of rows and every one of those 密日 days is a Sunday.
  * 其日忌安葬、啟攢 (凶).  This is the only marker keyed to the weekday, hence the
  * extra wday input (0 = Sunday .. 6 = Saturday).
+ *
+ * 重日 (ChongRi): the day whose 日支 is 巳 or 亥 (the 陽極/陰極 positions).
+ * 《欽定協紀辨方書》卷五 義例三: 天寶歷「重日者,以陰陽混合於亥, 陽起於甲子而順,
+ * 陰起於甲戌而逆, 至己亥而同, 故曰重日, 其日忌為凶事利為吉事」;
+ * 歷例「重日者,己亥二日也」 (四庫本作「己」, 巳/己 形近之訝);
+ * 曹震圭「亥為陰極之位, 坤辟在焉; 巳為陽極之位, 乾辟在焉,
+ * 是陽中陽而陰中陰也, 故曰重」 -- 不論天干, 亦不論月建:
+ *   日支 巳(5) 或 亥(11) -> 重日.
  */
 #include <string.h>
 #include "shensha.h"
@@ -240,6 +248,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xc3\xdc\xc8\xd5", "\xb1\x4b\xa4\xe9",
       "\xe5\xaf\x86\xe6\x97\xa5",
       "\xe5\xaf\x86\xe6\x97\xa5" },   /* 密日 */
+    { "ChongRi",
+      "\xd6\xd8\xc8\xd5", "\xad\xab\xa4\xe9",
+      "\xe9\x87\x8d\xe6\x97\xa5",
+      "\xe9\x87\x8d\xe6\x97\xa5" },   /* 重日 */
 };
 
 int ShenShaCount(void)
@@ -487,6 +499,9 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
         return dbranch == guiji_branch[mbranch];
     case SS_YUESHA:
         return dbranch == yuesha_branch[mbranch];
+    case SS_CHONGRI:
+        /* 歷例「重日者,己亥二日也」 -> 日支 巳/亥, 不論天干與月建. */
+        return dbranch == 5 || dbranch == 11;
     case SS_MIRI:
         return wday == 0;   /* 房/虛/昴/星 = 日曜 = 星期日 */
     }
