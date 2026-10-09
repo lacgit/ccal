@@ -562,6 +562,12 @@
  * 築垣墻行嫁娶安産室」; 曆例「益後者正月子二月午三月丑四月未五月寅六月申
  * 七月夘八月酉九月辰十月戌十一月巳十二月亥」; 曹震圭「益後者於子嗣有補益之神也」。
  *
+ *
+* 續世 (XuShi): 日支 = 該月(節氣月)之續世支 (常在益後後一辰)。
+ * 《欽定協紀辨方書》卷六 義例四 樞要曆「續世者月中善神也,所值之日宜結婚姻
+ * 睦親族祀神祗求嗣續」; 曆例「續世者正月丑二月未三月寅四月申五月夘六月酉
+ * 七月辰八月戌九月巳十月亥十一月午十二月子」; 考原「續世者…常在益後後一辰」。
+ *
  */
 #include <string.h>
 #include "shensha.h"
@@ -976,6 +982,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xd2\xe6\xba\xf3", "\xaf\x71\xab\xe1",
       "\xe7\x9b\x8a\xe5\x90\x8e",
       "\xe7\x9b\x8a\xe5\xbe\x8c" },   /* 益後 */
+    { "XuShi",
+      "\xd0\xf8\xca\xc0", "\xc4\xf2\xa5\x40",
+      "\xe7\xbb\xad\xe4\xb8\x96",
+      "\xe7\xba\x8c\xe4\xb8\x96" },   /* 續世 */
 };
 
 int ShenShaCount(void)
@@ -1432,6 +1442,13 @@ static const char puhu_branch[12] = {1, 7, 8, 2, 9, 3, 10, 4, 11, 5, 0, 6};
  */
 static const char yihou_branch[12] = {5, 11, 0, 6, 1, 7, 2, 8, 3, 9, 4, 10};
 
+/* 續世 (XuShi): 日支 = 該月(節氣月)之續世支 (常在益後後一辰)。
+ * 《欽定協紀辨方書》卷六 義例四 樞要曆「續世者月中善神也,所值之日宜結婚姻
+ * 睦親族祀神祗求嗣續」; 曆例「續世者正月丑二月未三月寅四月申五月夘六月酉
+ * 七月辰八月戌九月巳十月亥十一月午十二月子」; 考原「續世者…常在益後後一辰」。
+ */
+static const char xushi_branch[12] = {6, 0, 1, 7, 2, 8, 3, 9, 4, 10, 5, 11};
+
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
               int wday, int suigz)
 {
@@ -1788,6 +1805,9 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
     case SS_YIHOU:
         /* 益後: 日支 == 該月(節氣月)之益後支 (正月子, 二月午 ... 十二月亥). */
         return dbranch == yihou_branch[mbranch];
+    case SS_XUSHI:
+        /* 續世: 日支 == 該月(節氣月)之續世支 (正月丑, 二月未 ... 十二月子). */
+        return dbranch == xushi_branch[mbranch];
     }
     return 0;
 }

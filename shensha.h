@@ -114,6 +114,7 @@ enum {
     SS_JINGAN,           /* 敬安   吉 */
     SS_PUHU,             /* 普護   吉 */
     SS_YIHOU,            /* 益後   吉 */
+    SS_XUSHI,            /* 續世   吉 */
     SS_COUNT
 };
 
