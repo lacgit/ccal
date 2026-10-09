@@ -201,6 +201,17 @@
  * 每一季之衰日論: 春季(寅卯辰月)以辰日、夏季(巳午未月)以未日、秋季(申酉戌月)以戌日、
  * 冬季(亥子丑月)以丑日」, 其日忌安葬嫁娶入宅.  Keyed to 節氣月/月建 mbranch
  * (同 月破/大耗/災煞/月厭/月刑/大時/天吏/血忌/血支/復日/天賊/歸忌/五墓/月煞).
+ *
+ * 月忌 (YueJi): 《欽定協紀辨方書》「月忌日」條 -- 曆例曰「月忌日,止注祭祀、宴會、
+ * 沐浴、整容、剃頭、整手足甲、求醫療病、補垣、掃舍宇、修飾垣牆、平治道塗、
+ * 破屋壞垣,餘事不注」; 齊東野語「俗以每月初五、十四、二十三日為月忌,凡事必避之,
+ * 其說不經 -- 此三日即河圖之中宮五宮五數耳,五為君象,故民庶不可用」;
+ * 通書「俗忌初五、十四、二十三,以五黃值日,配廉貞火,生起中宮之土也」;
+ * 考原「以其日為九五之數,自初一至初五五數也,自初五至十四、自十四至二十三
+ * 皆距九日,世不敢用,故忌也」; 《玉匣記》民俗吉凶日篇「月忌日 百事忌 --
+ * 初五十四二十三,年年月月在人間」.  Keyed to the 農曆 day (lmonth/lday),
+ * like 短星/楊公忌/三娘煞 (NOT the 節氣月/月建):
+ *   農曆 初五(5) 十四(14) 廿三(23) 日 -> 月忌 (閏月亦照該月之農曆日).
  */
 #include <string.h>
 #include "shensha.h"
@@ -359,6 +370,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xc8\xfd\x86\xca", "\xa4\x54\xb3\xe0",
       "\xe4\xb8\x89\xe4\xb8\xa7",
       "\xe4\xb8\x89\xe5\x96\xaa" },   /* 三喪 */
+    { "YueJi",
+      "\xd4\xc2\xbc\xc9", "\xa4\xeb\xa7\xd2",
+      "\xe6\x9c\x88\xe5\xbf\x8c",
+      "\xe6\x9c\x88\xe5\xbf\x8c" },   /* 月忌 */
 };
 
 int ShenShaCount(void)
@@ -590,6 +605,9 @@ static int yangjiang_front(int mbranch, int br)
    Index = season_of(mbranch): 春(寅卯辰)->辰(4) 夏(巳午未)->未(7)
    秋(申酉戌)->戌(10) 冬(亥子丑)->丑(1). */
 static const char sansang_branch[4] = {4, 7, 10, 1};
+/* 月忌 by 農曆 day: 每月 初五、十四、廿三 (see the header comment). */
+static const char yueji_day[3] = { 5, 14, 23 };
+
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
               int wday)
 {
@@ -706,6 +724,12 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
         return dbranch == (mbranch + 5) % 12;
     case SS_SANSANG:
         return dbranch == sansang_branch[season_of(mbranch)];
+    case SS_YUEJI:
+        /* 月忌: 農曆 初五、十四、廿三 (五黃值日). */
+        for (k = 0; k < 3; k++)
+            if (lday == yueji_day[k])
+                return 1;
+        return 0;
     }
     return 0;
 }
