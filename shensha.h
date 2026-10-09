@@ -60,6 +60,7 @@ enum {
     SS_DINANG,          /* 地囊   凶 */
     SS_WUXU,            /* 五虛   凶 */
     SS_JIESHA,             /* 劫煞   凶 */
+    SS_YOUHUO,             /* 遊禍   凶 */
     SS_COUNT
 };
 

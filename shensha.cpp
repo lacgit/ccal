@@ -304,6 +304,15 @@
  * 災煞為正衝,月煞為盡地」 -- 即該月三合局之絕辰:
  *   寅午戌月->亥日, 亥卯未月->申日, 申子辰月->巳日, 巳酉丑月->寅日
  * (index = mbranch 0=子..11=亥; 劫煞 = 災煞 前一辰).
+ *
+ * 遊禍 (YouHuo): 三合五行臨官之神 (對衝劫煞之位) -- 日支 = 月建三合局之臨官辰.
+ * 《欽定協紀辨方書》卷六 義例四: 神樞經曰「遊禍者,月中惡神也,其日忌服藥請醫
+ * 祝神致祭」; 李鼎祚曰「遊禍者,正月起巳,逆行四孟」; 曹震圭曰「遊禍者,
+ * 三合五行臨官之神,是對衝刼煞之位也」; 考原曰「以其流行於四隅故曰遊,
+ * 以其過旺故曰禍」.  卷十 宜忌: 「遊禍 忌祈福求嗣解除求醫療病」,
+ * 「與德合天赦併猶忌」.  孟支 巳→寅→亥→申 逐月逆行:
+ *   寅午戌月->巳日, 亥卯未月->寅日, 申子辰月->亥日, 巳酉丑月->申日
+ * (index = mbranch 0=子..11=亥; 遊禍 = 劫煞之對衝, 即該局之臨官).
  */
 #include <string.h>
 #include "shensha.h"
@@ -502,6 +511,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xbd\xd9\xc9\xb7", "\xa7\x54\xb7\xd9",
       "\xe5\x8a\xab\xe7\x85\x9e",
       "\xe5\x8a\xab\xe7\x85\x9e" },   /* 劫煞 */
+    { "YouHuo",
+      "\xd3\xce\xbb\xf6", "\xb9\x43\xba\xd7",
+      "\xe6\xb8\xb8\xe7\xa5\xb8",
+      "\xe9\x81\x8a\xe7\xa6\x8d" },   /* 遊禍 */
 };
 
 int ShenShaCount(void)
@@ -766,6 +779,10 @@ static const char wuxu_branch[4][3] = {
    index = mbranch 0=子..11=亥: 子月->巳, 丑月->寅, 寅月->亥, 卯月->申,
    辰月->巳, 巳月->寅, 午月->亥, 未月->申, 申月->巳, 酉月->寅, 戌月->亥, 亥月->申. */
 static const char jiesha_branch[12] = {5, 2, 11, 8, 5, 2, 11, 8, 5, 2, 11, 8};
+/* 遊禍 (YouHuo) -- see the header comment.  三合臨官 (劫煞之對衝),
+   index = mbranch 0=子..11=亥: 子月->亥, 丑月->申, 寅月->巳, 卯月->寅,
+   辰月->亥, 巳月->申, 午月->巳, 未月->寅, 申月->亥, 酉月->申, 戌月->巳, 亥月->寅. */
+static const char youhuo_branch[12] = {11, 8, 5, 2, 11, 8, 5, 2, 11, 8, 5, 2};
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
               int wday)
 {
@@ -924,6 +941,9 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
     case SS_JIESHA:
         /* 劫煞: 日支 == 該月三合局之絕地 (災煞前一辰). */
         return dbranch == jiesha_branch[mbranch];
+    case SS_YOUHUO:
+        /* 遊禍: 日支 == 該月三合局之臨官 (劫煞之對衝). */
+        return dbranch == youhuo_branch[mbranch];
     }
     return 0;
 }
