@@ -262,6 +262,27 @@
  * 《欽定協紀辨方書》卷四 義例二: 定〈時陰 官符 死氣〉; 卷十 宜忌別列「死氣」為所忌.
  * 六壬「死氣者,月建向前四位(即生氣對沖為死氣),正月在午、二月在未、三月申…」.
  * Keyed to the 節氣月/月建 (同其兄弟 月破/大耗/災煞/月厭/月刑/大時/天吏/血忌/死神).
+ *
+ * 地囊 (DiNang): the day whose 日柱 is one of the two 納甲 days of that month's
+ * 三合卦 (the internal and external initial 爻 / 世應 pair), keyed to the
+ * 節氣月/月建 like its siblings.  《欽定協紀辨方書》卷六 義例四 曆例
+ * 「地囊者 正月庚子庚午 二月癸未癸丑 三月甲子甲寅 四月己卯己丑
+ * 五月戊辰戊午 六月癸未癸巳 七月丙寅丙申 八月丁卯丁巳 九月戊辰戊子
+ * 十月庚戌庚子 十一月辛未辛酉 十二月乙酉乙未」 -- but the 四庫 傳本 is corrupt:
+ * the 協紀 按語 counts 23 of its 48 characters as 傳寫之誤 and rebuilds every month
+ * from 當時三合卦內外兩初爻之納甲 (春 亥卯未局 震坤乾 / 夏 寅午戌局 離乾艮 /
+ * 秋 巳酉丑局 兌艮巽 / 冬 申子辰局 坎巽坤; 一卦兩用者再用世應二爻):
+ *   正月 震 庚子庚午, 二月 坤 乙未癸丑, 三月 乾 甲子壬午, 四月 離 己卯己酉,
+ *   五月 乾(世應) 壬戌甲辰, 六月 艮 丙辰丙戌, 七月 兌 丁巳丁亥,
+ *   八月 艮(世應) 丙寅丙申, 九月 巽 辛丑辛未, 十月 坎 戊寅戊申,
+ *   十一月 巽(世應) 辛卯辛酉, 十二月 坤(世應) 癸酉乙卯.
+ * (協紀 辨訛 also lists 「七八月互易」 among the corruptions.)  Keyed to the
+ * 節氣月/月建 (mbranch 0=子..11=亥):
+ *   寅月->庚子/庚午日, 卯月->乙未/癸丑日, 辰月->甲子/壬午日, 巳月->己卯/己酉日,
+ *   午月->壬戌/甲辰日, 未月->丙辰/丙戌日, 申月->丁巳/丁亥日, 酉月->丙寅/丙申日,
+ *   戌月->辛丑/辛未日, 亥月->戊寅/戊申日, 子月->辛卯/辛酉日, 丑月->癸酉/乙卯日.
+ * 其日忌營建穿鑿.  The 通勝 oracle settles transmitted vs corrected: corrected
+ * matches 19 of the 22 printed 地囊 days, the transmitted list only 7.
  */
 #include <string.h>
 #include "shensha.h"
@@ -448,6 +469,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xcb\xc0\x9a\xe2", "\xa6\xba\xae\xf0",
       "\xe6\xad\xbb\xe6\xb0\x94",
       "\xe6\xad\xbb\xe6\xb0\xa3" },   /* 死氣 */
+    { "DiNang",
+      "\xb5\xd8\xc4\xd2", "\xa6\x61\xc5\x6e",
+      "\xe5\x9c\xb0\xe5\x9b\x8a",
+      "\xe5\x9c\xb0\xe5\x9b\x8a" },   /* 地囊 */
 };
 
 int ShenShaCount(void)
@@ -686,6 +711,14 @@ static const char yueji_day[3] = { 5, 14, 23 };
    months, index = mbranch 0=子 .. 11=亥 (see the header comment). */
 static const char tufu_branch[12] = {8, 0, 1, 5, 9, 2, 6, 10, 3, 7, 11, 4};
 
+/* 地囊 by 月建 (solar-term month): the two 納甲 日柱 of the month's 三合卦,
+   index = mbranch 0=子 .. 11=亥, value = 干支 index (甲子 = 0).  See the header
+   comment -- this is the 協紀 按語 corrected 曆例, not the 四庫 傳本. */
+static const char dinang_gz[12][2] = {
+    {27, 57}, { 9, 51}, {36,  6}, {31, 49}, { 0, 18}, {15, 45},
+    {58, 40}, {52, 22}, {53, 23}, { 2, 32}, {37,  7}, {14, 44}
+};
+
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
               int wday)
 {
@@ -828,6 +861,12 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
     case SS_SIQI:
         /* 死氣 = 月建前四辰 (建除「定」日). */
         return dbranch == (mbranch + 4) % 12;
+    case SS_DINANG:
+        /* 地囊: 日柱 = 該月(節氣月)三合卦兩初爻之納甲日 (九月辛丑辛未 ...). */
+        for (k = 0; k < 2; k++)
+            if (ganzhi == dinang_gz[mbranch][k])
+                return 1;
+        return 0;
     }
     return 0;
 }
