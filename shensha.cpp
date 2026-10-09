@@ -1000,6 +1000,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xbd\xf0\xcc\xc3", "\xaa\xf7\xb0\xf3",
       "\xe9\x87\x91\xe5\xa0\x82",
       "\xe9\x87\x91\xe5\xa0\x82" },   /* 金堂 */
+    { "QingLong",
+      "\xc7\xe0\xc1\xfa", "\xab\x43\xc0\x73",
+      "\xe9\x9d\x92\xe9\xbe\x99",
+      "\xe9\x9d\x92\xe9\xbe\x8d" },   /* 青龍 */
 };
 
 int ShenShaCount(void)
@@ -1474,6 +1478,10 @@ static const char shengxin_branch[12] = {4, 10, 11, 5, 0, 6, 1, 7, 2, 8, 3, 9};
    宜營建宫室興造修築」; 曆例「正月辰 二月戌 三月巳 四月亥 五月午 六月子 七月未 八月丑
    九月申 十月寅 十一月酉 十二月卯」; 曹震圭「金堂者建神安樂之堂也,常在玉宇之前」. */
 static const char jintang_branch[12] = {9, 3, 4, 10, 5, 11, 6, 0, 7, 1, 8, 2};
+/* 黃道十二神 (日家值日): 《欽定協紀辨方書》卷七 義例五 「黃道黑道」-- 神樞經「青龍明堂
+   金匱天德玉堂司命皆月内天黄道之神也…天刑朱雀白虎天牢元武勾陳者月中黑道也」; 御定星曆考原
+   「一青龍 二明堂 三天刑 四朱雀 五金匱 六天德 七白虎 八玉堂 九天牢 十元武 十一司命 十二勾陳;
+   寅申青龍起子, 卯酉起寅, 辰戌起辰, 巳亥起午, 子午起申, 丑未起戌, 順行十二辰」) */
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
               int wday, int suigz)
 {
@@ -1839,6 +1847,9 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
     case SS_JINTANG:
         /* 金堂: 日支 == 該月(節氣月)金堂辰 (正月辰 二月戌 三月巳 …). */
         return dbranch == jintang_branch[mbranch];
+    case SS_QINGLONG:
+        /* 青龍 = 黃道十二神第 1 神 (黃道吉神, 支 = 青龍支 + 0). */
+        return huangdao_index(mbranch, dbranch) == 0;
     }
     return 0;
 }

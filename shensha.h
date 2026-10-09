@@ -117,6 +117,7 @@ enum {
     SS_XUSHI,            /* 續世   吉 */
     SS_SHENGXIN,         /* 聖心   吉 */
     SS_JINTANG,
+    SS_QINGLONG,
     SS_COUNT
 };
 
