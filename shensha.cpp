@@ -549,6 +549,13 @@
  * 叙尊卑納禮儀行慶賜」; 曆例「敬安者正月未二月丑三月申四月寅五月酉六月夘
  * 七月戌八月辰九月亥十月巳十一月子十二月午」; 曹震圭「敬安者是隂陽相㑹之義」。
  *
+ *
+* 普護 (PuHu): 日支 = 該月(節氣月)之普護支 (常與要安相對)。
+ * 《欽定協紀辨方書》卷六 義例四 樞要曆「普䕶者神廕之神也,所值之日宜祭祀
+ * 禱祠尋醫避病」; 曆例「普䕶者正月申二月寅三月酉四月夘五月戌六月辰七月亥
+ * 八月巳九月子十月午十一月丑十二月未」; 曹震圭「普䕶者乃月中普䕶萬物無偏私
+ * 之神也,常與要安相對」。
+ *
  */
 #include <string.h>
 #include "shensha.h"
@@ -955,6 +962,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xbe\xb4\xb0\xb2", "\xb7\x71\xa6\x77",
       "\xe6\x95\xac\xe5\xae\x89",
       "\xe6\x95\xac\xe5\xae\x89" },   /* 敬安 */
+    { "PuHu",
+      "\xc6\xd5\xbb\xa4", "\xb4\xb6\xc5\x40",
+      "\xe6\x99\xae\xe6\x8a\xa4",
+      "\xe6\x99\xae\xe8\xad\xb7" },   /* 普護 */
 };
 
 int ShenShaCount(void)
@@ -1396,6 +1407,14 @@ static const char yaoan_branch[12] = {7, 1, 2, 8, 3, 9, 4, 10, 5, 11, 6, 0};
  */
 static const char jingan_branch[12] = {0, 6, 7, 1, 8, 2, 9, 3, 10, 4, 11, 5};
 
+/* 普護 (PuHu): 日支 = 該月(節氣月)之普護支 (常與要安相對)。
+ * 《欽定協紀辨方書》卷六 義例四 樞要曆「普䕶者神廕之神也,所值之日宜祭祀
+ * 禱祠尋醫避病」; 曆例「普䕶者正月申二月寅三月酉四月夘五月戌六月辰七月亥
+ * 八月巳九月子十月午十一月丑十二月未」; 曹震圭「普䕶者乃月中普䕶萬物無偏私
+ * 之神也,常與要安相對」。
+ */
+static const char puhu_branch[12] = {1, 7, 8, 2, 9, 3, 10, 4, 11, 5, 0, 6};
+
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
               int wday, int suigz)
 {
@@ -1746,6 +1765,9 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
     case SS_JINGAN:
         /* 敬安: 日支 == 該月(節氣月)之敬安支 (正月未, 二月丑 ... 十二月午). */
         return dbranch == jingan_branch[mbranch];
+    case SS_PUHU:
+        /* 普護: 日支 == 該月(節氣月)之普護支 (正月申, 二月寅 ... 十二月未). */
+        return dbranch == puhu_branch[mbranch];
     }
     return 0;
 }

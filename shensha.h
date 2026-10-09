@@ -112,6 +112,7 @@ enum {
     SS_WUFU,             /* 五富   吉 */
     SS_YAOAN,            /* 要安   吉 */
     SS_JINGAN,           /* 敬安   吉 */
+    SS_PUHU,             /* 普護   吉 */
     SS_COUNT
 };
 
