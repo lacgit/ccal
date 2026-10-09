@@ -529,6 +529,13 @@
  * 十月未十一月辰十二月酉」; 曹震圭「建陽之月在三合前辰…建隂之月在三合後辰」
  * (即 陽月取 定日/官符、陰月取 成日/白虎 之位)。
  *
+ *
+* 五富 (WuFu): 三合長生之六合 -- 寅午戌月→亥日、亥卯未月→寅日、
+ * 申子辰月→巳日、巳酉丑月→申日。
+ * 《欽定協紀辨方書》卷六 義例四 總要曆「五富者富盛之神也,其日宜興舉運動
+ * 估市經求」; 曆例「正月起亥順行四孟」; 曹震圭「寅午戌月火王喜亥中甲木而生…」;
+ * 協紀 按語「五富者三合長生之六合也」。
+ *
  */
 #include <string.h>
 #include "shensha.h"
@@ -923,6 +930,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xc1\xd9\xc8\xd5", "\xc1\x7b\xa4\xe9",
       "\xe4\xb8\xb4\xe6\x97\xa5",
       "\xe8\x87\xa8\xe6\x97\xa5" },   /* 臨日 */
+    { "WuFu",
+      "\xce\xe5\xb8\xbb", "\xa4\xad\xb4\x49",
+      "\xe4\xba\x94\xe5\xaf\x8c",
+      "\xe4\xba\x94\xe5\xaf\x8c" },   /* 五富 */
 };
 
 int ShenShaCount(void)
@@ -1341,6 +1352,14 @@ static const char wangri_branch[4] = {2, 5, 8, 11};
  */
 static const char linri_branch[12] = {4, 9, 6, 11, 8, 1, 10, 3, 0, 5, 2, 7};
 
+/* 五富 (WuFu): 三合長生之六合 -- 寅午戌月→亥日、亥卯未月→寅日、
+ * 申子辰月→巳日、巳酉丑月→申日。
+ * 《欽定協紀辨方書》卷六 義例四 總要曆「五富者富盛之神也,其日宜興舉運動
+ * 估市經求」; 曆例「正月起亥順行四孟」; 曹震圭「寅午戌月火王喜亥中甲木而生…」;
+ * 協紀 按語「五富者三合長生之六合也」。
+ */
+static const char wufu_branch[12] = {5, 8, 11, 2, 5, 8, 11, 2, 5, 8, 11, 2};
+
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
               int wday, int suigz)
 {
@@ -1682,6 +1701,9 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
     case SS_LINRI:
         /* 臨日: 日支 == 該月(節氣月)之臨日支 (正月午, 二月亥 ... 十二月酉). */
         return dbranch == linri_branch[mbranch];
+    case SS_WUFU:
+        /* 五富: 寅午戌月→亥 亥卯未月→寅 申子辰月→巳 巳酉丑月→申. */
+        return dbranch == wufu_branch[mbranch];
     }
     return 0;
 }
