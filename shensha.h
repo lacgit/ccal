@@ -66,6 +66,7 @@ enum {
     SS_GOUCHEN,            /* 勾陳   凶 */
     SS_BAIHU,              /* 白虎   凶 */
     SS_ZHUQUE,             /* 朱雀   凶 */
+    SS_TIANXING,           /* 天刑   凶 */
     SS_COUNT
 };
 
