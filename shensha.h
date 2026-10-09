@@ -58,6 +58,7 @@ enum {
     SS_JUJIANG,         /* 俱將   凶 */
     SS_SIQI,           /* 死氣   凶 */
     SS_DINANG,          /* 地囊   凶 */
+    SS_WUXU,            /* 五虛   凶 */
     SS_COUNT
 };
 

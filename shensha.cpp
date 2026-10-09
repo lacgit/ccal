@@ -283,6 +283,19 @@
  *   戌月->辛丑/辛未日, 亥月->戊寅/戊申日, 子月->辛卯/辛酉日, 丑月->癸酉/乙卯日.
  * 其日忌營建穿鑿.  The 通勝 oracle settles transmitted vs corrected: corrected
  * matches 19 of the 22 printed 地囊 days, the transmitted list only 7.
+ * 五虛 (WuXu): 凶.  《欽定協紀辨方書》卷五 義例 樞要曆
+ * 「五虚者四時絶辰也,其日忌開倉庫營種蒔出財寶施債負」;
+ * 曆例「五虚者春巳酉丑、夏申子辰、秋亥卯未、冬寅午戌也」;
+ * 曹震圭「五虚者四時逢絶之辰也,物絶則損朽其中虚而無實也,
+ * 故曰虚 -- 如春木旺巳酉丑金絶也, 夏火旺申子辰水絶也,
+ * 秋金旺亥卯未木絶也, 冬水旺寅午戌火絶也」;
+ * 卷十 宜忌「五虚 -- 忌修倉庫開倉庫出貨財」「與天德月德
+ * 天德合月德合六合併則不忌」.  So 五虛 = the day whose 日支 lies in the
+ * 三合局 of the branch that is 絶 in the current season (四時絶辰), keyed to the
+ * 節氣月/月建 like its siblings 月破/大耗/災煞/月厭/月刑/大時/天吏/血忌/血支/復日/
+ * 天賊/歸忌/五墓/月煞/月害/陽將/陰將:
+ *   春(寅卯辰月)->巳酉丑日, 夏(巳午未月)->申子辰日, 秋(申酉戌月)->亥卯未日,
+ *   冬(亥子丑月)->寅午戌日.
  */
 #include <string.h>
 #include "shensha.h"
@@ -473,6 +486,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xb5\xd8\xc4\xd2", "\xa6\x61\xc5\x6e",
       "\xe5\x9c\xb0\xe5\x9b\x8a",
       "\xe5\x9c\xb0\xe5\x9b\x8a" },   /* 地囊 */
+    { "WuXu",
+      "\xce\xe5\xd0\xe9", "\xa4\xad\xb5\xea",
+      "\xe4\xba\x94\xe8\x99\x9a",
+      "\xe4\xba\x94\xe8\x99\x9b" },   /* 五虛 */
 };
 
 int ShenShaCount(void)
@@ -719,6 +736,20 @@ static const char dinang_gz[12][2] = {
     {58, 40}, {52, 22}, {53, 23}, { 2, 32}, {37,  7}, {14, 44}
 };
 
+/* 五虛 by 節氣月/月建 (four-season 絶辰): see the header comment.
+   season_of(mbranch) = 0春 1夏 2秋 3冬; index = season, value = the three 日支
+   of the 三合局 of the 絶 branch of that season's 旺行:
+     春(寅卯辰月) -> 巳(5) 酉(9) 丑(1)   (木旺金絶)
+     夏(巳午未月) -> 申(8) 子(0) 辰(4)   (火旺水絶)
+     秋(申酉戌月) -> 亥(11) 卯(3) 未(7)  (金旺木絶)
+     冬(亥子丑月) -> 寅(2) 午(6) 戌(10)  (水旺火絶) */
+static const char wuxu_branch[4][3] = {
+    { 5, 9, 1},
+    { 8, 0, 4},
+    {11, 3, 7},
+    { 2, 6, 10}
+};
+
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
               int wday)
 {
@@ -867,6 +898,13 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
             if (ganzhi == dinang_gz[mbranch][k])
                 return 1;
         return 0;
+    case SS_WUXU:
+    {
+        /* 五虛: 日支 ∈ 四時絶辰之三合局 (春巳酉丑 夏申子辰 秋亥卯未 冬寅午戌). */
+        int s = season_of(mbranch);
+        return dbranch == wuxu_branch[s][0] || dbranch == wuxu_branch[s][1] ||
+               dbranch == wuxu_branch[s][2];
+    }
     }
     return 0;
 }
