@@ -556,6 +556,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xcb\xc4\xbc\xc9", "\xa5\x7c\xa7\xd2",
       "\xe5\x9b\x9b\xe5\xbf\x8c",
       "\xe5\x9b\x9b\xe5\xbf\x8c" },   /* 四忌 */
+    { "SiQiong",
+      "\xcb\xc4\xb8\x46", "\xa5\x7c\xbd\x61",
+      "\xe5\x9b\x9b\xe7\xaa\xae",
+      "\xe5\x9b\x9b\xe7\xaa\xae" },   /* 四窮 */
 };
 
 int ShenShaCount(void)
@@ -845,6 +849,9 @@ static int huangdao_index(int mbranch, int dbranch)
 /* 四忌: 春甲子 夏丙子 秋庚子 冬壬子 (協紀卷五 義例三 神煞起例). */
 static const char siji_gz[4] = {0, 12, 36, 48};
 
+/* 四窮: 春乙亥 夏丁亥 秋辛亥 冬癸亥 (協紀卷五 義例三 總要曆). */
+static const char siqiong_gz[4] = {11, 23, 47, 59};
+
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
               int wday)
 {
@@ -1033,6 +1040,10 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
         /* 四忌 (SiJi): 《欽定協紀辨方書》卷五 義例三 神煞起例「四忌 春甲子 夏丙子
            秋庚子 冬壬子」-- 本令陽干加於辰首(子), keyed to the season (節氣月). */
         return ganzhi == siji_gz[season_of(mbranch)];
+    case SS_SIQIONG:
+        /* 四窮 (SiQiong): 《欽定協紀辨方書》卷五 義例三 總要曆「四窮者謂亥為隂絶之辰,
+           以四時旺干臨之…曆例曰春乙亥 夏丁亥 秋辛亥 冬癸亥」, keyed to the season. */
+        return ganzhi == siqiong_gz[season_of(mbranch)];
     }
     return 0;
 }
