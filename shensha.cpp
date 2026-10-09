@@ -574,6 +574,12 @@
  * 行恩澤營百事」; 曆例「聖心者正月亥二月巳三月子四月午五月丑六月未七月寅
  * 八月申九月夘十月酉十一月辰十二月戌」; 曹震圭「勞而不敢安者聖人之心也」。
  *
+ *
+ * 水痕 (ShuiHen): 凶.  通書/《玉匣記》民俗吉凶日篇「水痕日」-- 忌造酒、合醬
+ * (通勝該日之忌另作 開渠、放水、新船進水): 大月 初一、初七、十一、十七、廿三、三十;
+ * 小月 初三、初七、十二、廿六 (玉匣記原文併載 大月/小月 兩表; 行船 忌日 亦引之).
+ * Keyed to the 農曆月/日 (lmonth/lday) 同其兄弟 月忌/短星/楊公忌/三娘煞, 但多一層
+ * 大月/小月 (該農曆月 29 or 30 日, 即 ShenShaOn/ShenShaMask 之 mlendays 參數).
  */
 #include <string.h>
 #include "shensha.h"
@@ -1008,6 +1014,11 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xc3\xf7\xcc\xc3", "\xa9\xfa\xb0\xf3",
       "\xe6\x98\x8e\xe5\xa0\x82",
       "\xe6\x98\x8e\xe5\xa0\x82" },   /* 明堂 */
+    { "ShuiHen",
+      "\xcb\xae\xba\xdb",
+      "\xa4\xf4\xb2\xaa",
+      "\xe6\xb0\xb4\xe7\x97\x95",
+      "\xe6\xb0\xb4\xe7\x97\x95" },   /* ShuiHen */
 };
 
 int ShenShaCount(void)
@@ -1486,8 +1497,14 @@ static const char jintang_branch[12] = {9, 3, 4, 10, 5, 11, 6, 0, 7, 1, 8, 2};
    金匱天德玉堂司命皆月内天黄道之神也…天刑朱雀白虎天牢元武勾陳者月中黑道也」; 御定星曆考原
    「一青龍 二明堂 三天刑 四朱雀 五金匱 六天德 七白虎 八玉堂 九天牢 十元武 十一司命 十二勾陳;
    寅申青龍起子, 卯酉起寅, 辰戌起辰, 巳亥起午, 子午起申, 丑未起戌, 順行十二辰」) */
+/* 水痕 (ShuiHen): 農曆日 -- 《玉匣記》民俗吉凶日篇「水痕日」: 大月 初一、初七、
+   十一、十七、廿三、三十; 小月 初三、初七、十二、廿六 (忌造酒、合醬; 通勝亦
+   以之忌開渠放水、新船進水).  大月/小月 以該農曆月之天數 (mlendays 29/30) 定之,
+   故需 ShenShaOn/ShenShaMask 之 mlendays 參數. */
+static const char shuihen_big[6] = {1, 7, 11, 17, 23, 30};
+static const char shuihen_small[4] = {3, 7, 12, 26};
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
-              int wday, int suigz)
+              int wday, int suigz, int mlendays)
 {
     int k, mm = mmonth_of(mbranch);
     switch (i)
@@ -1857,6 +1874,25 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
     case SS_MINGTANG:
         /* 明堂 = 黃道十二神第 2 神 (黃道吉神, 支 = 青龍支 + 1). */
         return huangdao_index(mbranch, dbranch) == 1;
+    case SS_SHUIHEN:
+    {
+        /* 水痕日 (玉匣記 民俗吉凶日篇): 大月 初一/初七/十一/十七/廿三/三十;
+           小月 初三/初七/十二/廿六.  唯一需 農曆月天數 (mlendays) 之神煞. */
+        if (mlendays == 30)
+        {
+            for (k = 0; k < 6; k++)
+                if (lday == shuihen_big[k])
+                    return 1;
+            return 0;
+        }
+        if (mlendays == 29)
+        {
+            for (k = 0; k < 4; k++)
+                if (lday == shuihen_small[k])
+                    return 1;
+        }
+        return 0;
+    }
     }
     return 0;
 }
@@ -1868,12 +1904,12 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
    them (gcc/clang on 64-bit; the rest of this table already assumes a 64-bit
    target for `1ULL`). */
 unsigned __int128 ShenShaMask(int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
-                               int wday, int suigz)
+                               int wday, int suigz, int mlendays)
 {
     int i;
     unsigned __int128 mask = 0;
     for (i = 0; i < SS_COUNT; i++)
-        if (ShenShaOn(i, lmonth, lday, ganzhi, mbranch, dbranch, wday, suigz))
+        if (ShenShaOn(i, lmonth, lday, ganzhi, mbranch, dbranch, wday, suigz, mlendays))
             mask |= (unsigned __int128)1 << i;
     return mask;
 }

@@ -292,12 +292,39 @@ static int ShenShaEnc(int nEncoding)
 }
 
 /* 神煞 bitmask of a day (see shensha.cpp for the table). */
+/* 農曆月天數 (29 or 30) of the lunar month that contains day jd (whose
+   農曆日 is lday), i.e. the distance to the following new moon.  vmoons
+   holds the new moons of the running year, lastnew the last new moon of the
+   previous year and nextnew the first of the next.  Returns 0 if unknown. */
+static int LunarMonthDaysOf(vdouble& vmoons, double lastnew, double nextnew,
+                            double jd, int lday)
+{
+    double start = jd - (lday - 1), next;
+    int i, n;
+    if (vmoons.empty())
+        return 0;
+    if (start < vmoons[0])
+        next = vmoons[0];
+    else
+    {
+        for (i = 0; i < (int)vmoons.size(); i++)
+            if (vmoons[i] == start)
+                break;
+        if (i == (int)vmoons.size())
+            return 0;
+        next = (i + 1 < (int)vmoons.size()) ? vmoons[i + 1] : nextnew;
+    }
+    n = int(next - start);
+    return (n == 29 || n == 30) ? n : 0;
+}
+
 static unsigned __int128 ShenShaOfDay(vdouble& vterms, int lmonth, int lday, int jd,
-                                        int year)
+                                        int year,
+                                       int mlendays)
 {
     return ShenShaMask(lmonth, lday, (int(jd) + 49) % 60,
                        GetMonthBranch(jd, vterms), (int(jd) + 1) % 12,
-                       (int(jd) + 1) % 7, GetSuiGanzhi(jd, vterms, year));
+                       (int(jd) + 1) % 7, GetSuiGanzhi(jd, vterms, year), mlendays);
 }
 
 /* Lunar month number (1..12, leap months keep their number) of a day in the
@@ -963,7 +990,8 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
                room for them, the HTML and XML month tables carry them. */
             unsigned __int128 ss = (bJianChu)
                      ? ShenShaOfDay(vterms, LunarMonthOfDay(vmonth, lastmon, moncnt, ldcnt),
-                                    ldcnt, jdcnt, year)
+                                    ldcnt, jdcnt, year,
+                                    LunarMonthDaysOf(vmoons, lastnew, nextnew, jdcnt, ldcnt))
                      : 0;
             char szSS[512];
             szSS[0] = 0;
@@ -1621,7 +1649,8 @@ void PrintMonthList(short int year, short int month, vdouble& vterms,
                room for them, the HTML and XML month tables carry them. */
             unsigned __int128 ss = (bJianChu)
                      ? ShenShaOfDay(vterms, LunarMonthOfDay(vmonth, lastmon, moncnt, ldcnt),
-                                    ldcnt, jdcnt, year)
+                                    ldcnt, jdcnt, year,
+                                    LunarMonthDaysOf(vmoons, lastnew, nextnew, jdcnt, ldcnt))
                      : 0;
             char szSS[512];
             szSS[0] = 0;
@@ -2388,7 +2417,8 @@ void PrintICalendar(short int year, short int month, short int day,
             /* 日柱 index (0=甲子): 真三娘煞 and the 干支 line both need it */
             int n = (int(jdcnt) + 49) % 60;
             int sup = IsSuiPo(jdcnt, vterms, year, (int(jdcnt) + 1) % 12);
-            unsigned __int128 ss = ShenShaOfDay(vterms, cmonth, ldcnt, jdcnt, year);
+            unsigned __int128 ss = ShenShaOfDay(vterms, cmonth, ldcnt, jdcnt, year,
+                LunarMonthDaysOf(vmoons, lastnew, nextnew, jdcnt, ldcnt));
             char szSS[512];
             szSS[0] = 0;
             if (ss != 0)
@@ -2601,7 +2631,8 @@ void PrintDayASCII(short int year, short int month, short int day,
     short int cmonth;
     char leap[2] = {0x00, 0x00};
     GetMonthNumber(mnum, cmonth, leap);
-    unsigned __int128 ss = ShenShaOfDay(vterms, cmonth, ldcnt, jdcnt, year);
+    unsigned __int128 ss = ShenShaOfDay(vterms, cmonth, ldcnt, jdcnt, year,
+                LunarMonthDaysOf(vmoons, lastnew, nextnew, jdcnt, ldcnt));
     char szSS[512];
     szSS[0] = 0;
     if (ss != 0)

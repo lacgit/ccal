@@ -12,6 +12,7 @@
      dbranch 日支 0=子..11=亥         (ccal: (int(jdcnt) + 1) % 12)
      wday    weekday 0=Sunday..6=Saturday (ccal: (int(jdcnt) + 1) % 7)
      suigz   太歲 60-甲子 index 0=甲子 (干支年: ccal GetSuiGanzhi(), 立春換歲)
+     mlendays  農曆月天數 29 or 30 (0 when unknown); 水痕/債不 need it
    enc: 'a' ASCII, 'g' GB/GBK ('GB2312' plus a few GBK-extension
  *   characters such as the 厭 in 月厭), 'b' Big5, 'u' UTF-8. */
 enum {
@@ -119,14 +120,15 @@ enum {
     SS_JINTANG,
     SS_QINGLONG,
     SS_MINGTANG, /* 明堂 吉 */
+    SS_SHUIHEN,   /* ShuiHen   凶 */
     SS_COUNT
 };
 
 int ShenShaCount(void);
 const char* ShenShaName(int i, int enc);
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
-              int wday, int suigz);
-unsigned __int128 ShenShaMask(int lmonth, int lday, int ganzhi, int mbranch, int dbranch, int wday, int suigz);
+              int wday, int suigz, int mlendays);
+unsigned __int128 ShenShaMask(int lmonth, int lday, int ganzhi, int mbranch, int dbranch, int wday, int suigz, int mlendays);
 void ShenShaText(unsigned __int128 mask, int enc, char* buf, int bufsize);
 
 #endif /* SHENSHA_H */
