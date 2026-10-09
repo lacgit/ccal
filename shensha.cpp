@@ -399,6 +399,16 @@
  * 卷五 義例三 五離條下 考原「按通書以申酉日為除神,與五合對衝之日也,宜沐浴祓除
  * 災眚」; 卷九 立成「日神取一定干支者: 五合 寅夘 / 除神〈五離〉申酉 / 重日 己亥」.
  * 日神, 不從月建起義.
+ *
+ * 陽錯 (YangCuo): 凶.  《欽定協紀辨方書》卷四 義例二「陽錯 隂錯 隂陽俱錯」引
+ * 堪輿經曰「以陽建之支配當方之干, 陰陽自相配合為日, 以值所衝之宿為陽錯 -- 如正月
+ * 陽建在寅, 近於甲, 支干相配為甲寅日, 寅衝於申, 故正月甲寅之日…為陽錯; 二月陽建
+ * 在夘…乙夘日…為陽錯; 三月陽建在辰…得甲辰日…為陽錯也; 餘月倣此」.  協紀按語
+ * 「陽建疊陽建為陽錯, 隂建疊隂建為隂錯, 五月十一月隂陽同建又疊同建之干為隂陽俱錯」.
+ * 故 陽錯 = 日柱 為 月建之支 配其當方之干 (陽支配陽干、陰支配陰干, 干取該方位之干):
+ *   寅月->甲寅日, 卯月->乙卯日, 辰月->甲辰日, 巳月->丁巳日, 午月->丙午日,
+ *   未月->丁未日, 申月->庚申日, 酉月->辛酉日, 戌月->庚戌日, 亥月->癸亥日,
+ *   子月->壬子日, 丑月->癸丑日.  Keyed to the 節氣月/月建 (mbranch) 與 日柱 (ganzhi).
  */
 #include <string.h>
 #include "shensha.h"
@@ -695,6 +705,11 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xb0\xcb\xef\x4c", "\xa4\x4b\xad\xb7",
       "\xe5\x85\xab\xe9\xa2\xa8",
       "\xe5\x85\xab\xe9\xa2\xa8" },   /* 八風 */
+    { "YangCuo",
+      "\xd1\xf4\xb4\xed",
+      "\xb6\xa7\xbf\xf9",
+      "\xe9\x98\xb3\xe9\x94\x99",
+      "\xe9\x99\xbd\xe9\x8c\xaf" },   /* YangCuo */
 };
 
 int ShenShaCount(void)
@@ -1019,6 +1034,11 @@ static const char hongsha_branch[12] = {5, 1, 9, 5, 1, 9, 5, 1, 9, 5, 1, 9};
 /* 八風: 春丁丑丁巳 夏甲申甲辰 秋丁未丁亥 冬甲戌甲寅 (協紀卷五 樞要曆 + 按語所正). */
 static const char bafeng_gz[4][2] = {{13, 53}, {20, 40}, {43, 23}, {10, 50}};
 
+/* 陽錯 / 陰錯 (YangCuo / YinCuo) -- 見檔頭: 日柱 == 該建之支配「當方之干」.
+   堪輿經 (協紀卷四 義例二 引) 以 陽建 (月建) 之支、陰建 (月厭) 之支 各配其方之干:
+   寅甲寅 卯乙卯 辰甲辰 巳丁巳 午丙午 未丁未 申庚申 酉辛酉 戌庚戌 亥癸亥 子壬子 丑癸丑.
+   Index = 支 0=子..11=亥; 五月(午月)/十一月(子月) 陰陽二建同辰 -> 無 陰錯陽錯. */
+static const char cuo_gz[12] = {48, 49, 50, 51, 40, 53, 42, 43, 56, 57, 46, 59};
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
               int wday, int suigz)
 {
@@ -1272,6 +1292,11 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
            甲戌日」-- 即五虛之三支去其正位, 配丁/甲. Keyed to the season (節氣月). */
         return ganzhi == bafeng_gz[season_of(mbranch)][0] ||
                ganzhi == bafeng_gz[season_of(mbranch)][1];
+    case SS_YANGCUO:
+        /* 陽錯: 日柱 == 陽建(月建)之支所配之干 (五月/十一月陰陽同建, 無). */
+        if (mbranch == 0 || mbranch == 6)
+            return 0;
+        return ganzhi == cuo_gz[mbranch];
     }
     return 0;
 }

@@ -85,6 +85,7 @@ enum {
     SS_CHUSHEN,          /* 除神 */
     SS_JIUJIAO,         /* 九焦   凶 */
     SS_BAFENG,          /* 八風   凶 */
+    SS_YANGCUO,   /* YangCuo   凶 */
     SS_COUNT
 };
 
