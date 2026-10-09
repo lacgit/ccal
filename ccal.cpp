@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <string.h>
+#include <stdarg.h>
 #include "lunaryear.h"
 #include "htmlmonth.h"
 #include "psmonth.h"
@@ -2275,6 +2276,29 @@ void JieQiMonthLabel(int termidx, int enc, char* out)
     strcat(out, (*CHmiscchar)[14]);                     /* 月 */
 }
 
+/* Bounded append helper for the iCalendar block below.  Behaves like
+   sprintf(buf + used, fmt, ...) but never writes more than `cap` bytes
+   (including the terminating NUL) and returns the new used length, so an
+   over-long 神煞 list can no longer overflow the SUMMARY / DESCRIPTION
+   buffers (the previous code appended with an unbounded sprintf(), which
+   for a ~220-byte 神煞 list ran past szSum[160] and corrupted the stack). */
+static int AppendBounded(char* buf, int cap, int used, const char* fmt, ...)
+{
+    if (used < 0)
+        used = 0;
+    if (used >= cap - 1)
+        return cap - 1;
+    va_list ap;
+    va_start(ap, fmt);
+    int n = vsnprintf(buf + used, (size_t)(cap - used), fmt, ap);
+    va_end(ap);
+    if (n < 0)
+        return used;
+    if (n > cap - 1 - used)
+        n = cap - 1 - used;         /* truncated: stay in bounds */
+    return used + n;
+}
+
 /* Escape a string for an iCalendar TEXT property value (RFC 5545). */
 void IcsEscape(const char* in, char* out, int outsize)
 {
@@ -2360,7 +2384,7 @@ void PrintICalendar(short int year, short int month, short int day,
     struct tm *tmnow = gmtime(&now);
     strftime(szStamp, sizeof(szStamp), "%Y%m%dT%H%M%SZ", tmnow);
 
-    char line[1700];   /* fits DESCRIPTION: + szEsc[1600] before folding */
+    char line[8300];   /* fits DESCRIPTION: + szEsc[8200] before folding */
     printf("BEGIN:VCALENDAR\r\n");
     printf("VERSION:2.0\r\n");
     printf("PRODID:-//chinesebay//ccal %s//EN\r\n", versionstr);
@@ -2413,7 +2437,7 @@ void PrintICalendar(short int year, short int month, short int day,
 
             if (day == 0 || dcnt == day)
             {
-            char szSum[160], szDesc[1024], szEsc[1600];
+            char szSum[1024], szDesc[4096], szEsc[8200];
             /* 日柱 index (0=甲子): 真三娘煞 and the 干支 line both need it */
             int n = (int(jdcnt) + 49) % 60;
             int sup = IsSuiPo(jdcnt, vterms, year, (int(jdcnt) + 1) % 12);
@@ -2425,7 +2449,7 @@ void PrintICalendar(short int year, short int month, short int day,
                 ShenShaText(ss, 'u', szSS, sizeof(szSS));
             /* SUMMARY: 農曆日 [節氣 HH:MM] [建除] [四離/四絕] [三娘煞] */
             int sl = 0;
-            sl += sprintf(szSum + sl, "%s%s", (ldcnt == 1) ? cmonname : "", cdayname);
+            sl = AppendBounded(szSum, sizeof(szSum), sl, "%s%s", (ldcnt == 1) ? cmonname : "", cdayname);
             if (bTerm)
             {
                 int hr, min, sec;
@@ -2435,32 +2459,32 @@ void PrintICalendar(short int year, short int month, short int day,
                 /* without 建除 the 節氣月 stays with the 節氣; with 建除 it
                    moves to right after the 建除 field below */
                 if (bJianChu)
-                    sl += sprintf(szSum + sl, " %s %02d:%02d",
+                    sl = AppendBounded(szSum, sizeof(szSum), sl, " %s %02d:%02d",
                                   (*CHjieqi)[termcnt], hr, min);
                 else
-                    sl += sprintf(szSum + sl, " %s %02d:%02d （%s）",
+                    sl = AppendBounded(szSum, sizeof(szSum), sl, " %s %02d:%02d （%s）",
                                   (*CHjieqi)[termcnt], hr, min, szJQ);
             }
             int lj = bJianChu ? GetLiJue(jdcnt, vterms) : 0;
             if (bJianChu)
             {
                 int jc = GetJianChu(jdcnt, vterms);
-                sl += sprintf(szSum + sl, " %s%s",
+                sl = AppendBounded(szSum, sizeof(szSum), sl, " %s%s",
                               JianChuName(jc, 'u'), JianChuField(1, jc, 'u'));
                 if (bTerm)                    /* 節氣月, 建除之后 */
                 {
                     char szJQ[24];
                     JieQiMonthLabel(termcnt, 'u', szJQ);
-                    sl += sprintf(szSum + sl, " （%s）", szJQ);
+                    sl = AppendBounded(szSum, sizeof(szSum), sl, " （%s）", szJQ);
                 }
                 if (sup != 0)                 /* 歲破, 建除之后 */
-                    sl += sprintf(szSum + sl, " %s", SuiPoName('u'));
+                    sl = AppendBounded(szSum, sizeof(szSum), sl, " %s", SuiPoName('u'));
                 if (lj != 0)
-                    sl += sprintf(szSum + sl, " %s", LiJueName(lj - 1, 'u'));
+                    sl = AppendBounded(szSum, sizeof(szSum), sl, " %s", LiJueName(lj - 1, 'u'));
             }
             /* 三娘煞 標於建除之后 */
             if (ss != 0)
-                sl += sprintf(szSum + sl, " %s", szSS);
+                sl = AppendBounded(szSum, sizeof(szSum), sl, " %s", szSS);
 
             /* DESCRIPTION */
             int dl = 0;
@@ -2475,49 +2499,49 @@ void PrintICalendar(short int year, short int month, short int day,
             int ystem = (year - 4) % 10;
             if (jdcnt < vterms[2])
                 ystem = (ystem - 1 + 10) % 10;
-            dl += sprintf(szDesc + dl, "農曆：%s%s（%s%s年 %s%s月）\n", cmonname, cdayname,
+            dl = AppendBounded(szDesc, sizeof(szDesc), dl, "農曆：%s%s（%s%s年 %s%s月）\n", cmonname, cdayname,
                           (*CHtiangan)[cyear % 10], (*CHdizhi)[cyear % 12],
                           (*CHtiangan)[GetMonthStem(ystem, mbranch)],
                           (*CHdizhi)[mbranch]);
-            dl += sprintf(szDesc + dl, "干支：%s%s日\n",
+            dl = AppendBounded(szDesc, sizeof(szDesc), dl, "干支：%s%s日\n",
                           (*CHtiangan)[n % 10], (*CHdizhi)[n % 12]);
             if (bJianChu)
             {
                 int jc = GetJianChu(jdcnt, vterms);
                 const char* pyi = JianChuField(3, jc, 'u');
                 const char* pji = JianChuField(4, jc, 'u');
-                dl += sprintf(szDesc + dl, "建除：%s日（%s）\n",
+                dl = AppendBounded(szDesc, sizeof(szDesc), dl, "建除：%s日（%s）\n",
                               JianChuName(jc, 'u'), JianChuField(1, jc, 'u'));
                 if (bTerm)                    /* 節氣月, 建除之后 */
                 {
                     char szJQ[24];
                     JieQiMonthLabel(termcnt, 'u', szJQ);
-                    dl += sprintf(szDesc + dl, "節氣月：%s\n", szJQ);
+                    dl = AppendBounded(szDesc, sizeof(szDesc), dl, "節氣月：%s\n", szJQ);
                 }
                 if (sup != 0)                 /* 歲破, 建除之后 */
-                    dl += sprintf(szDesc + dl, "%s（諸事不宜）\n", SuiPoName('u'));
+                    dl = AppendBounded(szDesc, sizeof(szDesc), dl, "%s（諸事不宜）\n", SuiPoName('u'));
                 if (lj != 0)
-                    dl += sprintf(szDesc + dl, "%s（諸事不宜）\n", LiJueName(lj - 1, 'u'));
+                    dl = AppendBounded(szDesc, sizeof(szDesc), dl, "%s（諸事不宜）\n", LiJueName(lj - 1, 'u'));
                 if (ss != 0)
-                    dl += sprintf(szDesc + dl, "神煞：%s\n", szSS);
+                    dl = AppendBounded(szDesc, sizeof(szDesc), dl, "神煞：%s\n", szSS);
                 if (pyi != 0 && pyi[0] != 0)
-                    dl += sprintf(szDesc + dl, "宜：%s\n", pyi);
+                    dl = AppendBounded(szDesc, sizeof(szDesc), dl, "宜：%s\n", pyi);
                 if (pji != 0 && pji[0] != 0)
-                    dl += sprintf(szDesc + dl, "忌：%s\n", pji);
+                    dl = AppendBounded(szDesc, sizeof(szDesc), dl, "忌：%s\n", pji);
                 /* 時辰吉凶, with hh:mm ranges for reference */
                 int db = (int(jdcnt) + 1) % 12;
                 int yb = (lyear - 4) % 12;
                 if (yb < 0)
                     yb += 12;
-                dl += sprintf(szDesc + dl, "時辰吉凶：\n");
+                dl = AppendBounded(szDesc, sizeof(szDesc), dl, "時辰吉凶：\n");
                 for (int h = 0; h < 12; h++)
-                    dl += sprintf(szDesc + dl, "%s時 %s%s %s %s\n",
+                    dl = AppendBounded(szDesc, sizeof(szDesc), dl, "%s時 %s%s %s %s\n",
                                   (*CHdizhi)[h],
                                   (*CHtiangan)[GetHourStem(n % 10, h)], (*CHdizhi)[h],
                                   ShiChenHHMM(h), ShiChenJixiong(h, db, yb, 'u'));
             }
             if (!bJianChu && ss != 0)
-                dl += sprintf(szDesc + dl, "神煞：%s\n", szSS);
+                dl = AppendBounded(szDesc, sizeof(szDesc), dl, "神煞：%s\n", szSS);
             if (bTerm)
             {
                 int hr, min, sec;
@@ -2526,11 +2550,11 @@ void PrintICalendar(short int year, short int month, short int day,
                 if (!bJianChu)
                 {
                     JieQiMonthLabel(termcnt, 'u', szJQ);
-                    dl += sprintf(szDesc + dl, "節氣：%s %02d:%02d （%s）\n",
+                    dl = AppendBounded(szDesc, sizeof(szDesc), dl, "節氣：%s %02d:%02d （%s）\n",
                                   (*CHjieqi)[termcnt], hr, min, szJQ);
                 }
                 else
-                    dl += sprintf(szDesc + dl, "節氣：%s %02d:%02d\n",
+                    dl = AppendBounded(szDesc, sizeof(szDesc), dl, "節氣：%s %02d:%02d\n",
                                   (*CHjieqi)[termcnt], hr, min);
             }
             /* Drop the trailing newline: keeps the last fold clean */
@@ -2548,9 +2572,9 @@ void PrintICalendar(short int year, short int month, short int day,
             printf("DTSTAMP:%s\r\n", szStamp);
             printf("DTSTART;VALUE=DATE:%04d%02d%02d\r\n", year, m, dcnt);
             printf("DTEND;VALUE=DATE:%04d%02d%02d\r\n", ny, nm, nd);
-            sprintf(line, "SUMMARY:%s", szSum);
+            snprintf(line, sizeof(line), "SUMMARY:%s", szSum);
             IcsLine(line);
-            sprintf(line, "DESCRIPTION:%s", szEsc);
+            snprintf(line, sizeof(line), "DESCRIPTION:%s", szEsc);
             IcsLine(line);
             printf("CATEGORIES:農曆\r\n");
             printf("TRANSP:TRANSPARENT\r\n");
