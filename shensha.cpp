@@ -322,6 +322,16 @@
  *   寅月->辰日, 卯月->卯日, 辰月->寅日, 巳月->丑日, 午月->子日, 未月->亥日,
  *   申月->戌日, 酉月->酉日, 戌月->申日, 亥月->未日, 子月->午日, 丑月->巳日
  * (index = mbranch 0=子..11=亥).  卷十 宜忌「厭對忌嫁娶,又為招搖忌取魚乘船渡水」.
+ *
+ * 咸池 (XianChi): 凶.  《欽定協紀辨方書》卷五 義例三 引淮南子「斗柄為小歲…
+ * 咸池為大歲, 正月建夘, 月從右行四仲, 終而復始」, 又「大時者, 咸池也;
+ * 小時者, 月建也」; 神樞經「大時者, 將軍之象也, 所值之日忌出軍、攻戰、築室、會親」;
+ * 李鼎祚「大時者正月起夘, 逆行四仲」; 曹震圭「大時者, 乃月建三合五行沐浴之辰也,
+ * 蓋五行至此則敗絕, 是最凶之辰也」.  故 咸池 = 大時 = 月建三合局之沐浴位
+ * (亦即 桃花/四仲 之位): 寅午戌月->卯日, 亥卯未月->子日, 申子辰月->酉日,
+ * 巳酉丑月->午日.  Keyed to the 節氣月/月建 (mbranch) 與 日支 (dbranch),
+ * 同其兄弟 大時/月破/大耗/災煞/月厭/月刑.  四本通勝 兩名並用: 印 咸池 的 31 日 中
+ * 27 日 同時 (或另日) 見 大時 之名.
  */
 #include <string.h>
 #include "shensha.h"
@@ -568,6 +578,11 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xbe\xc5\xbf\xb2", "\xa4\x45\xa7\xa2",
       "\xe4\xb9\x9d\xe5\x9d\x8e",
       "\xe4\xb9\x9d\xe5\x9d\x8e" },   /* 九坎 */
+    { "XianChi",
+      "\xcf\xcc\xb3\xd8",
+      "\xab\x77\xa6\xc0",
+      "\xe5\x92\xb8\xe6\xb1\xa0",
+      "\xe5\x92\xb8\xe6\xb1\xa0" },   /* XianChi */
 };
 
 int ShenShaCount(void)
@@ -866,6 +881,7 @@ static const char jiukong_branch[12] = {10, 7, 4, 1, 10, 7, 4, 1, 10, 7, 4, 1};
 /* 九坎/九焦: 正月在辰逆行四季、五月在卯逆行四仲、九月在寅逆行四孟 (協紀卷五 廣聖曆). */
 static const char jiukan_branch[12] = {8, 5, 4, 1, 10, 7, 3, 0, 9, 6, 2, 11};
 
+/* 咸池 (XianChi) -- 見檔頭: 與 大時 同辰 (月建三合局之沐浴位), 即 `dashi_branch`. */
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
               int wday)
 {
@@ -1071,6 +1087,9 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
            午月卯日 未月子日 申月酉日 酉月午日 戌月寅日 亥月亥日 子月申日 丑月巳日),
            keyed to the 節氣月/月建. */
         return dbranch == jiukan_branch[mbranch];
+    case SS_XIANCHI:
+        /* 咸池 = 大時: 日支 == 月建三合局之沐浴位 (協紀卷五 "大時者咸池也"). */
+        return dbranch == dashi_branch[mbranch];
     }
     return 0;
 }
