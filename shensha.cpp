@@ -560,6 +560,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xcb\xc4\xb8\x46", "\xa5\x7c\xbd\x61",
       "\xe5\x9b\x9b\xe7\xaa\xae",
       "\xe5\x9b\x9b\xe7\xaa\xae" },   /* 四窮 */
+    { "JiuKong",
+      "\xbe\xc5\xbf\xd5", "\xa4\x45\xaa\xc5",
+      "\xe4\xb9\x9d\xe7\xa9\xba",
+      "\xe4\xb9\x9d\xe7\xa9\xba" },   /* 九空 */
 };
 
 int ShenShaCount(void)
@@ -852,6 +856,9 @@ static const char siji_gz[4] = {0, 12, 36, 48};
 /* 四窮: 春乙亥 夏丁亥 秋辛亥 冬癸亥 (協紀卷五 義例三 總要曆). */
 static const char siqiong_gz[4] = {11, 23, 47, 59};
 
+/* 九空: 正月在辰逆行四季 (辰丑戌未循環), keyed to 月建 (協紀卷五 廣聖曆). */
+static const char jiukong_branch[12] = {10, 7, 4, 1, 10, 7, 4, 1, 10, 7, 4, 1};
+
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
               int wday)
 {
@@ -1044,6 +1051,12 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
         /* 四窮 (SiQiong): 《欽定協紀辨方書》卷五 義例三 總要曆「四窮者謂亥為隂絶之辰,
            以四時旺干臨之…曆例曰春乙亥 夏丁亥 秋辛亥 冬癸亥」, keyed to the season. */
         return ganzhi == siqiong_gz[season_of(mbranch)];
+    case SS_JIUKONG:
+        /* 九空 (JiuKong): 《欽定協紀辨方書》卷五 義例三 廣聖曆「九空者月内殺神也,
+           其日忌修造倉庫出入貨財」+ 曆例「九空者正月在辰逆行四季」; 曹震圭
+           「九空者墓庫破散之神也…今歴家所傳與九坎九焦同行者非」-- 即月建三合局之
+           墓辰受衝 (寅午戌月火庫戌, 辰衝之). Keyed to the 節氣月/月建. */
+        return dbranch == jiukong_branch[mbranch];
     }
     return 0;
 }
