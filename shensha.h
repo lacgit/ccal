@@ -46,6 +46,7 @@ enum {
     SS_CHONGRI,         /* 重日   凶 */
     SS_FANZHI,          /* 反支   凶 */
     SS_HUOXING,         /* 火星   凶 */
+    SS_YINJIANG,        /* 陰將   凶 */
     SS_COUNT
 };
 

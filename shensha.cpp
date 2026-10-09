@@ -158,6 +158,14 @@
  *   (陽將/陰將 are the 凶 halves of the 不將 family; the 不將 day lists of 卷四 are
  *   reproduced exactly by 不將 = 日支 ∈ 後區\{月厭} 且 祿(日干) ∈ 前區.)
  *
+ * 陰將 (YinJiang): 同段 曆例 -- 陽將/陰將 是 陰陽不將 家族的一對凶日.
+ *   「厭後支幹自相配者為陰將」 -> 陰將 = 日支 ∈ 後區 且 日干之祿支 ∈ 後區,
+ *   月厭 A = (12 - 月建) mod 12;  後區(支) = {A+1 .. A+5},
+ *   後區(干) = 祿支 ∈ {A .. A+5} (甲寅 乙卯 丙巳 丁午 戊丑 己未 庚申 辛酉 壬亥 癸子).
+ *   「支幹自相配」 取 日支 與 日干之祿支 同區; 後區 只取 A+1..A+5 (月厭自身與其沖 厭對
+ *   不取), 與 卷四 不將 日表 的取法一致 (該表列出的正月至十二月不將日, 用
+ *   不將 = 日支 ∈ 後區\{月厭} 且 祿 ∈ 前區 全部對中).  陽將傷夫, 陰將傷婦,
+ *   其日忌嫁娶.  Keyed to the 節氣月/月建 like its siblings. *
  * 火星 (HuoXing): the day whose 日柱 is one of the month's 火星日, keyed to the
  * solar-term month (節氣月/月建) like its siblings 月破/大耗/災煞/月厭/月刑/
  * 大時/天吏/血忌/血支/復日/天賊/歸忌/五墓.  通書/《玉匣記》民俗吉凶日篇「火星日」
@@ -309,6 +317,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xb7\xb4\xd6\xa7", "\xa4\xcf\xa4\xe4",
       "\xe5\x8f\x8d\xe6\x94\xaf",
       "\xe5\x8f\x8d\xe6\x94\xaf" },   /* 反支 */
+    { "YinJiang",
+      "\xea\x8e\x8c\xa2", "\xb3\xb1\xb1\x4e",
+      "\xe9\x98\xb4\xe5\xb0\x86",
+      "\xe9\x99\xb0\xe5\xb0\x87" },   /* 陰將 */
     { "HuoXing",
       "\xbb\xf0\xd0\xc7", "\xa4\xf5\xac\x50",
       "\xe7\x81\xab\xe6\x98\x9f",
@@ -507,6 +519,27 @@ static const char huoxing_gz[3][7] = {
     { 1, 10, 19, 28, 37, 46, 55}
 };
 
+/* 陰將 (YinJiang) -- see the header comment.  祿支 of the 日干 (identical table to
+   陽將's): 甲寅 乙卯 丙巳 丁午 戊丑 己未 庚申 辛酉 壬亥 癸子, index = 干 0=甲..9=癸. */
+static const char yinjiang_lu[10] = {2, 3, 5, 6, 1, 7, 8, 9, 11, 0};
+
+/* 1 when branch br lies in the 陰將 支 後區: 月厭 A = (12 - mbranch) mod 12,
+   後區 = {A+1 .. A+5} (月厭 itself and its 沖 厭對 excluded -- the same取法 as the
+   卷四 不將 day lists, which never fall on a 月厭/厭對 支). */
+static int yinjiang_back5(int mbranch, int br)
+{
+    int o = (br - (12 - mbranch) % 12 + 12) % 12;
+    return o >= 1 && o <= 5;
+}
+
+/* 1 when branch br lies in the 陰將 干 後區: 月厭 A, 後區 = {A .. A+5}
+   (the 干 half includes the 月厭 位, mirroring 陽將's 前區 which includes 厭對). */
+static int yinjiang_back6(int mbranch, int br)
+{
+    int o = (br - (12 - mbranch) % 12 + 12) % 12;
+    return o >= 0 && o <= 5;
+}
+
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
               int wday)
 {
@@ -605,6 +638,10 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
         int s = ((dbranch - lday + 1) % 12 + 12) % 12;
         return lday == 6 - s / 2;
     }
+    case SS_YINJIANG:
+        /* 陰將: 日支 ∈ 後區 (月厭+1..+5) 且 日干之祿支 ∈ 後區 (月厭..+5). */
+        return yinjiang_back5(mbranch, dbranch) &&
+               yinjiang_back6(mbranch, yinjiang_lu[ganzhi % 10]);
     case SS_HUOXING:
         /* 通書/玉匣記 火星日: 日柱 == 該月(孟/仲/季)之火星干支. */
         for (k = 0; k < 7; k++)
