@@ -92,6 +92,7 @@ enum {
     SS_SIXIANG,                  /* 四相   吉 */
     SS_SHIDE,                    /* 時德   吉 */
     SS_TIANXI,                   /* 天喜   吉 */
+    SS_TIANYI,                   /* 天醫   吉 */
     SS_COUNT
 };
 

@@ -440,6 +440,10 @@
  *   二月亥、三月子、四月丑順輪十二月, 乃日支與月建三合故曰天喜…與成日同位」;
  *   協紀 按「今通書與宗鏡皆以成日為天喜…故改從畫一」; 卷十 宜忌「成日〈天喜 天醫〉」.
  *   按 節氣月/月建 mbranch keying.
+ * 天醫 (TianYi): 日支 = 月建+8, 即建除之「成」日.  《欽定協紀辨方書》卷四
+ *   建除十二神所合叢辰「成〈天醫 天喜〉」+ 總要曆「天醫者天之巫醫…」+ 曆例
+ *   「天醫者正月起戌順行十二辰」; 曹震圭「天醫者三合後辰, 能使萬物死而復生」;
+ *   卷十 宜忌「成日…乂為天醫宜求醫療病」.  按 節氣月/月建 mbranch keying.
  */
 #include <string.h>
 #include "shensha.h"
@@ -765,6 +769,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xcc\xec\xcf\xb2", "\xa4\xd1\xb3\xdf",
       "\xe5\xa4\xa9\xe5\x96\x9c",
       "\xe5\xa4\xa9\xe5\x96\x9c" },   /* 天喜 */
+    { "TianYi",
+      "\xcc\xec\xd2\xbd", "\xa4\xd1\xc2\xe5",
+      "\xe5\xa4\xa9\xe5\x8c\xbb",
+      "\xe5\xa4\xa9\xe9\x86\xab" },   /* 天醫 */
 };
 
 int ShenShaCount(void)
@@ -1398,6 +1406,9 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
         return dbranch == shide_branch[season_of(mbranch)];
     case SS_TIANXI:
         /* 天喜: 日支 = 月建+8 (= 建除 成日; 選擇宗鏡「與成日同位」, 協紀改從成日). */
+        return dbranch == (mbranch + 8) % 12;
+    case SS_TIANYI:
+        /* 天醫: 日支 = 月建+8 (= 建除 成日; 曆例「正月起戌順行十二辰」). */
         return dbranch == (mbranch + 8) % 12;
     }
     return 0;
