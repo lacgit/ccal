@@ -37,6 +37,14 @@
  * (節氣月/月建) like its siblings 月破/大耗/災煞/月厭/月刑:
    寅月->卯日, 卯月->子日, 辰月->酉日, 巳月->午日, 午月->卯日, 未月->子日,
    申月->酉日, 酉月->午日, 戌月->卯日, 亥月->子日, 子月->酉日, 丑月->午日.
+ *
+ * 天吏 (TianLi): 《欽定協紀辨方書》卷五 義例三 -- 樞要曆曰"天吏者,月中凶神也,
+ * 其日忌臨官赴任,遠行詞訟", 曆例曰"天吏者,正月起酉,逆行四仲", 曹震圭曰"天吏
+ * 者,三合五行死氣之位"; 卷十 宜忌 "按天吏又名致死,為三合死地".  So the day
+ * whose 日支 is the 死 position of the month's 三合局, keyed to the 節氣月/月建
+ * like its siblings 月破/大耗/災煞/月厭/月刑 (寅申巳亥月->危日, 辰戌丑未月->閉日,
+ * 子午卯酉月->平日 -- the 建除 officer the rule lands on, also per 卷十):
+ *   寅午戌月->酉日, 亥卯未月->午日, 巳酉丑月->子日, 申子辰月->卯日.
  */
 #include <string.h>
 #include "shensha.h"
@@ -123,6 +131,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xb4\xf3\xca\xb1", "\xa4\x6a\xae\xc9",
       "\xe5\xa4\xa7\xe6\x97\xb6",
       "\xe5\xa4\xa7\xe6\x99\x82" },   /* 大時 */
+    { "TianLi",
+      "\xcc\xec\xc0\xf4", "\xa4\xd1\xa6\x4f",
+      "\xe5\xa4\xa9\xe5\x90\x8f",
+      "\xe5\xa4\xa9\xe5\x90\x8f" },   /* 天吏 */
 };
 
 int ShenShaCount(void)
@@ -236,6 +248,13 @@ static const char yuexing_branch[12] = {3, 10, 5, 0, 4, 8, 6, 1, 2, 9, 7, 11};
      戌(10)->卯(3) 亥(11)->子(0) 子(0)->酉(9)  丑(1)->午(6) */
 static const char dashi_branch[12] = {9, 6, 3, 0, 9, 6, 3, 0, 9, 6, 3, 0};
 
+/* 天吏 by 月建 (solar-term month): the day whose 日支 is the 死 position of
+   that month's 三合局 (三合之死地/死氣 = "正月起酉逆行四仲").  Index = mbranch
+   0=子..11=亥:
+     寅午戌(2,6,10)->酉(9)  亥卯未(11,3,7)->午(6)
+     巳酉丑(5,9,1)->子(0)    申子辰(8,0,4)->卯(3) */
+static const char tianli_branch[12] = {3, 0, 9, 6, 3, 0, 9, 6, 3, 0, 9, 6};
+
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch)
 {
     int k, mm = mmonth_of(mbranch);
@@ -292,6 +311,8 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch)
         return dbranch == yuexing_branch[mbranch];
     case SS_DASHI:
         return dbranch == dashi_branch[mbranch];
+    case SS_TIANLI:
+        return dbranch == tianli_branch[mbranch];
     }
     return 0;
 }
