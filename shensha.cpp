@@ -536,6 +536,13 @@
  * 估市經求」; 曆例「正月起亥順行四孟」; 曹震圭「寅午戌月火王喜亥中甲木而生…」;
  * 協紀 按語「五富者三合長生之六合也」。
  *
+ *
+* 要安 (YaoAn): 日支 = 該月(節氣月)之要安支 (九神之一, 自要安至續世凡九神
+ * 皆以六隂月與六陽月對衝起例)。
+ * 《欽定協紀辨方書》卷六 義例四 樞要曆「要安者月中吉神也,所值之日宜
+ * 安撫邊境修葺城隍」; 曆例「要安者正月寅二月申三月夘四月酉五月辰六月戌
+ * 七月巳八月亥九月午十月子十一月未十二月丑也」。
+ *
  */
 #include <string.h>
 #include "shensha.h"
@@ -934,6 +941,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xce\xe5\xb8\xbb", "\xa4\xad\xb4\x49",
       "\xe4\xba\x94\xe5\xaf\x8c",
       "\xe4\xba\x94\xe5\xaf\x8c" },   /* 五富 */
+    { "YaoAn",
+      "\xd2\xaa\xb0\xb2", "\xad\x6e\xa6\x77",
+      "\xe8\xa6\x81\xe5\xae\x89",
+      "\xe8\xa6\x81\xe5\xae\x89" },   /* 要安 */
 };
 
 int ShenShaCount(void)
@@ -1360,6 +1371,14 @@ static const char linri_branch[12] = {4, 9, 6, 11, 8, 1, 10, 3, 0, 5, 2, 7};
  */
 static const char wufu_branch[12] = {5, 8, 11, 2, 5, 8, 11, 2, 5, 8, 11, 2};
 
+/* 要安 (YaoAn): 日支 = 該月(節氣月)之要安支 (九神之一, 自要安至續世凡九神
+ * 皆以六隂月與六陽月對衝起例)。
+ * 《欽定協紀辨方書》卷六 義例四 樞要曆「要安者月中吉神也,所值之日宜
+ * 安撫邊境修葺城隍」; 曆例「要安者正月寅二月申三月夘四月酉五月辰六月戌
+ * 七月巳八月亥九月午十月子十一月未十二月丑也」。
+ */
+static const char yaoan_branch[12] = {7, 1, 2, 8, 3, 9, 4, 10, 5, 11, 6, 0};
+
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
               int wday, int suigz)
 {
@@ -1704,6 +1723,9 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
     case SS_WUFU:
         /* 五富: 寅午戌月→亥 亥卯未月→寅 申子辰月→巳 巳酉丑月→申. */
         return dbranch == wufu_branch[mbranch];
+    case SS_YAOAN:
+        /* 要安: 日支 == 該月(節氣月)之要安支 (正月寅, 二月申 ... 十二月丑). */
+        return dbranch == yaoan_branch[mbranch];
     }
     return 0;
 }

@@ -110,6 +110,7 @@ enum {
     SS_WANGRI,           /* 王日   吉 */
     SS_LINRI,            /* 臨日   吉 */
     SS_WUFU,             /* 五富   吉 */
+    SS_YAOAN,            /* 要安   吉 */
     SS_COUNT
 };
 
