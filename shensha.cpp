@@ -430,6 +430,11 @@
  *   《欽定協紀辨方書》卷五 義例三 總要曆「四相者四時王相之辰也…」+ 曆例
  *   「春丙丁、夏戊己、秋壬癸、冬甲乙」; 曹震圭「四相者養育之道, 母生子也」;
  *   卷十 宜忌「月恩 四相 時德 宜祭祀祈福…」.  按 節氣月/月建 mbranch keying.
+ * 時德 (ShiDe, 亦名 四時天德): 日支 = 該四時所生之陽辰 -- 春(寅卯辰月)->午日,
+ *   夏(巳午未月)->辰日, 秋(申酉戌月)->子日, 冬(亥子丑月)->寅日.  《欽定協紀
+ *   辨方書》卷五 義例三 總要曆「四時天德者四序中德神也…亦名時德」+ 曆例
+ *   「春午、夏辰、秋子、冬寅」; 曹震圭「子寅辰午乃東方生育之陽辰…」; 按
+ *   「時德與四相同義, 春木生午火…四相取天干時德取地支」.  按節氣月/月建 keying.
  */
 #include <string.h>
 #include "shensha.h"
@@ -747,6 +752,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xcb\xc4\xcf\xe0", "\xa5\x7c\xac\xdb",
       "\xe5\x9b\x9b\xe7\x9b\xb8",
       "\xe5\x9b\x9b\xe7\x9b\xb8" },   /* 四相 */
+    { "ShiDe",
+      "\xca\xb1\xb5\xc2", "\xae\xc9\xbc\x77",
+      "\xe6\x97\xb6\xe5\xbe\xb7",
+      "\xe6\x99\x82\xe5\xbe\xb7" },   /* 時德 */
 };
 
 int ShenShaCount(void)
@@ -1090,6 +1099,9 @@ static const char yueen_stem[12] = {0, 7, 2, 3, 6, 5, 4, 7, 8, 9, 6, 1};
 /* 四相 by 四時 (月建) -> 日干: 春丙丁 夏戊己 秋壬癸 冬甲乙. */
 static const char sixiang_stem[4][2] = {{2, 3}, {4, 5}, {8, 9}, {0, 1}};
 
+/* 時德 by 四時 (月建) -> 日支: 春午 夏辰 秋子 冬寅. */
+static const char shide_branch[4] = {6, 4, 0, 2};
+
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
               int wday, int suigz)
 {
@@ -1372,6 +1384,9 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
         for (k = 0; k < 2; k++) if (ganzhi % 10 == t[k]) return 1;
         return 0;
     }
+    case SS_SHIDE:
+        /* 時德: 日支 = 該四時所生之陽辰 (春午/夏辰/秋子/冬寅). */
+        return dbranch == shide_branch[season_of(mbranch)];
     }
     return 0;
 }

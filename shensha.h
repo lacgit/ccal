@@ -90,6 +90,7 @@ enum {
     SS_MUCANG,                   /* 母倉   吉 */
     SS_YUEEN,                    /* 月恩   吉 */
     SS_SIXIANG,                  /* 四相   吉 */
+    SS_SHIDE,                    /* 時德   吉 */
     SS_COUNT
 };
 
