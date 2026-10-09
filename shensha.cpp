@@ -1099,6 +1099,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xcc\xec\xb2\xd6", "\xa4\xd1\xad\xdc",
       "\xe5\xa4\xa9\xe4\xbb\x93",
       "\xe5\xa4\xa9\xe5\x80\x89" },   /* 天倉 */
+    { "FuDuan",
+      "\xb7\xfc\x94\xe0", "\xa5\xf1\xc2\x5f",
+      "\xe4\xbc\x8f\xe6\x96\xb7",
+      "\xe4\xbc\x8f\xe6\x96\xb7" },   /* 伏斷 */
 };
 
 /* 三合 (SanHe) by 月建: 日支 = 月建三合局之另外兩辰 = {mbranch+4, mbranch+8}. */
@@ -1606,6 +1610,20 @@ static const char bazhuan_gz[5] = {43, 55, 56, 50, 49};
 /* 天倉: 日支 == 該月(節氣月)天倉辰 -- 《欽定協紀辨方書》卷六 義例四 總要曆「天倉者
    天庫之神也,其日可以修倉庫受賞賜納財牧養」; 曆例「天倉者正月起寅逆行十二辰」. */
 static const char tiancang_branch[12] = {4, 3, 2, 1, 0, 11, 10, 9, 8, 7, 6, 5};
+/* 值宿 = (jdn-17) mod 28 indexed [wday][日支] (ccal: wday=(int(jd)+1)%7). */
+static const char fuduan_su[7][12] = {
+    { 10,  3, 24, 17, 10,  3, 24, 17, 10,  3, 24, 17 },
+    { 18, 11,  4, 25, 18, 11,  4, 25, 18, 11,  4, 25 },
+    { 26, 19, 12,  5, 26, 19, 12,  5, 26, 19, 12,  5 },
+    {  6, 27, 20, 13,  6, 27, 20, 13,  6, 27, 20, 13 },
+    { 14,  7,  0, 21, 14,  7,  0, 21, 14,  7,  0, 21 },
+    { 22, 15,  8,  1, 22, 15,  8,  1, 22, 15,  8,  1 },
+    {  2, 23, 16,  9,  2, 23, 16,  9,  2, 23, 16,  9 },
+};
+/* 伏斷日: 日支對應之宿 (協紀卷三十六 辨譌「伏斷日宻日裁衣日」條之「隔四取之」表,
+   卯值女為傳寫之誤之訂正): 子虛 丑斗 寅室 卯女 辰箕 巳房 午角 未張 申鬼 酉觜 戌胃 亥壁. */
+static const char fuduan_branch[12] = {10, 7, 12, 9, 6, 3, 0, 25, 22, 19, 16, 13};
+
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
               int wday, int suigz, int mlendays)
 {
@@ -2042,6 +2060,12 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
     case SS_TIANCANG:
         /* 天倉: 日支 == 該月天倉辰 (正月寅 逆行十二辰). */
         return dbranch == tiancang_branch[mbranch];
+    case SS_FUDUAN:
+        /* 伏斷 (FuDuan): 《欽定協紀辨方書》卷三十六 辨譌「伏斷日宻日裁衣日皆以值宿起算,
+           查二十八宿選擇之法來自西域…八十四日而一周」-- 該日之值宿(二十八宿值日)等於
+           日支所配之宿 (戌胃酉觜申鬼未張午角巳房辰箕卯女寅室丑斗子虛亥壁), 八十四日
+           (＝3×28＝7×12) 而一周. 值宿 = (jdn-17) mod 28; 由 (日支,星期) 唯一決定. */
+        return fuduan_su[wday][dbranch] == fuduan_branch[dbranch];
     }
     return 0;
 }

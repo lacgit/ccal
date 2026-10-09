@@ -133,6 +133,7 @@ enum {
     SS_BAZHUAN,         /* 八專   凶 */
     SS_TIANFU, /* 天符 吉 */
     SS_TIANCANG, /* 天倉 吉 */
+    SS_FUDUAN,          /* 伏斷   凶 */
     SS_COUNT
 };
 
