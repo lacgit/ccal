@@ -496,6 +496,15 @@
  * 異文: 四庫本注「今易為王日」-- 通書間有把官日/王日互易者(見王日條),
  * 本表採 協紀 按語所主之舊說(王日寅巳申亥、官日卯午酉子), 與四年通勝 DB 相合。
  *
+ *
+* 守日 (ShouRi): 四序當王之土神 (春辰 夏未 秋戌 冬丑), 按節氣月所屬季節。
+ * 《欽定協紀辨方書》卷五 義例三「至於春辰夏未秋戌冬丑者,四序當王之土神也,
+ * 故曰守日,守封疆之臣用之」; 協紀 又按「曆例以春酉夏子秋卯冬午為守日,
+ * 以春辰夏未秋戌冬丑為牢日,邵泰衢…謂守與牢二字相近而訛易之,則吉凶各以類聚,
+ * 且與五勝義恰符,甚為有理,今從之」-- 故 協紀 定 守日 = 辰未戌丑。
+ * 異文: 曆例 守日 = 春酉夏子秋卯冬午; 四年通勝 DB 印 辰未戌丑 之日,
+ * 與 協紀 改正本相合 (亦即 三喪 之辰位)。
+ *
  */
 #include <string.h>
 #include "shensha.h"
@@ -870,6 +879,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xb9\xd9\xc8\xd5", "\xa9\x78\xa4\xe9",
       "\xe5\xae\x98\xe6\x97\xa5",
       "\xe5\xae\x98\xe6\x97\xa5" },   /* 官日 */
+    { "ShouRi",
+      "\xca\xd8\xc8\xd5", "\xa6\x75\xa4\xe9",
+      "\xe5\xae\x88\xe6\x97\xa5",
+      "\xe5\xae\x88\xe6\x97\xa5" },   /* 守日 */
 };
 
 int ShenShaCount(void)
@@ -1250,6 +1263,16 @@ static const char fusheng_branch[12] = {2, 8, 9, 3, 10, 4, 11, 5, 0, 6, 1, 7};
  */
 static const char guanri_branch[4] = {3, 6, 9, 0};
 
+/* 守日 (ShouRi): 四序當王之土神 (春辰 夏未 秋戌 冬丑), 按節氣月所屬季節。
+ * 《欽定協紀辨方書》卷五 義例三「至於春辰夏未秋戌冬丑者,四序當王之土神也,
+ * 故曰守日,守封疆之臣用之」; 協紀 又按「曆例以春酉夏子秋卯冬午為守日,
+ * 以春辰夏未秋戌冬丑為牢日,邵泰衢…謂守與牢二字相近而訛易之,則吉凶各以類聚,
+ * 且與五勝義恰符,甚為有理,今從之」-- 故 協紀 定 守日 = 辰未戌丑。
+ * 異文: 曆例 守日 = 春酉夏子秋卯冬午; 四年通勝 DB 印 辰未戌丑 之日,
+ * 與 協紀 改正本相合 (亦即 三喪 之辰位)。
+ */
+static const char shouri_branch[4] = {4, 7, 10, 1};
+
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
               int wday, int suigz)
 {
@@ -1576,6 +1599,9 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
     case SS_GUANRI:
         /* 官日: 春卯 夏午 秋酉 冬子 (season_of(mbranch)). */
         return dbranch == guanri_branch[season_of(mbranch)];
+    case SS_SHOURI:
+        /* 守日: 春辰 夏未 秋戌 冬丑 (協紀改正本; season_of(mbranch)). */
+        return dbranch == shouri_branch[season_of(mbranch)];
     }
     return 0;
 }
