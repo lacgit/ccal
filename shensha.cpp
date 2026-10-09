@@ -471,6 +471,12 @@
  *   申月->甲辰日, 酉月->乙卯日, 戌月->甲寅日, 亥月->癸丑日, 丑月->癸亥日;
  *   午月/子月 (陰陽二建同辰) 無 陰錯陽錯 (該日為 陰陽俱錯: 五月丙午、十一月壬子).
  * Keyed to the 節氣月/月建 (mbranch, 經 月厭) 與 日柱 (ganzhi).
+ *
+* 福生 (FuSheng): 日支 = 該月(節氣月)之福生支。
+ * 《欽定協紀辨方書》卷六 義例四 樞要曆「福生者月中福神也,所值之日宜
+ * 祈福求恩祀神致祭」; 曆例「福生者正月酉二月夘三月戌四月辰五月亥六月巳
+ * 七月子八月午九月丑十月未十一月寅十二月申」。
+ *
  */
 #include <string.h>
 #include "shensha.h"
@@ -829,6 +835,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xd4\xc2\xbf\xd5", "\xa4\xeb\xaa\xc5",
       "\xe6\x9c\x88\xe7\xa9\xba",
       "\xe6\x9c\x88\xe7\xa9\xba" },   /* 月空 */
+    { "FuSheng",
+      "\xb8\xa3\xc9\xfa", "\xba\xd6\xa5\xcd",
+      "\xe7\xa6\x8f\xe7\x94\x9f",
+      "\xe7\xa6\x8f\xe7\x94\x9f" },   /* 福生 */
 };
 
 int ShenShaCount(void)
@@ -1182,6 +1192,13 @@ static const char shide_branch[4] = {6, 4, 0, 2};
    申子辰月丙 巳酉丑月甲」; 曆神原始「月德自南而東丙甲壬庚, 月空自北而西壬庚丙甲, 乃天德之衝神也」
    (寅甲 卯乙 辰戊 巳丙 午丁 未己 申庚 酉辛 戌戊 亥壬 子癸 丑己 之沖). 宜上表章. */
 static const char yuekong_stem[12] = {2, 0, 8, 6, 2, 0, 8, 6, 2, 0, 8, 6};
+/* 福生 (FuSheng): 日支 = 該月(節氣月)之福生支。
+ * 《欽定協紀辨方書》卷六 義例四 樞要曆「福生者月中福神也,所值之日宜
+ * 祈福求恩祀神致祭」; 曆例「福生者正月酉二月夘三月戌四月辰五月亥六月巳
+ * 七月子八月午九月丑十月未十一月寅十二月申」。
+ */
+static const char fusheng_branch[12] = {2, 8, 9, 3, 10, 4, 11, 5, 0, 6, 1, 7};
+
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
               int wday, int suigz)
 {
@@ -1496,6 +1513,9 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
     case SS_YUEKONG:
         /* 月空 = 日干 為月德之五合(沖)干 (寅午戌月壬/亥卯未月庚/申子辰月丙/巳酉丑月甲). */
         return (ganzhi % 10) == yuekong_stem[mbranch];
+    case SS_FUSHENG:
+        /* 福生: 日支 == 該月(節氣月)之福生支 (正月酉, 二月夘 ... 十二月申). */
+        return dbranch == fusheng_branch[mbranch];
     }
     return 0;
 }
