@@ -586,6 +586,11 @@
  * 曆例「正月在午戌 二月在未亥 三月在子申 四月在丑酉 五月在寅戌 六月在卯亥 七月在子辰 八月在丑巳 九月在寅午
  * 十月在卯未 十一月在辰申 十二月在丑巳」考原「三合者各與其月建會成三合局也」.  通勝吉神欄之「三合」印於此;
  * 另有「歲支三合」(日支與太歲成三合, 見 SS_SUIZHI) 亦印「三合」二字.
+ * 六合 (LiuHe): 日支 = 月建(節氣月)之六合.  《欽定協紀辨方書》卷六 義例四 神樞經
+ * 「六合者日月合宿之辰也,其日宜會賓客結婚姻立契劵合交易」李鼎祚「正月在亥逆行十二辰」
+ * (寅月->亥, 卯月->戌, 辰月->酉, 巳月->申, 午月->未, 未月->午, 申月->巳, 酉月->辰, 戌月->卯, 亥月->寅,
+ * 子月->丑, 丑月->子)考原「六合者月建與月將相合也」.  通勝吉神欄之「六合」印於此;
+ * 「歲支六合」(日支與太歲六合, 見 SS_SUIZHI) 亦印之.
  *
  */
 #include <string.h>
@@ -1042,6 +1047,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xc8\xfd\xba\xcf", "\xa4\x54\xa6\x58",
       "\xe4\xb8\x89\xe5\x90\x88",
       "\xe4\xb8\x89\xe5\x90\x88" },   /* 三合   吉 */
+    { "LiuHe",
+      "\xc1\xf9\xba\xcf", "\xa4\xbb\xa6\x58",
+      "\xe5\x85\xad\xe5\x90\x88",
+      "\xe5\x85\xad\xe5\x90\x88" },   /* 六合   吉 */
 };
 
 /* 三合 (SanHe) by 月建: 日支 = 月建三合局之另外兩辰 = {mbranch+4, mbranch+8}. */
@@ -1049,6 +1058,10 @@ static int sanhe_branch(int mbranch, int br)
 {
     return br == (mbranch + 4) % 12 || br == (mbranch + 8) % 12;
 }
+
+/* 六合 (LiuHe) by 月建: 日支 = 月建之六合 = (1 - mbranch) mod 12.
+   Index = mbranch 子..亥 -> 丑子亥戌酉申未午巳辰卯寅. */
+static const char liuhe_branch[12] = { 1, 0, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2 };
 
 int ShenShaCount(void)
 {
@@ -1934,6 +1947,9 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
     case SS_SANHE:
         /* 三合: 日支 = 月建三合局之另外兩辰 (見檔頭 三合). */
         return sanhe_branch(mbranch, dbranch);
+    case SS_LIUHE:
+        /* 六合: 日支 = 月建之六合 (見檔頭 六合). */
+        return dbranch == liuhe_branch[mbranch];
     }
     return 0;
 }

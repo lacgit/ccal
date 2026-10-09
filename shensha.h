@@ -125,6 +125,7 @@ enum {
     SS_BAOGUANG, /* 寶光 吉 */
     SS_YUTANG, /* 玉堂 吉 */
     SS_SANHE,            /* 三合   吉 */
+    SS_LIUHE,            /* 六合   吉 */
     SS_COUNT
 };
 
