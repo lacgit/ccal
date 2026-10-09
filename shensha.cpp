@@ -30,6 +30,13 @@
    寅->巳(5), 卯->子(0), 辰->辰(4), 巳->申(8),
    午->午(6), 未->丑(1), 申->寅(2), 酉->酉(9),
    戌->未(7), 亥->亥(11), 子->卯(3), 丑->戌(10).
+ *
+ * 大時 (DaShi): the day whose 日支 sits on the 咸池/桃花 position of the
+ * month's 三合局 (曹震圭 "大時者乃月建三合五行沐浴之辰也"; 李鼎祚 "大時者
+ * 正月起卯逆行四仲" -- 卯/子/酉/午 cycle), keyed to the solar-term month
+ * (節氣月/月建) like its siblings 月破/大耗/災煞/月厭/月刑:
+   寅月->卯日, 卯月->子日, 辰月->酉日, 巳月->午日, 午月->卯日, 未月->子日,
+   申月->酉日, 酉月->午日, 戌月->卯日, 亥月->子日, 子月->酉日, 丑月->午日.
  */
 #include <string.h>
 #include "shensha.h"
@@ -112,6 +119,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xd4\xc2\xd0\xcc", "\xa4\xeb\xa6\x44",
       "\xe6\x9c\x88\xe5\x88\x91",
       "\xe6\x9c\x88\xe5\x88\x91" },   /* 月刑 */
+    { "DaShi",
+      "\xb4\xf3\xca\xb1", "\xa4\x6a\xae\xc9",
+      "\xe5\xa4\xa7\xe6\x97\xb6",
+      "\xe5\xa4\xa7\xe6\x99\x82" },   /* 大時 */
 };
 
 int ShenShaCount(void)
@@ -218,6 +229,13 @@ static const char yueyan_branch[12] = {0, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1};
      申->寅(2), 酉->酉(9), 戌->未(7), 亥->亥(11) */
 static const char yuexing_branch[12] = {3, 10, 5, 0, 4, 8, 6, 1, 2, 9, 7, 11};
 
+/* 大時 by 月建 (solar-term month): "正月起卯逆行四仲" (咸池/桃花 position,
+   月建三合五行沐浴之辰).  Index = mbranch 0=子..11=亥:
+     寅(2)->卯(3)  卯(3)->子(0)  辰(4)->酉(9)  巳(5)->午(6)
+     午(6)->卯(3)  未(7)->子(0)  申(8)->酉(9)  酉(9)->午(6)
+     戌(10)->卯(3) 亥(11)->子(0) 子(0)->酉(9)  丑(1)->午(6) */
+static const char dashi_branch[12] = {9, 6, 3, 0, 9, 6, 3, 0, 9, 6, 3, 0};
+
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch)
 {
     int k, mm = mmonth_of(mbranch);
@@ -272,6 +290,8 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch)
         return dbranch == yueyan_branch[mbranch];
     case SS_YUEXING:
         return dbranch == yuexing_branch[mbranch];
+    case SS_DASHI:
+        return dbranch == dashi_branch[mbranch];
     }
     return 0;
 }
