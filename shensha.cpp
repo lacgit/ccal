@@ -821,6 +821,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xb3\xb1\xbf\xf9",
       "\xe9\x98\xb4\xe9\x94\x99",
       "\xe9\x99\xb0\xe9\x8c\xaf" },   /* YinCuo */
+    { "YinDe",
+      "\xd2\xf5\xb5\xc2", "\xb3\xb1\xbc\x77",
+      "\xe9\x98\xb4\xe5\xbe\xb7",
+      "\xe9\x99\xb0\xe5\xbe\xb7" },   /* 陰德 */
 };
 
 int ShenShaCount(void)
@@ -1478,6 +1482,9 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
         if (mbranch == 0 || mbranch == 6)
             return 0;
         return ganzhi == cuo_gz[yueyan_branch[mbranch]];
+    case SS_YINDE:
+        /* 陰德: 日支 = (13 - 2*月建) mod 12 (正月酉 逆行六辰循環). */
+        return dbranch == (13 - 2 * mbranch + 24) % 12;
     }
     return 0;
 }
