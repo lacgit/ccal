@@ -40,6 +40,7 @@ enum {
     SS_TIANZEI,         /* 天賊   凶 */
     SS_GUIJI,           /* 歸忌   凶 */
     SS_YUESHA,          /* 月煞   凶 */
+    SS_YANGJIANG,       /* 陽將   凶 */
     SS_DUANXING,        /* 短星   凶 */
     SS_MIRI,            /* 密日   凶 */
     SS_CHONGRI,         /* 重日   凶 */

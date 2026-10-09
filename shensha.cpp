@@ -147,6 +147,16 @@
  * 按 「反支之義, 惡其將盡也」 -- 反支 = 該農曆月的第 (6 - 朔支/2) 日
  * (朔支 子丑=六日, 寅夘=五日, 辰巳=四日, 午未=三日, 申酉=二日, 戌亥=一日).
  * 唯一按月朔 (農曆月) 取日數的神煞 -- 與 月建(節氣月)-keyed 的兄弟不同.
+ *
+ * 陽將 (YangJiang): 《欽定協紀辨方書》卷四 義例二 天寶曆「陰陽不將者,以月建為陽謂之陽建(正月起寅順行十二辰),
+ * 月厭為陰謂之陰建(正月起戌逆行十二辰); 分於卯酉,會於子午。厭前枝幹自相配者為陽將,厭後枝幹自相配者為陰將;
+ * 厭後幹配厭前枝者為陰陽俱將,厭前幹配厭後枝者為陰陽不將也。陽將傷夫,陰將傷婦」。  Keyed to the 節氣月/月建 like its
+ * siblings (月破/大耗/災煞/月厭/月刑/大時/天吏/血忌/血支/復日/天賊/歸忌/五墓):
+ *   月厭 A = (12 - 月建) mod 12;  前區 = {A+6 .. A+11} (6 辰), 後區 = {A .. A+5};
+ *   「自相配」 = the day's 日支 AND the 日干's 祿支 (甲寅 乙卯 丙巳 丁午 戊丑 己未 庚申 辛酉 壬亥 癸子)
+ *   both lie in 前區 -- so 陽將 = 日支 ∈ 前區 且 祿(日干) ∈ 前區.
+ *   (陽將/陰將 are the 凶 halves of the 不將 family; the 不將 day lists of 卷四 are
+ *   reproduced exactly by 不將 = 日支 ∈ 後區\{月厭} 且 祿(日干) ∈ 前區.)
  */
 #include <string.h>
 #include "shensha.h"
@@ -265,6 +275,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xd4\xc2\xc9\xb7", "\xa4\xeb\xb7\xd9",
       "\xe6\x9c\x88\xe7\x85\x9e",
       "\xe6\x9c\x88\xe7\x85\x9e" },   /* 月煞 */
+    { "YangJiang",
+      "\xea\x96\x8c\xa2", "\xb6\xa7\xb1\x4e",
+      "\xe9\x98\xb3\xe5\xb0\x86",
+      "\xe9\x99\xbd\xe5\xb0\x87" },   /* 陽將 */
     { "DuanXing",
       "\xb6\xcc\xd0\xc7", "\xb5\x75\xac\x50",
       "\xe7\x9f\xad\xe6\x98\x9f",
@@ -536,6 +550,9 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
         return dbranch == guiji_branch[mbranch];
     case SS_YUESHA:
         return dbranch == yuesha_branch[mbranch];
+    case SS_YANGJIANG:
+        return yangjiang_front(mbranch, dbranch) &&
+               yangjiang_front(mbranch, yangjiang_lu[ganzhi % 10]);
     case SS_DUANXING:
         for (k = 0; k < 14; k++)
             if (lmonth == duanxing_mon[k] && lday == duanxing_day[k])
