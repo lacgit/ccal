@@ -103,6 +103,7 @@ enum {
     SS_FUSHENG,          /* 福生   吉 */
     SS_FUDE,             /* 福德   吉 */
     SS_JIQI,             /* 吉期   吉 */
+    SS_GUANRI,           /* 官日   吉 */
     SS_COUNT
 };
 

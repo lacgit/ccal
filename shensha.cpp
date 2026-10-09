@@ -489,6 +489,13 @@
  * 總要曆「吉期者吉慶之神也,所值之日宜出軍行師攻城寨興弔伐㑹親姻」,
  * 曆例「常居月建前一辰也」; 曹震圭「吉期者是月建腹心同契之侍臣也」。
  *
+ *
+* 官日 (GuanRi): 四時臨官之辰 (春卯 夏午 秋酉 冬子), 按節氣月所屬季節。
+ * 《欽定協紀辨方書》卷五 義例三 壇經「王官相民守日者皆月内視事之吉辰也」;
+ * 曆例「官日者春卯夏午秋酉冬子」(曹震圭「官日者四時臨官之辰,諸侯之象」)。
+ * 異文: 四庫本注「今易為王日」-- 通書間有把官日/王日互易者(見王日條),
+ * 本表採 協紀 按語所主之舊說(王日寅巳申亥、官日卯午酉子), 與四年通勝 DB 相合。
+ *
  */
 #include <string.h>
 #include "shensha.h"
@@ -859,6 +866,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xbc\xaa\xc6\xda", "\xa6\x4e\xb4\xc1",
       "\xe5\x90\x89\xe6\x9c\x9f",
       "\xe5\x90\x89\xe6\x9c\x9f" },   /* 吉期 */
+    { "GuanRi",
+      "\xb9\xd9\xc8\xd5", "\xa9\x78\xa4\xe9",
+      "\xe5\xae\x98\xe6\x97\xa5",
+      "\xe5\xae\x98\xe6\x97\xa5" },   /* 官日 */
 };
 
 int ShenShaCount(void)
@@ -1231,6 +1242,14 @@ static const char fusheng_branch[12] = {2, 8, 9, 3, 10, 4, 11, 5, 0, 6, 1, 7};
  * 曆例「常居月建前一辰也」; 曹震圭「吉期者是月建腹心同契之侍臣也」。
  */
 
+/* 官日 (GuanRi): 四時臨官之辰 (春卯 夏午 秋酉 冬子), 按節氣月所屬季節。
+ * 《欽定協紀辨方書》卷五 義例三 壇經「王官相民守日者皆月内視事之吉辰也」;
+ * 曆例「官日者春卯夏午秋酉冬子」(曹震圭「官日者四時臨官之辰,諸侯之象」)。
+ * 異文: 四庫本注「今易為王日」-- 通書間有把官日/王日互易者(見王日條),
+ * 本表採 協紀 按語所主之舊說(王日寅巳申亥、官日卯午酉子), 與四年通勝 DB 相合。
+ */
+static const char guanri_branch[4] = {3, 6, 9, 0};
+
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
               int wday, int suigz)
 {
@@ -1554,6 +1573,9 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
     case SS_JIQI:
         /* 吉期: 除日 = 月建後一辰 (日支 == mbranch + 1). */
         return dbranch == (mbranch + 1) % 12;
+    case SS_GUANRI:
+        /* 官日: 春卯 夏午 秋酉 冬子 (season_of(mbranch)). */
+        return dbranch == guanri_branch[season_of(mbranch)];
     }
     return 0;
 }
