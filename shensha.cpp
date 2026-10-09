@@ -394,6 +394,11 @@
  * 卷十 宜忌亦列紅沙為嫁娶之忌.  按 節氣月/月建 mbranch keyed,
  * 同 月破/大耗/災煞/月厭/月刑/大時/天吏/血忌/血支 等.  四年通勝 DB 無任何
  * 「紅沙/紅紗/破碎」印記, 故無 oracle 可核, 依曆例 (同 受死/五墓).
+ *
+ * 除神 (ChuShen): 日支 申/酉 -- 五離之別名 (通書吉神欄用之吉神名). 《欽定協紀辨方書》
+ * 卷五 義例三 五離條下 考原「按通書以申酉日為除神,與五合對衝之日也,宜沐浴祓除
+ * 災眚」; 卷九 立成「日神取一定干支者: 五合 寅夘 / 除神〈五離〉申酉 / 重日 己亥」.
+ * 日神, 不從月建起義.
  */
 #include <string.h>
 #include "shensha.h"
@@ -678,6 +683,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xba\xec\xc9\xb3", "\xac\xf5\xa8\x46",
       "\xe7\xba\xa2\xe6\xb2\x99",
       "\xe7\xb4\x85\xe6\xb2\x99" },   /* 紅沙 */
+    { "ChuShen",
+      "\xb3\xfd\xc9\xf1", "\xb0\xa3\xaf\xab",
+      "\xe9\x99\xa4\xe7\xa5\x9e",
+      "\xe9\x99\xa4\xe7\xa5\x9e" },   /* 除神 */
 };
 
 int ShenShaCount(void)
@@ -1236,6 +1245,10 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
     case SS_HONGSHA:
         /* 紅沙: 日支 == 該月(節氣月)三煞/破碎之紅沙辰 -- 孟月酉日/仲月巳日/季月丑日. */
         return dbranch == hongsha_branch[mbranch];
+    case SS_CHUSHEN:
+        /* 除神 = 五離之吉神名: 日支 申/酉 (協紀卷五 考原「以申酉日為除神,與五合對衝
+           之日也,宜沐浴祓除災眚」; 卷九 立成「除神〈五離〉申酉」). */
+        return dbranch == 8 || dbranch == 9;
     }
     return 0;
 }
