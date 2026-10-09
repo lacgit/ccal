@@ -612,6 +612,13 @@
  * 陰陽不將夫婦榮昌」+考原「幹為陽當居於前,枝為陰當從其後,是夫唱婦隨之理,故厭前幹配厭後枝為陰陽不將也」.
  * 即 陽將/陰將/俱將 之外之第四格 (陽將=枝前幹前, 陰將=枝後幹後, 俱將=枝前幹後, 不將=枝後幹前).
  *
+ *
+ * 債不 (ZhaiBu): 凶.  通勝凶星欄之「債不」(亦見作「不債」).  無協紀經文, 其曆例
+ * 由四本通勝 (2006/2010/2025/2026) 逐日反推而得, 並與外部通勝日曆 (白鶴鳴
+ * hokming.com 2011/2015 年每日凶星) 完全吻合: 農曆日 大月 初三、十一、十九、廿七;
+ * 小月 初二、初十、十八、廿六 -- 即每八日一組 (第 2/3、10/11、18/19、26/27 日),
+ * 大月取第 3 日 (3/11/19/27)、小月取第 2 日 (2/10/18/26), 兩組互斥.  Keyed to the
+ * 農曆月/日 同 月忌/短星/楊公忌/三娘煞, 但需 mlendays (農曆月天數) 以分 大月/小月.
  */
 #include <string.h>
 #include "shensha.h"
@@ -1107,6 +1114,11 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xe6\xe4\xc2\xed", "\xc5\xe6\xb0\xa8",
       "\xe9\xa9\xbf\xe9\xa9\xac",
       "\xe9\xa9\x9b\xe9\xa6\xac" },   /* 驛馬 */
+    { "ZhaiBu",
+      "\xd5\xae\xb2\xbb",
+      "\xb6\xc5\xa4\xa3",
+      "\xe5\x80\xba\xe4\xb8\x8d",
+      "\xe5\x82\xb5\xe4\xb8\x8d" },   /* ZhaiBu */
 };
 
 /* 三合 (SanHe) by 月建: 日支 = 月建三合局之另外兩辰 = {mbranch+4, mbranch+8}. */
@@ -1632,6 +1644,11 @@ static const char fuduan_branch[12] = {10, 7, 12, 9, 6, 3, 0, 25, 22, 19, 16, 13
    《欽定協紀辨方書》卷六 義例四 神樞經「驛馬者驛騎也,其日宜封贈官爵詔命公卿遠行赴任移徙遷居」;
    李鼎祚「驛馬者正月起申逆行四孟」. 協紀按語「驛馬有從年支取者有從日支取者其義例皆與月同」. */
 static const char yima_branch[12] = {2, 11, 8, 5, 2, 11, 8, 5, 2, 11, 8, 5};
+/* 債不 (ZhaiBu): 農曆日 -- 通勝凶星欄之「債不」, 每月 大月 初三、十一、十九、廿七;
+   小月 初二、初十、十八、廿六 (每八日一組, 大月取第 3、小月取第 2 日; 兩表相差一
+   日而互斥, 通勝只印與月長相符之一組).  大月/小月 以 mlendays 定之. */
+static const char zhaibu_big[4] = {3, 11, 19, 27};
+static const char zhaibu_small[4] = {2, 10, 18, 26};
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
               int wday, int suigz, int mlendays)
 {
@@ -2077,6 +2094,17 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
     case SS_YIMA:
         /* 驛馬: 日支 == 該月三合之驛馬 (正月在申, 逆行四孟). */
         return dbranch == yima_branch[mbranch];
+    case SS_ZHAIBU:
+    {
+        /* 債不: 大月 初三/十一/十九/廿七; 小月 初二/初十/十八/廿六. */
+        const char* tbl = (mlendays == 30) ? zhaibu_big : zhaibu_small;
+        if (mlendays != 29 && mlendays != 30)
+            return 0;
+        for (k = 0; k < 4; k++)
+            if (lday == tbl[k])
+                return 1;
+        return 0;
+    }
     }
     return 0;
 }
