@@ -425,6 +425,11 @@
  *   三月庚、四月己、五月戊、六月辛、七月壬、八月癸、九月庚、十月乙、十一月甲、
  *   十二月辛」; 卷十 宜忌「月恩 四相 時德 宜祭祀祈福求嗣施恩封拜…」.
  *   按 節氣月/月建 mbranch keying (同其兄弟 月破/大耗/災煞…).
+ * 四相 (SiXiang): 日干 ∈ 該四時王相之干 -- 春(寅卯辰月)->丙丁日,
+ *   夏(巳午未月)->戊己日, 秋(申酉戌月)->壬癸日, 冬(亥子丑月)->甲乙日.
+ *   《欽定協紀辨方書》卷五 義例三 總要曆「四相者四時王相之辰也…」+ 曆例
+ *   「春丙丁、夏戊己、秋壬癸、冬甲乙」; 曹震圭「四相者養育之道, 母生子也」;
+ *   卷十 宜忌「月恩 四相 時德 宜祭祀祈福…」.  按 節氣月/月建 mbranch keying.
  */
 #include <string.h>
 #include "shensha.h"
@@ -738,6 +743,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xd4\xc2\xb6\xf7", "\xa4\xeb\xae\xa6",
       "\xe6\x9c\x88\xe6\x81\xa9",
       "\xe6\x9c\x88\xe6\x81\xa9" },   /* 月恩 */
+    { "SiXiang",
+      "\xcb\xc4\xcf\xe0", "\xa5\x7c\xac\xdb",
+      "\xe5\x9b\x9b\xe7\x9b\xb8",
+      "\xe5\x9b\x9b\xe7\x9b\xb8" },   /* 四相 */
 };
 
 int ShenShaCount(void)
@@ -1078,6 +1087,9 @@ static const char mucang_branch[4][4] = {
 /* 月恩 by 月建 (節氣月) -> 日干: 寅丙 卯丁 辰庚 巳己 午戊 未辛 申壬 酉癸 戌庚 亥乙 子甲 丑辛. */
 static const char yueen_stem[12] = {0, 7, 2, 3, 6, 5, 4, 7, 8, 9, 6, 1};
 
+/* 四相 by 四時 (月建) -> 日干: 春丙丁 夏戊己 秋壬癸 冬甲乙. */
+static const char sixiang_stem[4][2] = {{2, 3}, {4, 5}, {8, 9}, {0, 1}};
+
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
               int wday, int suigz)
 {
@@ -1353,6 +1365,13 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
     case SS_YUEEN:
         /* 月恩: 日干 = 月建所生之干 (曆例 正月丙 二月丁 …). */
         return ganzhi % 10 == yueen_stem[mbranch];
+    case SS_SIXIANG:
+    {
+        /* 四相: 日干 ∈ 該四時所生之干 (春丙丁/夏戊己/秋壬癸/冬甲乙). */
+        int k; const char* t = sixiang_stem[season_of(mbranch)];
+        for (k = 0; k < 2; k++) if (ganzhi % 10 == t[k]) return 1;
+        return 0;
+    }
     }
     return 0;
 }
