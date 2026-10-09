@@ -43,6 +43,7 @@ enum {
     SS_DUANXING,        /* 短星   凶 */
     SS_MIRI,            /* 密日   凶 */
     SS_CHONGRI,         /* 重日   凶 */
+    SS_FANZHI,          /* 反支   凶 */
     SS_COUNT
 };
 
