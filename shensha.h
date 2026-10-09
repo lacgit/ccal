@@ -71,6 +71,7 @@ enum {
     SS_SIJI,            /* 四忌   凶 */
     SS_SIQIONG,         /* 四窮   凶 */
     SS_JIUKONG,         /* 九空   凶 */
+    SS_JIUKAN,          /* 九坎   凶 */
     SS_COUNT
 };
 

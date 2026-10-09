@@ -564,6 +564,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xbe\xc5\xbf\xd5", "\xa4\x45\xaa\xc5",
       "\xe4\xb9\x9d\xe7\xa9\xba",
       "\xe4\xb9\x9d\xe7\xa9\xba" },   /* 九空 */
+    { "JiuKan",
+      "\xbe\xc5\xbf\xb2", "\xa4\x45\xa7\xa2",
+      "\xe4\xb9\x9d\xe5\x9d\x8e",
+      "\xe4\xb9\x9d\xe5\x9d\x8e" },   /* 九坎 */
 };
 
 int ShenShaCount(void)
@@ -859,6 +863,9 @@ static const char siqiong_gz[4] = {11, 23, 47, 59};
 /* 九空: 正月在辰逆行四季 (辰丑戌未循環), keyed to 月建 (協紀卷五 廣聖曆). */
 static const char jiukong_branch[12] = {10, 7, 4, 1, 10, 7, 4, 1, 10, 7, 4, 1};
 
+/* 九坎/九焦: 正月在辰逆行四季、五月在卯逆行四仲、九月在寅逆行四孟 (協紀卷五 廣聖曆). */
+static const char jiukan_branch[12] = {8, 5, 4, 1, 10, 7, 3, 0, 9, 6, 2, 11};
+
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
               int wday)
 {
@@ -1057,6 +1064,13 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
            「九空者墓庫破散之神也…今歴家所傳與九坎九焦同行者非」-- 即月建三合局之
            墓辰受衝 (寅午戌月火庫戌, 辰衝之). Keyed to the 節氣月/月建. */
         return dbranch == jiukong_branch[mbranch];
+    case SS_JIUKAN:
+        /* 九坎 (JiuKan): 《欽定協紀辨方書》卷五 義例三 廣聖曆「九坎者月中殺神也,
+           其日忌乘船渡水修堤防築垣墻苫蓋屋舍」+ 曆例「九坎者正月在辰逆行四季,
+           五月在卯逆行四仲, 九月在寅逆行四孟」(寅月辰日 卯月丑日 辰月戌日 巳月未日
+           午月卯日 未月子日 申月酉日 酉月午日 戌月寅日 亥月亥日 子月申日 丑月巳日),
+           keyed to the 節氣月/月建. */
+        return dbranch == jiukan_branch[mbranch];
     }
     return 0;
 }
