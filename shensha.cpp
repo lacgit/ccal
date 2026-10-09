@@ -1135,6 +1135,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xcc\xec\xce\xd7", "\xa4\xd1\xa7\xc5",
       "\xe5\xa4\xa9\xe5\xb7\xab",
       "\xe5\xa4\xa9\xe5\xb7\xab" },   /* 天巫 */
+    { "MingFei",
+      "\xc3\xf9\xb7\xcd", "\xbb\xef\xa7\x70",
+      "\xe9\xb8\xa3\xe5\x90\xa0",
+      "\xe9\xb3\xb4\xe5\x90\xa0" },   /* 鳴吠 */
 };
 
 /* 三合 (SanHe) by 月建: 日支 = 月建三合局之另外兩辰 = {mbranch+4, mbranch+8}. */
@@ -1674,6 +1678,10 @@ static const char tianma_branch[12] = {2, 4, 6, 8, 10, 0, 2, 4, 6, 8, 10, 0};
 /* 天巫: 日支 == 月建前二辰 (= 建除「滿」日; 福德/天狗同日異名). 《欽定協紀辨方書》
    卷四 義例二 建除同位異名「滿〈福徳 天巫 天狗〉」; 卷五? 總要厯「天巫者月中善神也,
    所值之日宜合藥請醫祀鬼神求福願」; 曆例「常居月建前二辰」. */
+/* 鳴吠日: 日柱 ∈ 14 日 -- 《欽定協紀辨方書》卷五 義例三 一行「鳴吠者五性安葬之辰也,
+   用之者得金雞鳴玉犬吠上下相呼亡靈安穩子孫富昌」; 鳴吠日者 庚午 壬申 癸酉 壬午 甲申 乙酉
+   庚寅 丙申 丁酉 壬寅 丙午 己酉 庚申 辛酉 (十四日). 日神, 不從月建. */
+static const char mingfei_gz[14] = {6, 8, 9, 18, 20, 21, 26, 32, 33, 38, 42, 45, 56, 57};
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
               int wday, int suigz, int mlendays)
 {
@@ -2145,6 +2153,13 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
     case SS_TIANWU:
         /* 天巫 = 月建前二辰 (建除「滿」日, 建除同位異名 滿〈福德 天巫 天狗〉). */
         return dbranch == (mbranch + 2) % 12;
+    case SS_MINGFEI:
+    {
+        /* 鳴吠日: 日柱 ∈ 庚午 壬申 癸酉 壬午 甲申 乙酉 庚寅 丙申 丁酉 壬寅 丙午 己酉 庚申 辛酉. */
+        int k;
+        for (k = 0; k < 14; k++) if (ganzhi == mingfei_gz[k]) return 1;
+        return 0;
+    }
     }
     return 0;
 }
