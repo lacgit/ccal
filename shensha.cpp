@@ -194,6 +194,13 @@
  * i.e. the 建除 「執」 day, keyed to the 節氣月/月建 like its siblings:
  *   寅月->未日, 卯月->申日, 辰月->酉日, 巳月->戌日, 午月->亥日, 未月->子日,
  *   申月->丑日, 酉月->寅日, 戌月->卯日, 亥月->辰日, 子月->巳日, 丑月->午日.
+ *
+ * 三喪 (SanSang): 凶.  日支 = 該月(節氣月/月建)所屬季節之土辰 -- 春(寅卯辰月)辰日、
+ * 夏(巳午未月)未日、秋(申酉戌月)戌日、冬(亥子丑月)丑日; 即四序當旺之土, 與《欽定協紀
+ * 辨方書》卷五「守日」同辰位 (春辰夏未秋戌冬丑).  通書/通勝凶星欄之三喪: 「三喪日以
+ * 每一季之衰日論: 春季(寅卯辰月)以辰日、夏季(巳午未月)以未日、秋季(申酉戌月)以戌日、
+ * 冬季(亥子丑月)以丑日」, 其日忌安葬嫁娶入宅.  Keyed to 節氣月/月建 mbranch
+ * (同 月破/大耗/災煞/月厭/月刑/大時/天吏/血忌/血支/復日/天賊/歸忌/五墓/月煞).
  */
 #include <string.h>
 #include "shensha.h"
@@ -348,6 +355,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xd0\xa1\xba\xc4", "\xa4\x70\xaf\xd3",
       "\xe5\xb0\x8f\xe8\x80\x97",
       "\xe5\xb0\x8f\xe8\x80\x97" },   /* 小耗 */
+    { "SanSang",
+      "\xc8\xfd\x86\xca", "\xa4\x54\xb3\xe0",
+      "\xe4\xb8\x89\xe4\xb8\xa7",
+      "\xe4\xb8\x89\xe5\x96\xaa" },   /* 三喪 */
 };
 
 int ShenShaCount(void)
@@ -575,6 +586,10 @@ static int yangjiang_front(int mbranch, int br)
     int a = (12 - mbranch) % 12;
     return ((br - a + 12) % 12) >= 6;
 }
+/* 三喪 by 月建 (solar-term month): 日支 = 該季節之土辰 (四序當旺之土).
+   Index = season_of(mbranch): 春(寅卯辰)->辰(4) 夏(巳午未)->未(7)
+   秋(申酉戌)->戌(10) 冬(亥子丑)->丑(1). */
+static const char sansang_branch[4] = {4, 7, 10, 1};
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
               int wday)
 {
@@ -689,6 +704,8 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
     case SS_XIAOHAO:
         /* 小耗: 日支 == 月建前五辰 (建除 執日). */
         return dbranch == (mbranch + 5) % 12;
+    case SS_SANSANG:
+        return dbranch == sansang_branch[season_of(mbranch)];
     }
     return 0;
 }
