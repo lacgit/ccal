@@ -74,7 +74,15 @@
  * I.e. 日干 == 本氣干 of the 月建 branch -- 寅甲 卯乙 辰戊 巳丙 午丁 未己 申庚 酉辛 戌戊 亥壬 子癸 丑己:
  *   寅月->甲日, 卯月->乙日, 辰月->戊日, 巳月->丙日, 午月->丁日, 未月->己日,
  *   申月->庚日, 酉月->辛日, 戌月->戊日, 亥月->壬日, 子月->癸日, 丑月->己日.
- * 其日忌為凶事 (尤忌安葬破土), 利為吉事 */
+ * 其日忌為凶事 (尤忌安葬破土), 利為吉事 *
+ * 天賊 (TianZei): the day whose 日支 sits on "正月在丑,逆行十二辰" (李鼎祎;
+ * 《欽定協紀辨方書》卷五 義例 "天賊者,盜神也,常居天倉後辰", i.e. 月厭之收日),
+ * keyed to the solar-term month (節氣月/月建) like its siblings
+ * 月破/大耗/災煞/月厭/月刑/大時/天吏/血忌/血支.  天賊 = 月厭 + 3
+ * (月厭 正月起戌逆行, 天賊 正月在丑):
+ *   寅月->丑日, 卯月->子日, 辰月->亥日, 巳月->戌日, 午月->酉日, 未月->申日,
+ *   申月->未日, 酉月->午日, 戌月->巳日, 亥月->辰日, 子月->卯日, 丑月->寅日.
+ */
 #include <string.h>
 #include "shensha.h"
 #include "jianchu.h"
@@ -176,6 +184,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\x8f\xcd\xc8\xd5", "\xb4\x5f\xa4\xe9",
       "\xe5\xa4\x8d\xe6\x97\xa5",
       "\xe5\xbe\xa9\xe6\x97\xa5" },   /* 復日 */
+    { "TianZei",
+      "\xcc\xec\xd4\xf4", "\xa4\xd1\xb8\xe9",
+      "\xe5\xa4\xa9\xe8\xb4\xbc",
+      "\xe5\xa4\xa9\xe8\xb3\x8a" },   /* 天賊 */
 };
 
 int ShenShaCount(void)
@@ -316,6 +328,13 @@ static const char xuezhi_branch[12] = {11, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
      申->庚(6)  酉->辛(7)  戌->戊(4)  亥->壬(8)  子->癸(9)  丑->己(5) */
 static const char furi_stem[12] = {9, 5, 0, 1, 4, 2, 3, 5, 6, 7, 4, 8};
 
+/* 天賊 by 月建 (solar-term month): the 月厭 branch + 3 ("正月在丑逆行十二辰",
+   李鼎祎; 曹震圭 "天賊者盜神也常居天倉後辰").  Index = mbranch 0=子..11=亥:
+     子(0)->卯(3)  丑(1)->寅(2)  寅(2)->丑(1)  卯(3)->子(0)
+     辰(4)->亥(11) 巳(5)->戌(10) 午(6)->酉(9)  未(7)->申(8)
+     申(8)->未(7)  酉(9)->午(6)  戌(10)->巳(5) 亥(11)->辰(4) */
+static const char tianzei_branch[12] = {3, 2, 1, 0, 11, 10, 9, 8, 7, 6, 5, 4};
+
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch)
 {
     int k, mm = mmonth_of(mbranch);
@@ -380,6 +399,8 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch)
         return dbranch == xuezhi_branch[mbranch];
     case SS_FURI:
         return (ganzhi % 10) == furi_stem[mbranch];
+    case SS_TIANZEI:
+        return dbranch == tianzei_branch[mbranch];
     }
     return 0;
 }

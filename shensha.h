@@ -35,6 +35,7 @@ enum {
     SS_XUEJI,           /* 血忌   凶 */
     SS_XUEZHI,          /* 血支   凶 */
     SS_FURI,            /* 復日   凶 */
+    SS_TIANZEI,         /* 天賊   凶 */
     SS_COUNT
 };
 
