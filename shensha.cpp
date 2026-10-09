@@ -1095,6 +1095,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xcc\xec\xb7\xfb", "\xa4\xd1\xb2\xc5",
       "\xe5\xa4\xa9\xe7\xac\xa6",
       "\xe5\xa4\xa9\xe7\xac\xa6" },   /* 天符 */
+    { "TianCang",
+      "\xcc\xec\xb2\xd6", "\xa4\xd1\xad\xdc",
+      "\xe5\xa4\xa9\xe4\xbb\x93",
+      "\xe5\xa4\xa9\xe5\x80\x89" },   /* 天倉 */
 };
 
 /* 三合 (SanHe) by 月建: 日支 = 月建三合局之另外兩辰 = {mbranch+4, mbranch+8}. */
@@ -1599,6 +1603,9 @@ static const char shuihen_small[4] = {3, 7, 12, 26};
 /* 八專: 丁未 己未 庚申 甲寅 癸丑 (協紀卷五 義例三 曾門經) -- 干寄其支之日. */
 static const char bazhuan_gz[5] = {43, 55, 56, 50, 49};
 
+/* 天倉: 日支 == 該月(節氣月)天倉辰 -- 《欽定協紀辨方書》卷六 義例四 總要曆「天倉者
+   天庫之神也,其日可以修倉庫受賞賜納財牧養」; 曆例「天倉者正月起寅逆行十二辰」. */
+static const char tiancang_branch[12] = {4, 3, 2, 1, 0, 11, 10, 9, 8, 7, 6, 5};
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
               int wday, int suigz, int mlendays)
 {
@@ -2032,6 +2039,9 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
     case SS_TIANFU:
         /* 天符 = 黃道十二神第 11 神 (黃道吉神, 支 = 青龍支 + 10). */
         return huangdao_index(mbranch, dbranch) == 10;
+    case SS_TIANCANG:
+        /* 天倉: 日支 == 該月天倉辰 (正月寅 逆行十二辰). */
+        return dbranch == tiancang_branch[mbranch];
     }
     return 0;
 }
