@@ -232,6 +232,13 @@
  * 「重日月建」 ...); 卷四 又「建為歲君為元神,為吉凶眾神之主帥」.  Keyed to the
  * 節氣月/月建 like its siblings:
  *   建日 -> 日支 == 月建支 (寅月寅日, 卯月卯日 ... 丑月丑日).
+ *
+ * 死神 (SiShen): 凶.  日支 = 月建前三辰 = 建除「平」日 (死氣前一辰).  《欽定協紀
+ * 辨方書》卷四 義例二: 平〈陽月天罡 陰月河魁 死神〉; 神樞經「死神者,月中凶神也,
+ * 其日忌請醫服藥、出師征討、種植樹木、進人納畜」; 李鼎祚「常居月建前三辰」;
+ * 曹震圭「死神者,以月建為旺辰前逢死位也,大抵死氣之前必有死神,其義同前」.
+ * 六壬「死神者,死氣後一位,月建向前三位為死神,正月巳、二月午、三月未…」.
+ * Keyed to the 節氣月/月建 (同其兄弟 月破/大耗/災煞/月厭/月刑/大時/天吏/死氣).
  */
 #include <string.h>
 #include "shensha.h"
@@ -402,6 +409,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xd4\xc2\xbd\xa8", "\xa4\xeb\xab\xd8",
       "\xe6\x9c\x88\xe5\xbb\xba",
       "\xe6\x9c\x88\xe5\xbb\xba" },   /* 月建 */
+    { "SiShen",
+      "\xcb\xc0\xc9\xf1", "\xa6\xba\xaf\xab",
+      "\xe6\xad\xbb\xe7\xa5\x9e",
+      "\xe6\xad\xbb\xe7\xa5\x9e" },   /* 死神 */
 };
 
 int ShenShaCount(void)
@@ -768,6 +779,9 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
     case SS_YUEJIAN:
         /* 月建: 日支 == 月建支 (建日; 通書 作 土府月建). */
         return dbranch == mbranch;
+    case SS_SISHEN:
+        /* 死神 = 月建前三辰 (建除「平」日). */
+        return dbranch == (mbranch + 3) % 12;
     }
     return 0;
 }
