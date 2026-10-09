@@ -600,6 +600,11 @@
  * 故甲子為第一進神,則丙子丁丑戊寅為交退伏神; 己卯為第二進神…甲午為第三進神…己酉為第四進神…」;
  * 其對衝之四柱(丁丑丁未壬辰壬戌)為退神.  《欽定協紀辨方書》無此條, 以通書/《三命通會》為準
  * (通書另有逐月「進神 午午午酉酉酉子子子卯卯卯」一表, 核四年通勝 DB 不合, 故取干支四柱之说).
+ * 解神 (JieShen): 日支 = 月建(節氣月)所對之陽辰之衝.  《欽定協紀辨方書》卷五 義例三
+ * 總要曆「解神者月中善神也,所值之日宜上詞章雪寃枉」曆例「正二月申 三四月戌 五六月子 七八月寅
+ * 九十月辰 十一月十二月午」曹震圭「解神者月中奏對直諫之臣也,常居與月建相對之陽辰」; 按語
+ * 「解神於六陽辰即用衝神,於六隂辰則用前一陽辰之衝神」 (寅卯月->申, 辰巳月->戌, 午未月->子,
+ * 申酉月->寅, 戌亥月->辰, 子丑月->午).
  *
  */
 #include <string.h>
@@ -1068,6 +1073,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xbd\xf8\xc9\xf1", "\xb6\x69\xaf\xab",
       "\xe8\xbf\x9b\xe7\xa5\x9e",
       "\xe9\x80\xb2\xe7\xa5\x9e" },   /* 進神   吉 */
+    { "JieShen",
+      "\xbd\xe2\xc9\xf1", "\xb8\xd1\xaf\xab",
+      "\xe8\xa7\xa3\xe7\xa5\x9e",
+      "\xe8\xa7\xa3\xe7\xa5\x9e" },   /* 解神   吉 */
 };
 
 /* 三合 (SanHe) by 月建: 日支 = 月建三合局之另外兩辰 = {mbranch+4, mbranch+8}. */
@@ -1082,6 +1091,10 @@ static const char liuhe_branch[12] = { 1, 0, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2 };
 
 /* 進神 (JinShen): 日柱 ∈ {甲子(0), 己卯(15), 甲午(30), 己酉(45)}. */
 static const char jinshen_gz[4] = { 0, 15, 30, 45 };
+
+/* 解神 (JieShen) by 月建: 日支 = 衝 of 最近的陽辰 (子寅辰午申戌) <= 月建.
+   Index = mbranch 子..亥 -> 午午申申戌戌子子寅寅辰辰. */
+static const char jieshen_branch[12] = { 6, 6, 8, 8, 10, 10, 0, 0, 2, 2, 4, 4 };
 
 int ShenShaCount(void)
 {
@@ -1979,6 +1992,9 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
             if (ganzhi == jinshen_gz[k])
                 return 1;
         return 0;
+    case SS_JIESHEN:
+        /* 解神: 日支 = 月建相對之陽辰之衝 (見檔頭 解神). */
+        return dbranch == jieshen_branch[mbranch];
     }
     return 0;
 }
