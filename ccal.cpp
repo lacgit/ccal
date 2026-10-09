@@ -965,7 +965,7 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
                      ? ShenShaOfDay(vterms, LunarMonthOfDay(vmonth, lastmon, moncnt, ldcnt),
                                     ldcnt, jdcnt, year)
                      : 0;
-            char szSS[128];
+            char szSS[512];
             szSS[0] = 0;
             if (ss != 0)
                 ShenShaText(ss, ShenShaEnc(nEncoding), szSS, sizeof(szSS));
@@ -1623,7 +1623,7 @@ void PrintMonthList(short int year, short int month, vdouble& vterms,
                      ? ShenShaOfDay(vterms, LunarMonthOfDay(vmonth, lastmon, moncnt, ldcnt),
                                     ldcnt, jdcnt, year)
                      : 0;
-            char szSS[128];
+            char szSS[512];
             szSS[0] = 0;
             if (ss != 0)
                 ShenShaText(ss, ShenShaEnc(nEncoding), szSS, sizeof(szSS));
@@ -2389,7 +2389,7 @@ void PrintICalendar(short int year, short int month, short int day,
             int n = (int(jdcnt) + 49) % 60;
             int sup = IsSuiPo(jdcnt, vterms, year, (int(jdcnt) + 1) % 12);
             unsigned __int128 ss = ShenShaOfDay(vterms, cmonth, ldcnt, jdcnt, year);
-            char szSS[128];
+            char szSS[512];
             szSS[0] = 0;
             if (ss != 0)
                 ShenShaText(ss, 'u', szSS, sizeof(szSS));
@@ -2602,7 +2602,7 @@ void PrintDayASCII(short int year, short int month, short int day,
     char leap[2] = {0x00, 0x00};
     GetMonthNumber(mnum, cmonth, leap);
     unsigned __int128 ss = ShenShaOfDay(vterms, cmonth, ldcnt, jdcnt, year);
-    char szSS[128];
+    char szSS[512];
     szSS[0] = 0;
     if (ss != 0)
         ShenShaText(ss, nEncoding, szSS, sizeof(szSS));
