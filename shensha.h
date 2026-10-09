@@ -139,6 +139,7 @@ enum {
     SS_TIANHOU, /* 天后 吉 */
     SS_TIANGANG,        /* 天罡   凶 */
     SS_TIANMA, /* 天馬 吉 */
+    SS_TIANWU, /* 天巫 吉 */
     SS_COUNT
 };
 

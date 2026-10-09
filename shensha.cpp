@@ -1131,6 +1131,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xcc\xec\xc2\xed", "\xa4\xd1\xb0\xa8",
       "\xe5\xa4\xa9\xe9\xa9\xac",
       "\xe5\xa4\xa9\xe9\xa6\xac" },   /* 天馬 */
+    { "TianWu",
+      "\xcc\xec\xce\xd7", "\xa4\xd1\xa7\xc5",
+      "\xe5\xa4\xa9\xe5\xb7\xab",
+      "\xe5\xa4\xa9\xe5\xb7\xab" },   /* 天巫 */
 };
 
 /* 三合 (SanHe) by 月建: 日支 = 月建三合局之另外兩辰 = {mbranch+4, mbranch+8}. */
@@ -1667,6 +1671,9 @@ static const char zhaibu_small[4] = {2, 10, 18, 26};
    卷六 義例四 神樞經「天馬者天之驛騎也,其日宜拜公卿擇賢良宣布政事遠行出征」;
    李鼎祚「天馬者正月起午順行六陽辰」. */
 static const char tianma_branch[12] = {2, 4, 6, 8, 10, 0, 2, 4, 6, 8, 10, 0};
+/* 天巫: 日支 == 月建前二辰 (= 建除「滿」日; 福德/天狗同日異名). 《欽定協紀辨方書》
+   卷四 義例二 建除同位異名「滿〈福徳 天巫 天狗〉」; 卷五? 總要厯「天巫者月中善神也,
+   所值之日宜合藥請醫祀鬼神求福願」; 曆例「常居月建前二辰」. */
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
               int wday, int suigz, int mlendays)
 {
@@ -2135,6 +2142,9 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
     case SS_TIANMA:
         /* 天馬: 日支 == 該月天馬辰 (正月午, 順行六陽辰). */
         return dbranch == tianma_branch[mbranch];
+    case SS_TIANWU:
+        /* 天巫 = 月建前二辰 (建除「滿」日, 建除同位異名 滿〈福德 天巫 天狗〉). */
+        return dbranch == (mbranch + 2) % 12;
     }
     return 0;
 }
