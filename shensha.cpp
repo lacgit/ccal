@@ -515,6 +515,13 @@
  * 《欽定協紀辨方書》卷五 義例三 曆例「民日者春午夏酉秋子冬卯」
  * (按語「午酉子夘則專火專金專水專木,為四序當令之真子,吉莫大焉,故為民日」)。
  *
+ *
+* 王日 (WangRi): 四時正王之辰 (春寅 夏巳 秋申 冬亥), 按節氣月所屬季節。
+ * 《欽定協紀辨方書》卷五 義例三 曆例「王日者春寅夏巳秋申冬亥」(今易為官日),
+ * 曹震圭「王日者四時正王之辰,四正之位,帝王之象」; 協紀 按語 主 舊說
+ * 「王日向為寅巳申亥…今悉刪去…帝居帝位官居官位皆臨官也」-- 採 寅巳申亥。
+ * 異文: 通書有把 王日/官日 互易者(見官日條); 四年通勝 DB 印 寅巳申亥。
+ *
  */
 #include <string.h>
 #include "shensha.h"
@@ -901,6 +908,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xc3\xf1\xc8\xd5", "\xa5\xc1\xa4\xe9",
       "\xe6\xb0\x91\xe6\x97\xa5",
       "\xe6\xb0\x91\xe6\x97\xa5" },   /* 民日 */
+    { "WangRi",
+      "\xcd\xf5\xc8\xd5", "\xa4\xfd\xa4\xe9",
+      "\xe7\x8e\x8b\xe6\x97\xa5",
+      "\xe7\x8e\x8b\xe6\x97\xa5" },   /* 王日 */
 };
 
 int ShenShaCount(void)
@@ -1303,6 +1314,14 @@ static const char xiangri_branch[4] = {5, 8, 11, 2};
  */
 static const char minri_branch[4] = {6, 9, 0, 3};
 
+/* 王日 (WangRi): 四時正王之辰 (春寅 夏巳 秋申 冬亥), 按節氣月所屬季節。
+ * 《欽定協紀辨方書》卷五 義例三 曆例「王日者春寅夏巳秋申冬亥」(今易為官日),
+ * 曹震圭「王日者四時正王之辰,四正之位,帝王之象」; 協紀 按語 主 舊說
+ * 「王日向為寅巳申亥…今悉刪去…帝居帝位官居官位皆臨官也」-- 採 寅巳申亥。
+ * 異文: 通書有把 王日/官日 互易者(見官日條); 四年通勝 DB 印 寅巳申亥。
+ */
+static const char wangri_branch[4] = {2, 5, 8, 11};
+
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
               int wday, int suigz)
 {
@@ -1638,6 +1657,9 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
     case SS_MINRI:
         /* 民日: 春午 夏酉 秋子 冬卯 (season_of(mbranch)). */
         return dbranch == minri_branch[season_of(mbranch)];
+    case SS_WANGRI:
+        /* 王日: 春寅 夏巳 秋申 冬亥 (season_of(mbranch)). */
+        return dbranch == wangri_branch[season_of(mbranch)];
     }
     return 0;
 }

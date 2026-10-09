@@ -107,6 +107,7 @@ enum {
     SS_SHOURI,           /* 守日   吉 */
     SS_XIANGRI,          /* 相日   吉 */
     SS_MINRI,            /* 民日   吉 */
+    SS_WANGRI,           /* 王日   吉 */
     SS_COUNT
 };
 
