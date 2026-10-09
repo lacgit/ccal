@@ -157,6 +157,20 @@
  *   both lie in 前區 -- so 陽將 = 日支 ∈ 前區 且 祿(日干) ∈ 前區.
  *   (陽將/陰將 are the 凶 halves of the 不將 family; the 不將 day lists of 卷四 are
  *   reproduced exactly by 不將 = 日支 ∈ 後區\{月厭} 且 祿(日干) ∈ 前區.)
+ *
+ * 火星 (HuoXing): the day whose 日柱 is one of the month's 火星日, keyed to the
+ * solar-term month (節氣月/月建) like its siblings 月破/大耗/災煞/月厭/月刑/
+ * 大時/天吏/血忌/血支/復日/天賊/歸忌/五墓.  通書/《玉匣記》民俗吉凶日篇「火星日」
+ * (忌修造、起蓋、砌灶、裁衣等事) lists them by 月之孟仲季:
+ *   正四七十月 (四孟: 寅巳申亥月) 乙丑 甲戌 癸未 壬辰 辛丑 庚戌 己未;
+ *   二五八十一月 (四仲: 子卯午酉月) 甲子 癸酉 壬午 辛卯 庚子 己酉 戊午;
+ *   三六九十二月 (四季: 辰未戌丑月) 壬申 辛巳 庚寅 己亥 戊申 丁巳.
+ * Each set is the 60-甲子 arithmetic progression with common difference 9
+ * (日干退一、日支退三).  《欽定協紀辨方書》卷三十四 火星條 只以火星為方位凶神
+ * (「火星乃三合旺方即打頭火也」; 卷三十三 又斥日家諸火星為偽造), 故日家之火星
+ * 以通書為準.  Index = mbranch % 3 (0 = 四仲月, 1 = 四季月, 2 = 四孟月); every
+ * listed 干支 has 序號 % 9 = 0 (仲) / 8 (季) / 1 (孟), i.e.
+  hx_off[mbranch 子..亥] = {0, 8, 1, 0, 8, 1, 0, 8, 1, 0, 8, 1}.
  */
 #include <string.h>
 #include "shensha.h"
@@ -295,6 +309,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xb7\xb4\xd6\xa7", "\xa4\xcf\xa4\xe4",
       "\xe5\x8f\x8d\xe6\x94\xaf",
       "\xe5\x8f\x8d\xe6\x94\xaf" },   /* 反支 */
+    { "HuoXing",
+      "\xbb\xf0\xd0\xc7", "\xa4\xf5\xac\x50",
+      "\xe7\x81\xab\xe6\x98\x9f",
+      "\xe7\x81\xab\xe6\x98\x9f" },   /* 火星 */
 };
 
 int ShenShaCount(void)
@@ -477,6 +495,18 @@ static const char yuesha_branch[12] = {7, 4, 1, 10, 7, 4, 1, 10, 7, 4, 1, 10};
 static const char duanxing_mon[14] = {1, 2, 3, 4, 5, 6, 7, 8, 8, 9, 9, 10, 11, 12};
 static const char duanxing_day[14] = {21, 19, 16, 25, 25, 20, 22, 18, 19, 16, 17, 14, 22, 25};
 
+/* 火星 by 月建 (solar-term month): the 通書/玉匣記 火星日 干支 sets (see the
+   header comment).  Index = mbranch % 3:
+     0 = 四仲月 (子卯午酉) -> 甲子 癸酉 壬午 辛卯 庚子 己酉 戊午
+     1 = 四季月 (辰未戌丑) -> 壬申 辛巳 庚寅 己亥 戊申 丁巳
+     2 = 四孟月 (寅巳申亥) -> 乙丑 甲戌 癸未 壬辰 辛丑 庚戌 己未
+   (-1 = pad; the 季月 set has only six entries.) */
+static const char huoxing_gz[3][7] = {
+    { 0, 9, 18, 27, 36, 45, 54},
+    { 8, 17, 26, 35, 44, 53, -1},
+    { 1, 10, 19, 28, 37, 46, 55}
+};
+
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
               int wday)
 {
@@ -575,21 +605,31 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
         int s = ((dbranch - lday + 1) % 12 + 12) % 12;
         return lday == 6 - s / 2;
     }
+    case SS_HUOXING:
+        /* 通書/玉匣記 火星日: 日柱 == 該月(孟/仲/季)之火星干支. */
+        for (k = 0; k < 7; k++)
+            if (ganzhi == huoxing_gz[mbranch % 3][k])
+                return 1;
+        return 0;
     }
     return 0;
 }
 
-int ShenShaMask(int lmonth, int lday, int ganzhi, int mbranch, int dbranch, int wday)
+/* The mask must be wider than int: SS_COUNT now exceeds 32, and `1 << 32` wraps
+   to bit 0 on x86-64 (shift count taken mod 32), which would corrupt 天赦. */
+unsigned long long ShenShaMask(int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
+                               int wday)
 {
-    int i, mask = 0;
+    int i;
+    unsigned long long mask = 0;
     for (i = 0; i < SS_COUNT; i++)
         if (ShenShaOn(i, lmonth, lday, ganzhi, mbranch, dbranch, wday))
-            mask |= 1 << i;
+            mask |= 1ULL << i;
     return mask;
 }
 
 /* Join the names of the set bits with "、", in table order. */
-void ShenShaText(int mask, int enc, char* buf, int bufsize)
+void ShenShaText(unsigned long long mask, int enc, char* buf, int bufsize)
 {
     const char* sep = (enc == 'a') ? ", " :
                       (enc == 'g') ? "\xa1\xa2" :
@@ -599,7 +639,7 @@ void ShenShaText(int mask, int enc, char* buf, int bufsize)
     for (i = 0; i < SS_COUNT; i++)
     {
         const char* n;
-        if (!(mask & (1 << i)))
+        if (!(mask & (1ULL << i)))
             continue;
         n = ShenShaName(i, enc);
         if ((int)(strlen(buf) + strlen(n) + strlen(sep) + 1) >= bufsize)

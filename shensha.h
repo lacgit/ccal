@@ -45,6 +45,7 @@ enum {
     SS_MIRI,            /* 密日   凶 */
     SS_CHONGRI,         /* 重日   凶 */
     SS_FANZHI,          /* 反支   凶 */
+    SS_HUOXING,         /* 火星   凶 */
     SS_COUNT
 };
 
@@ -52,7 +53,7 @@ int ShenShaCount(void);
 const char* ShenShaName(int i, int enc);
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
               int wday);
-int ShenShaMask(int lmonth, int lday, int ganzhi, int mbranch, int dbranch, int wday);
-void ShenShaText(int mask, int enc, char* buf, int bufsize);
+unsigned long long ShenShaMask(int lmonth, int lday, int ganzhi, int mbranch, int dbranch, int wday);
+void ShenShaText(unsigned long long mask, int enc, char* buf, int bufsize);
 
 #endif /* SHENSHA_H */

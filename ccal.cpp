@@ -281,7 +281,7 @@ static int ShenShaEnc(int nEncoding)
 }
 
 /* 神煞 bitmask of a day (see shensha.cpp for the table). */
-static int ShenShaOfDay(vdouble& vterms, int lmonth, int lday, int jd)
+static unsigned long long ShenShaOfDay(vdouble& vterms, int lmonth, int lday, int jd)
 {
     return ShenShaMask(lmonth, lday, (int(jd) + 49) % 60,
                        GetMonthBranch(jd, vterms), (int(jd) + 1) % 12,
@@ -949,7 +949,7 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
             int lj = (bJianChu) ? GetLiJue(jdcnt, vterms) : 0;
             /* 神煞 (三娘煞 and friends, shensha.cpp): the text tables have no
                room for them, the HTML and XML month tables carry them. */
-            int ss = (bJianChu)
+            unsigned long long ss = (bJianChu)
                      ? ShenShaOfDay(vterms, LunarMonthOfDay(vmonth, lastmon, moncnt, ldcnt),
                                     ldcnt, jdcnt)
                      : 0;
@@ -1607,7 +1607,7 @@ void PrintMonthList(short int year, short int month, vdouble& vterms,
             int lj = (bJianChu) ? GetLiJue(jdcnt, vterms) : 0;
             /* 神煞 (三娘煞 and friends, shensha.cpp): the text tables have no
                room for them, the HTML and XML month tables carry them. */
-            int ss = (bJianChu)
+            unsigned long long ss = (bJianChu)
                      ? ShenShaOfDay(vterms, LunarMonthOfDay(vmonth, lastmon, moncnt, ldcnt),
                                     ldcnt, jdcnt)
                      : 0;
@@ -2376,7 +2376,7 @@ void PrintICalendar(short int year, short int month, short int day,
             /* 日柱 index (0=甲子): 真三娘煞 and the 干支 line both need it */
             int n = (int(jdcnt) + 49) % 60;
             int sup = IsSuiPo(jdcnt, vterms, year, (int(jdcnt) + 1) % 12);
-            int ss = ShenShaOfDay(vterms, cmonth, ldcnt, jdcnt);
+            unsigned long long ss = ShenShaOfDay(vterms, cmonth, ldcnt, jdcnt);
             char szSS[128];
             szSS[0] = 0;
             if (ss != 0)
@@ -2589,7 +2589,7 @@ void PrintDayASCII(short int year, short int month, short int day,
     short int cmonth;
     char leap[2] = {0x00, 0x00};
     GetMonthNumber(mnum, cmonth, leap);
-    int ss = ShenShaOfDay(vterms, cmonth, ldcnt, jdcnt);
+    unsigned long long ss = ShenShaOfDay(vterms, cmonth, ldcnt, jdcnt);
     char szSS[128];
     szSS[0] = 0;
     if (ss != 0)
