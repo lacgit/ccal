@@ -130,6 +130,7 @@ enum {
     SS_JINSHEN,          /* 進神   吉 */
     SS_JIESHEN,          /* 解神   吉 */
     SS_BUJIANG,          /* 不將   吉 */
+    SS_BAZHUAN,         /* 八專   凶 */
     SS_COUNT
 };
 

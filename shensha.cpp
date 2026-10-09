@@ -1087,6 +1087,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xb2\xbb\xbd\xab", "\xa4\xa3\xb1\x4e",
       "\xe4\xb8\x8d\xe5\xb0\x86",
       "\xe4\xb8\x8d\xe5\xb0\x87" },   /* 不將   吉 */
+    { "BaZhuan",
+      "\xb0\xcb\x8c\xa3", "\xa4\x4b\xb1\x4d",
+      "\xe5\x85\xab\xe5\xb0\x88",
+      "\xe5\x85\xab\xe5\xb0\x88" },   /* 八專 */
 };
 
 /* 三合 (SanHe) by 月建: 日支 = 月建三合局之另外兩辰 = {mbranch+4, mbranch+8}. */
@@ -1588,6 +1592,9 @@ static const char jintang_branch[12] = {9, 3, 4, 10, 5, 11, 6, 0, 7, 1, 8, 2};
    故需 ShenShaOn/ShenShaMask 之 mlendays 參數. */
 static const char shuihen_big[6] = {1, 7, 11, 17, 23, 30};
 static const char shuihen_small[4] = {3, 7, 12, 26};
+/* 八專: 丁未 己未 庚申 甲寅 癸丑 (協紀卷五 義例三 曾門經) -- 干寄其支之日. */
+static const char bazhuan_gz[5] = {43, 55, 56, 50, 49};
+
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
               int wday, int suigz, int mlendays)
 {
@@ -2009,6 +2016,15 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
         /* 不將: 日支 ∈ 月厭後區(+1..+5) 且 祿(日干) ∈ 月厭前區(+6..+11) (見檔頭 不將). */
         return yinjiang_back5(mbranch, dbranch) &&
                yangjiang_front(mbranch, yangjiang_lu[ganzhi % 10]);
+    case SS_BAZHUAN:
+        /* 八專 (BaZhuan): 《欽定協紀辨方書》卷五 義例三 曾門經「八專日忌出軍嫁娶
+           丁未己未庚申甲寅癸丑也」+ 按語「八專而止五日者,十干所寄止於八支,不居子午
+           夘酉…」-- 即六壬干寄之支與日支相同之五日 (甲寄寅 丁/己寄未 庚寄申 癸寄丑),
+           非月-shensha (不看月建). */
+        for (k = 0; k < 5; k++)
+            if (ganzhi == bazhuan_gz[k])
+                return 1;
+        return 0;
     }
     return 0;
 }
