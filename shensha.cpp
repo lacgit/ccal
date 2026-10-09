@@ -62,7 +62,19 @@
  * 血支 (「閉之為血忌...閉又為血支」/「閉在十二辰,猶小冬也」), 其日忌針刺出血:
  *   寅月->丑日, 卯月->寅日, 辰月->卯日, 巳月->辰日, 午月->巳日, 未月->午日,
  *   申月->未日, 酉月->申日, 戌月->酉日, 亥月->戌日, 子月->亥日, 丑月->子日.
- */
+ *
+ * 復日 (FuRi): the day whose 日干 repeats the intrinsic (本氣) stem of the 月建
+ * branch, keyed to the solar-term month (節氣月/月建) like its siblings
+ * 月破/大耗/災煞/月厭/月刑/大時/天吏/血忌/血支/五墓.  《欽定協紀辨方書》卷五 義例三:
+ * 天寶曆「復日者為魁罡所系之辰也, 其日忌為凶事利為吉事」; 曆例「復日者,
+ * 正七月甲庚, 二八月乙辛, 四十月丙壬, 五十一月丁癸,
+ * 三九六十二月戊己日也」; 曹震圭「復者重見也, 為本建之辰與所遇之干同也,
+ * 假令正月寅即甲也, 而又見甲是復也」; 地理新書「正月甲、七月庚、二月乙、八月辛、
+ * 四月丙、十月壬、五月丁、十一月癸、三月九月戊、六月十二月己」.
+ * I.e. 日干 == 本氣干 of the 月建 branch -- 寅甲 卯乙 辰戊 巳丙 午丁 未己 申庚 酉辛 戌戊 亥壬 子癸 丑己:
+ *   寅月->甲日, 卯月->乙日, 辰月->戊日, 巳月->丙日, 午月->丁日, 未月->己日,
+ *   申月->庚日, 酉月->辛日, 戌月->戊日, 亥月->壬日, 子月->癸日, 丑月->己日.
+ * 其日忌為凶事 (尤忌安葬破土), 利為吉事 */
 #include <string.h>
 #include "shensha.h"
 #include "jianchu.h"
@@ -160,6 +172,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xd1\xaa\xd6\xa7", "\xa6\xe5\xa4\xe4",
       "\xe8\xa1\x80\xe6\x94\xaf",
       "\xe8\xa1\x80\xe6\x94\xaf" },   /* 血支 */
+    { "FuRi",
+      "\x8f\xcd\xc8\xd5", "\xb4\x5f\xa4\xe9",
+      "\xe5\xa4\x8d\xe6\x97\xa5",
+      "\xe5\xbe\xa9\xe6\x97\xa5" },   /* 復日 */
 };
 
 int ShenShaCount(void)
@@ -294,6 +310,12 @@ static const char xueji_branch[12] = {6, 0, 1, 7, 2, 8, 3, 9, 4, 10, 5, 11};
      申(8)->未(7)  酉(9)->申(8)  戌(10)->酉(9) 亥(11)->戌(10) */
 static const char xuezhi_branch[12] = {11, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 
+/* 復日 by 月建 (solar-term month): 日干 == 本氣干 of the 月建 branch
+   (曹震圭 「本建之辰與所遇之干同」).  Index = mbranch 0=子..11=亥:
+     子->癸(9)  丑->己(5)  寅->甲(0)  卯->乙(1)  辰->戊(4)  巳->丙(2)
+     申->庚(6)  酉->辛(7)  戌->戊(4)  亥->壬(8)  子->癸(9)  丑->己(5) */
+static const char furi_stem[12] = {9, 5, 0, 1, 4, 2, 3, 5, 6, 7, 4, 8};
+
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch)
 {
     int k, mm = mmonth_of(mbranch);
@@ -356,6 +378,8 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch)
         return dbranch == xueji_branch[mbranch];
     case SS_XUEZHI:
         return dbranch == xuezhi_branch[mbranch];
+    case SS_FURI:
+        return (ganzhi % 10) == furi_stem[mbranch];
     }
     return 0;
 }
