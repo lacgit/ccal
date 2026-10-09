@@ -654,6 +654,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xcb\xea\xc2\xed", "\xb7\xb3\xb0\xa8",
       "\xe5\xb2\x81\xe9\xa9\xac",
       "\xe6\xad\xb2\xe9\xa6\xac" },   /* 歲馬   吉 */
+    { "SuiZhi",
+      "\xcb\xea\xd6\xa7", "\xb7\xb3\xa4\xe4",
+      "\xe5\xb2\x81\xe6\x94\xaf",
+      "\xe6\xad\xb2\xe6\x94\xaf" },   /* 歲支   吉 */
 };
 
 int ShenShaCount(void)
@@ -1192,6 +1196,14 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
     case SS_SUIMA:
         /* 歲馬: 日支 = 太歲支之驛馬 (寅午戌->申, 申子辰->寅, 巳酉丑->亥, 亥卯未->巳). */
         return dbranch == suima_branch[suigz % 12];
+    case SS_SUIZHI:
+    {
+        /* 歲支 (通書 印作 「歲支三合」/「歲支六合」):
+           日支 與 太歲支 三合或六合 (不含 太歲支 自身). */
+        int yb = suigz % 12;
+        return dbranch == (yb + 4) % 12 || dbranch == (yb + 8) % 12 ||
+               dbranch == (13 - yb) % 12;
+    }
     }
     return 0;
 }

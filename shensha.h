@@ -79,6 +79,7 @@ enum {
     SS_SUIDEHE,        /* 歲德合 吉 */
     SS_SUILU,          /* 歲祿   吉 */
     SS_SUIMA,          /* 歲馬   吉 */
+    SS_SUIZHI,         /* 歲支   吉 */
     SS_COUNT
 };
 
