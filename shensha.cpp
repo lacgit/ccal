@@ -825,6 +825,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xd2\xf5\xb5\xc2", "\xb3\xb1\xbc\x77",
       "\xe9\x98\xb4\xe5\xbe\xb7",
       "\xe9\x99\xb0\xe5\xbe\xb7" },   /* 陰德 */
+    { "YueKong",
+      "\xd4\xc2\xbf\xd5", "\xa4\xeb\xaa\xc5",
+      "\xe6\x9c\x88\xe7\xa9\xba",
+      "\xe6\x9c\x88\xe7\xa9\xba" },   /* 月空 */
 };
 
 int ShenShaCount(void)
@@ -1174,6 +1178,10 @@ static const char shide_branch[4] = {6, 4, 0, 2};
 /* 陰錯 (YinCuo) -- 見檔頭 陽錯 條: 同一張支干表, 但鍵於 陰建 (月厭) 之支
    (月厭 = (12 - 月建) mod 12, 即 `yueyan_branch`), 而非 月建. */
 
+/* 月空: 月德之沖干 -- 《欽定協紀辨方書》卷五 義例三 曆例「寅午戌月壬 亥卯未月庚
+   申子辰月丙 巳酉丑月甲」; 曆神原始「月德自南而東丙甲壬庚, 月空自北而西壬庚丙甲, 乃天德之衝神也」
+   (寅甲 卯乙 辰戊 巳丙 午丁 未己 申庚 酉辛 戌戊 亥壬 子癸 丑己 之沖). 宜上表章. */
+static const char yuekong_stem[12] = {2, 0, 8, 6, 2, 0, 8, 6, 2, 0, 8, 6};
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
               int wday, int suigz)
 {
@@ -1485,6 +1493,9 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
     case SS_YINDE:
         /* 陰德: 日支 = (13 - 2*月建) mod 12 (正月酉 逆行六辰循環). */
         return dbranch == (13 - 2 * mbranch + 24) % 12;
+    case SS_YUEKONG:
+        /* 月空 = 日干 為月德之五合(沖)干 (寅午戌月壬/亥卯未月庚/申子辰月丙/巳酉丑月甲). */
+        return (ganzhi % 10) == yuekong_stem[mbranch];
     }
     return 0;
 }

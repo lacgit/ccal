@@ -99,6 +99,7 @@ enum {
     SS_YANGDE,                   /* 陽德   吉 */
     SS_YINCUO,   /* YinCuo   凶 */
     SS_YINDE,                    /* 陰德   吉 */
+    SS_YUEKONG,
     SS_COUNT
 };
 
