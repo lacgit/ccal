@@ -239,6 +239,14 @@
  * 曹震圭「死神者,以月建為旺辰前逢死位也,大抵死氣之前必有死神,其義同前」.
  * 六壬「死神者,死氣後一位,月建向前三位為死神,正月巳、二月午、三月未…」.
  * Keyed to the 節氣月/月建 (同其兄弟 月破/大耗/災煞/月厭/月刑/大時/天吏/死氣).
+ *
+ * 土府 (TuFuMansion): the 建日 -- the day whose 日支 equals the 月建 itself.
+ * 《欽定協紀辨方書》卷六 義例四, 土符 按語: 「其有所忌者亦猶月建之為土府尊之,
+ * 故不敢犯也」, i.e. 月建之日 is the 土府.  Keyed to the 節氣月/月建 like its
+ * siblings 月破/大耗/災煞/月厭/月刑/大時/天吏/血忌/血支/土符:
+ *   日支 == mbranch  ->  土府 (建日); 其日忌動土、修築垣牆.
+ * (The 通勝 cells agree: of the four volumes' 土府 prints, 60 are 建日 and 4 more
+ * are the 建日 of the OLD 月建 on a 節氣 day.)
  */
 #include <string.h>
 #include "shensha.h"
@@ -413,6 +421,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xcb\xc0\xc9\xf1", "\xa6\xba\xaf\xab",
       "\xe6\xad\xbb\xe7\xa5\x9e",
       "\xe6\xad\xbb\xe7\xa5\x9e" },   /* 死神 */
+    { "TuFuMansion",
+      "\xcd\xc1\xb8\xae", "\xa4\x67\xa9\xb2",
+      "\xe5\x9c\x9f\xe5\xba\x9c",
+      "\xe5\x9c\x9f\xe5\xba\x9c" },   /* 土府 */
 };
 
 int ShenShaCount(void)
@@ -782,6 +794,9 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
     case SS_SISHEN:
         /* 死神 = 月建前三辰 (建除「平」日). */
         return dbranch == (mbranch + 3) % 12;
+    case SS_TUFU_MANSION:
+        /* 土府 = 月建之日 (建日): 日支等於節氣月之月建支. */
+        return dbranch == mbranch;
     }
     return 0;
 }
