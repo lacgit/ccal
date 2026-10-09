@@ -687,6 +687,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xb3\xfd\xc9\xf1", "\xb0\xa3\xaf\xab",
       "\xe9\x99\xa4\xe7\xa5\x9e",
       "\xe9\x99\xa4\xe7\xa5\x9e" },   /* 除神 */
+    { "JiuJiao",
+      "\xbe\xc5\xbd\xb9", "\xa4\x45\xb5\x4a",
+      "\xe4\xb9\x9d\xe7\x84\xa6",
+      "\xe4\xb9\x9d\xe7\x84\xa6" },   /* 九焦 */
 };
 
 int ShenShaCount(void)
@@ -1249,6 +1253,11 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
         /* 除神 = 五離之吉神名: 日支 申/酉 (協紀卷五 考原「以申酉日為除神,與五合對衝
            之日也,宜沐浴祓除災眚」; 卷九 立成「除神〈五離〉申酉」). */
         return dbranch == 8 || dbranch == 9;
+    case SS_JIUJIAO:
+        /* 九焦 (JiuJiao): 《欽定協紀辨方書》卷五 義例三 廣聖曆「九焦者月中殺神也,
+           其日忌爐冶鑄造種植修築園圃」+ 曆例與九坎同 (正月在辰逆行四季、五月在卯
+           逆行四仲、九月在寅逆行四孟); 曹震圭「坎者陷也險也不平也,義與九焦同」. */
+        return dbranch == jiukan_branch[mbranch];
     }
     return 0;
 }
