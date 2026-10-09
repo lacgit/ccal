@@ -2229,19 +2229,19 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
    of 2006 instead of the 25 its rule allows.  unsigned __int128 holds all of
    them (gcc/clang on 64-bit; the rest of this table already assumes a 64-bit
    target for `1ULL`). */
-unsigned __int128 ShenShaMask(int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
+ShenShaBits ShenShaMask(int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
                                int wday, int suigz, int mlendays)
 {
     int i;
-    unsigned __int128 mask = 0;
+    ShenShaBits mask;
     for (i = 0; i < SS_COUNT; i++)
         if (ShenShaOn(i, lmonth, lday, ganzhi, mbranch, dbranch, wday, suigz, mlendays))
-            mask |= (unsigned __int128)1 << i;
+            mask.set(i);
     return mask;
 }
 
 /* Join the names of the set bits with "、", in table order. */
-void ShenShaText(unsigned __int128 mask, int enc, char* buf, int bufsize)
+void ShenShaText(const ShenShaBits& mask, int enc, char* buf, int bufsize)
 {
     const char* sep = (enc == 'a') ? ", " :
                       (enc == 'g') ? "\xa1\xa2" :
@@ -2251,7 +2251,7 @@ void ShenShaText(unsigned __int128 mask, int enc, char* buf, int bufsize)
     for (i = 0; i < SS_COUNT; i++)
     {
         const char* n;
-        if (!((mask >> i) & 1))
+        if (!mask.test(i))
             continue;
         n = ShenShaName(i, enc);
         if ((int)(strlen(buf) + strlen(n) + strlen(sep) + 1) >= bufsize)

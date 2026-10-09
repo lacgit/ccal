@@ -149,11 +149,29 @@ enum {
     SS_COUNT
 };
 
+/* 神煞 bitmask: SS_COUNT passed 128 with the 吉神/凶煞 cards, and shifting a
+   128-bit integer by >= 128 is undefined (the x86 shift masks the count to 7
+   bits, so index 128 re-reads bit 0).  The mask is a word array instead, so it
+   grows with SS_COUNT. */
+#define SS_MASK_WORDS ((SS_COUNT + 63) / 64)
+struct ShenShaBits {
+    unsigned long long w[SS_MASK_WORDS];
+    ShenShaBits() { for (int i = 0; i < SS_MASK_WORDS; i++) w[i] = 0; }
+    ShenShaBits(int) { for (int i = 0; i < SS_MASK_WORDS; i++) w[i] = 0; }
+    bool operator!=(int) const {
+        for (int i = 0; i < SS_MASK_WORDS; i++) if (w[i]) return true;
+        return false;
+    }
+    bool operator==(int) const { return !(*this != 0); }
+    bool test(int i) const { return (w[i >> 6] >> (i & 63)) & 1ULL; }
+    void set(int i) { w[i >> 6] |= 1ULL << (i & 63); }
+};
+
 int ShenShaCount(void);
 const char* ShenShaName(int i, int enc);
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
               int wday, int suigz, int mlendays);
-unsigned __int128 ShenShaMask(int lmonth, int lday, int ganzhi, int mbranch, int dbranch, int wday, int suigz, int mlendays);
-void ShenShaText(unsigned __int128 mask, int enc, char* buf, int bufsize);
+ShenShaBits ShenShaMask(int lmonth, int lday, int ganzhi, int mbranch, int dbranch, int wday, int suigz, int mlendays);
+void ShenShaText(const ShenShaBits& mask, int enc, char* buf, int bufsize);
 
 #endif /* SHENSHA_H */

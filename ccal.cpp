@@ -318,7 +318,7 @@ static int LunarMonthDaysOf(vdouble& vmoons, double lastnew, double nextnew,
     return (n == 29 || n == 30) ? n : 0;
 }
 
-static unsigned __int128 ShenShaOfDay(vdouble& vterms, int lmonth, int lday, int jd,
+static ShenShaBits ShenShaOfDay(vdouble& vterms, int lmonth, int lday, int jd,
                                         int year,
                                        int mlendays)
 {
@@ -988,7 +988,7 @@ void PrintMonth(short int year, short int month, vdouble& vterms,
             int lj = (bJianChu) ? GetLiJue(jdcnt, vterms) : 0;
             /* 神煞 (三娘煞 and friends, shensha.cpp): the text tables have no
                room for them, the HTML and XML month tables carry them. */
-            unsigned __int128 ss = (bJianChu)
+            ShenShaBits ss = (bJianChu)
                      ? ShenShaOfDay(vterms, LunarMonthOfDay(vmonth, lastmon, moncnt, ldcnt),
                                     ldcnt, jdcnt, year,
                                     LunarMonthDaysOf(vmoons, lastnew, nextnew, jdcnt, ldcnt))
@@ -1647,7 +1647,7 @@ void PrintMonthList(short int year, short int month, vdouble& vterms,
             int lj = (bJianChu) ? GetLiJue(jdcnt, vterms) : 0;
             /* 神煞 (三娘煞 and friends, shensha.cpp): the text tables have no
                room for them, the HTML and XML month tables carry them. */
-            unsigned __int128 ss = (bJianChu)
+            ShenShaBits ss = (bJianChu)
                      ? ShenShaOfDay(vterms, LunarMonthOfDay(vmonth, lastmon, moncnt, ldcnt),
                                     ldcnt, jdcnt, year,
                                     LunarMonthDaysOf(vmoons, lastnew, nextnew, jdcnt, ldcnt))
@@ -2417,7 +2417,7 @@ void PrintICalendar(short int year, short int month, short int day,
             /* 日柱 index (0=甲子): 真三娘煞 and the 干支 line both need it */
             int n = (int(jdcnt) + 49) % 60;
             int sup = IsSuiPo(jdcnt, vterms, year, (int(jdcnt) + 1) % 12);
-            unsigned __int128 ss = ShenShaOfDay(vterms, cmonth, ldcnt, jdcnt, year,
+            ShenShaBits ss = ShenShaOfDay(vterms, cmonth, ldcnt, jdcnt, year,
                 LunarMonthDaysOf(vmoons, lastnew, nextnew, jdcnt, ldcnt));
             char szSS[512];
             szSS[0] = 0;
@@ -2631,7 +2631,7 @@ void PrintDayASCII(short int year, short int month, short int day,
     short int cmonth;
     char leap[2] = {0x00, 0x00};
     GetMonthNumber(mnum, cmonth, leap);
-    unsigned __int128 ss = ShenShaOfDay(vterms, cmonth, ldcnt, jdcnt, year,
+    ShenShaBits ss = ShenShaOfDay(vterms, cmonth, ldcnt, jdcnt, year,
                 LunarMonthDaysOf(vmoons, lastnew, nextnew, jdcnt, ldcnt));
     char szSS[512];
     szSS[0] = 0;
