@@ -1155,6 +1155,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xb9\xd1\xcb\xde", "\xb9\xe8\xb1\x4a",
       "\xe5\xaf\xa1\xe5\xae\xbf",
       "\xe5\xaf\xa1\xe5\xae\xbf" },   /* 寡宿 */
+    { "GuChen",
+      "\xb9\xc2\xb3\xbd", "\xa9\x74\xa8\xb0",
+      "\xe5\xad\xa4\xe8\xbe\xb0",
+      "\xe5\xad\xa4\xe8\xbe\xb0" },   /* 孤辰 */
 };
 
 /* 三合 (SanHe) by 月建: 日支 = 月建三合局之另外兩辰 = {mbranch+4, mbranch+8}. */
@@ -1710,6 +1714,9 @@ static const char tianyuan_gz[12] = {0, 19, 30, 10, 21, 12, 13, 54, 50, 52, 27, 
 /* 寡宿: 令後一辰 -- 春丑 夏辰 秋未 冬戌 (協紀卷三十六 辨譌). */
 static const char guasu_branch[4] = {1, 4, 7, 10};
 
+/* 孤辰: 令前一辰 -- 春巳 夏申 秋亥 冬寅 (協紀卷三十六 辨譌). */
+static const char guchen_branch[4] = {5, 8, 11, 2};
+
 int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
               int wday, int suigz, int mlendays)
 {
@@ -2207,6 +2214,11 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
            孤辰、令後一辰為寡宿,如寅夘辰春令,巳為孤辰,丑為寡宿」-- 春(寅卯辰月)丑日、
            夏(巳午未月)辰日、秋(申酉戌月)未日、冬(亥子丑月)戌日. Keyed to the 節氣月. */
         return dbranch == guasu_branch[season_of(mbranch)];
+    case SS_GUCHEN:
+        /* 孤辰 (GuChen): 《欽定協紀辨方書》卷三十六 辨譌「以令前一辰為孤辰…如寅夘辰
+           春令,巳為孤辰」-- 春(寅卯辰月)巳日、夏(巳午未月)申日、秋(申酉戌月)亥日、
+           冬(亥子丑月)寅日 (＝該季之絶辰). Keyed to the 節氣月. */
+        return dbranch == guchen_branch[season_of(mbranch)];
     }
     return 0;
 }
