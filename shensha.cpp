@@ -187,6 +187,13 @@
  * 「按通書以申酉日為除神,與五合對衝之日也,宜沐浴祓除災眚」.  卷九 立成
  * 「日神取一定干支者」: 五合 寅卯 / 除神〈五離〉申酉 / 重日 己亥.
  * → 日支 ∈ {申(8), 酉(9)}, 不論天干、不論月建 (同其兄弟 重日 之 keying).
+ *
+ * 小耗 (XiaoHao): 《欽定協紀辨方書》卷四 義例二 建除同位異名「執〈四利之死符、
+ * 小耗〉」; 樞要曆「小耗者亦月內之耗神也,其日忌經營種蒔、納財交易、開市」;
+ * 曆例「小耗者常居月建前五辰」/「小耗者正月在未,順行十二辰」 (正月建寅 -> 未 = 寅+5),
+ * i.e. the 建除 「執」 day, keyed to the 節氣月/月建 like its siblings:
+ *   寅月->未日, 卯月->申日, 辰月->酉日, 巳月->戌日, 午月->亥日, 未月->子日,
+ *   申月->丑日, 酉月->寅日, 戌月->卯日, 亥月->辰日, 子月->巳日, 丑月->午日.
  */
 #include <string.h>
 #include "shensha.h"
@@ -337,6 +344,10 @@ static const struct ShenShaDef ShenShaTbl[SS_COUNT] = {
       "\xce\xe5\xeb\x78", "\xa4\xad\xc2\xf7",
       "\xe4\xba\x94\xe7\xa6\xbb",
       "\xe4\xba\x94\xe9\x9b\xa2" },   /* 五離 */
+    { "XiaoHao",
+      "\xd0\xa1\xba\xc4", "\xa4\x70\xaf\xd3",
+      "\xe5\xb0\x8f\xe8\x80\x97",
+      "\xe5\xb0\x8f\xe8\x80\x97" },   /* 小耗 */
 };
 
 int ShenShaCount(void)
@@ -675,6 +686,9 @@ int ShenShaOn(int i, int lmonth, int lday, int ganzhi, int mbranch, int dbranch,
     case SS_WULI:
         /* 五離 = 除神: 日支 申/酉 (協紀卷五 義例三, 協紀卷九 立成). */
         return dbranch == 8 || dbranch == 9;
+    case SS_XIAOHAO:
+        /* 小耗: 日支 == 月建前五辰 (建除 執日). */
+        return dbranch == (mbranch + 5) % 12;
     }
     return 0;
 }

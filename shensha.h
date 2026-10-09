@@ -48,6 +48,7 @@ enum {
     SS_HUOXING,         /* 火星   凶 */
     SS_YINJIANG,        /* 陰將   凶 */
     SS_WULI,           /* 五離   凶 */
+    SS_XIAOHAO,         /* 小耗   凶 */
     SS_COUNT
 };
 
