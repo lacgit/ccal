@@ -11,6 +11,7 @@
 驗證 oracle: `webui/attachments/LunarCalendarRecords/db/tongsheng_{2006,2010,2025,2026}.db`
 `days` 表 — `row2_words`(JSON,吉神欄) / `row2_raw`, `r6_small` / `row6b_raw` / `row7_raw`
 (凶煞欄), `lower_raw` / `ji_text` / `yi_text`(忌)。
+> 📚 **神煞參考資料庫 (tools/)**: `tools/build_shensha_ref.py`(由 `shensha.h` / `shensha.cpp` / 本 plan / `git log` 重新 build, 可重跑) → `tools/shensha_ref.db`(SQLite, 133 行 = `SS_COUNT`；每行 key / enum / 繁簡名 / GB+Big5 hex / 吉凶 / keying / rule / rule_lut / effect / source / oracle / commit)；`tools/ssq.py`(查詢 CLI)；`tools/README.md`(schema + 用法)。只讀 source, 唔改任何現有 code / 輸出格式。
 
 核對時必注意:
 1. OCR 會將「X合」切成「X 合日」→ 睇落似普通天德/月德日。
