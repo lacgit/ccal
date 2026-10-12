@@ -8,6 +8,8 @@
 
 > ⚠ **框架變更 (歲神卡 t_1232bd08)**: 加 太歲(年)-keyed 吉神群 (歲德/歲德合/歲祿/歲馬/歲支/歲支德) 後, `ShenShaMask()` / `ShenShaOn()` 多一個 `int suigz` 入參 (太歲 60-甲子 index, 0=甲子), `ShenShaOfDay()` 多一個 `int year`; `ccal.cpp` 新增 `GetSuiGanzhi(jd, vterms, year)` (年界用 **立春** 換歲, 同 `IsSuiPo`)。日後加神煞如需年干支, 直接讀 `suigz` (不再只限 月建/日柱/農曆日/星期 keying)。
 
+> ⚠ **框架變更 (t_b277802d, 用戶裁決)**: `-i` 之 SUMMARY **唔再帶神煞**，回復神煞框架之前 (83a4f34^) 嘅組成: `農曆日 [節氣 HH:MM] [建除] [節氣月（…）] [歲破] [四離/四絕] [三娘煞]`（節氣／建除／節氣月／歲破／四離四絕／三娘煞 全部保留）。神煞全表只出現喺 DESCRIPTION 嘅「神煞：」一行（szDesc[4096] + AppendBounded()；四年 sweep 最長 213 bytes，遠低於 szSS[512] 上限，無截斷）。其餘輸出 byte-identical。
+
 驗證 oracle: `webui/attachments/LunarCalendarRecords/db/tongsheng_{2006,2010,2025,2026}.db`
 `days` 表 — `row2_words`(JSON,吉神欄) / `row2_raw`, `r6_small` / `row6b_raw` / `row7_raw`
 (凶煞欄), `lower_raw` / `ji_text` / `yi_text`(忌)。

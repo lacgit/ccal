@@ -2482,9 +2482,12 @@ void PrintICalendar(short int year, short int month, short int day,
                 if (lj != 0)
                     sl = AppendBounded(szSum, sizeof(szSum), sl, " %s", LiJueName(lj - 1, 'u'));
             }
-            /* 三娘煞 標於建除之后 */
-            if (ss != 0)
-                sl = AppendBounded(szSum, sizeof(szSum), sl, " %s", szSS);
+            /* 三娘煞 標於建除之后（神煞全表只入
+               DESCRIPTION，SUMMARY 回復 83a4f34^　之組成） */
+            int sns = GetSanNiangSha(ldcnt, n);
+            if (sns != 0)
+                sl = AppendBounded(szSum, sizeof(szSum), sl, " %s",
+                              SanNiangShaName(sns - 1, 'u'));
 
             /* DESCRIPTION */
             int dl = 0;
