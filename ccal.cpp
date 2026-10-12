@@ -364,6 +364,7 @@ const int FUNC_CAL		= 4;
 const int FUNC_JIEQI	= 5;
 const int FUNC_LIST		= 6;
 const int FUNC_ICAL		= 7;
+const int FUNC_JIEQI_ICAL	= 8;	/* -i -j: one all-day event per 節氣 */
 
 void SetChinese(int nEncoding, int pmode, pc10_4& CHtiangan, pc12_4& CHdizhi,
 				pc22_4& CHmiscchar, pc24_7& CHjieqi, pc7_10& daynamesCH,
@@ -2038,6 +2039,8 @@ bool ProcessArg(int argc, char** argv, short int& year, short int& month,
     day = 0;
     bool bIsUTF8 = false;
     bool bTrad = false;
+    bool bSawI = false;		/* -i given */
+    bool bSawJ = false;		/* -j given */
     if (argc == 1)
         return true;
     int i;
@@ -2074,11 +2077,11 @@ bool ProcessArg(int argc, char** argv, short int& year, short int& month,
             }
         }
         else if (argv[i][1] == 'j')
-            fmode = FUNC_JIEQI;
+        { fmode = FUNC_JIEQI; bSawJ = true; }
         else if (argv[i][1] == 'l')
             fmode = FUNC_LIST;
         else if (argv[i][1] == 'i')
-            fmode = FUNC_ICAL;
+        { fmode = FUNC_ICAL; bSawI = true; }
         else if (argv[i][1] == 'x')
             pmode = PMODE_XML;
         else if (argv[i][1] == 'p')
@@ -2099,6 +2102,11 @@ bool ProcessArg(int argc, char** argv, short int& year, short int& month,
             return false;
         }
     }
+    /* -i together with -j (any order): a 節氣-only iCalendar - the 24
+       all-day VEVENTs of the year instead of the 365 daily ones.  Either
+       flag on its own keeps its original behaviour. */
+    if (bSawI && bSawJ)
+        fmode = FUNC_JIEQI_ICAL;
     if (pmode != PMODE_PS)
     {
         if (bIsUTF8 || pmode == PMODE_XML)
@@ -2362,12 +2370,19 @@ void IcsLine(const char* s)
    that day and (with -c) the Jianchu 建除 deity.  Compatible with Outlook,
    Google Calendar, Apple Calendar, OneCalendar etc.: CRLF line endings,
    UTF-8, 75-octet folding, DATE values for all-day events and stable UIDs
-   so a re-import does not create duplicates. */
+   so a re-import does not create duplicates.
+
+   bJieQiOnly (ccal -i -j) emits only the 24 節氣 days of the year.  With
+   -c those events are built by exactly the same code as the daily ones
+   (so they are byte-identical to the corresponding day event); without -c
+   the SUMMARY/DESCRIPTION carry the solar term only.  The 節氣 events get
+   a distinct UID (ccal-jieqi-<YYYYMMDD>-<term>@chinesebay.com) and the
+   CATEGORIES:節氣 marker. */
 void PrintICalendar(short int year, short int month, short int day,
                     vdouble& vterms,
                     double lastnew, double lastmon, vdouble& vmoons,
                     vdouble& vmonth, double nextnew, bool bSingle,
-                    bool bJianChu, vdouble& vtermhours)
+                    bool bJianChu, vdouble& vtermhours, bool bJieQiOnly)
 {
     pc10_4 CHtiangan;
     pc12_4 CHdizhi;
@@ -2390,7 +2405,9 @@ void PrintICalendar(short int year, short int month, short int day,
     printf("PRODID:-//chinesebay//ccal %s//EN\r\n", versionstr);
     printf("CALSCALE:GREGORIAN\r\n");
     printf("METHOD:PUBLISH\r\n");
-    if (day > 0)
+    if (bJieQiOnly)
+        sprintf(line, "X-WR-CALNAME:Chinese Calendar %d 節氣", year);
+    else if (day > 0)
         sprintf(line, "X-WR-CALNAME:Chinese Calendar %d-%02d-%02d", year, month, day);
     else if (bSingle)
         sprintf(line, "X-WR-CALNAME:Chinese Calendar %d-%02d", year, month);
@@ -2408,8 +2425,8 @@ void PrintICalendar(short int year, short int month, short int day,
             break;
         }
 
-    short int m1 = bSingle ? month : 1;
-    short int m2 = bSingle ? month : 12;
+    short int m1 = (bSingle && !bJieQiOnly) ? month : 1;
+    short int m2 = (bSingle && !bJieQiOnly) ? month : 12;
     for (short int m = m1; m <= m2; m++)
     {
         double jdcnt, jdnext;
@@ -2435,9 +2452,28 @@ void PrintICalendar(short int year, short int month, short int day,
             char cdayname[8];
             Number2DayCH(ldcnt, 'u', cdayname);
 
-            if (day == 0 || dcnt == day)
+            /* -i -j: only the 24 節氣 days get an event */
+            if (bJieQiOnly ? bTerm : (day == 0 || dcnt == day))
             {
             char szSum[1024], szDesc[4096], szEsc[8200];
+            int dl = 0;
+            if (bJieQiOnly && !bJianChu)
+            {
+                /* Pure 節氣 event (ccal -i -j without -c): the SUMMARY
+                   carries the term and its time, the DESCRIPTION the same
+                   plus the 節氣月 it opens - nothing else, no 農曆日,
+                   干支, 建除, 吉凶, 歲破 or 神煞. */
+                int hr, min, sec;
+                char szJQ[24];
+                j2hms(vtermhours[termcnt], hr, min, sec);
+                JieQiMonthLabel(termcnt, 'u', szJQ);
+                AppendBounded(szSum, sizeof(szSum), 0, "%s %02d:%02d",
+                              (*CHjieqi)[termcnt], hr, min);
+                dl = AppendBounded(szDesc, sizeof(szDesc), dl, "節氣：%s %02d:%02d （%s）",
+                              (*CHjieqi)[termcnt], hr, min, szJQ);
+            }
+            else
+            {
             /* 日柱 index (0=甲子): 真三娘煞 and the 干支 line both need it */
             int n = (int(jdcnt) + 49) % 60;
             int sup = IsSuiPo(jdcnt, vterms, year, (int(jdcnt) + 1) % 12);
@@ -2490,7 +2526,6 @@ void PrintICalendar(short int year, short int month, short int day,
                               SanNiangShaName(sns - 1, 'u'));
 
             /* DESCRIPTION */
-            int dl = 0;
             int lyear = year;
             if (jdlny > 0.0 && jdcnt < jdlny)
                 lyear--;
@@ -2560,6 +2595,7 @@ void PrintICalendar(short int year, short int month, short int day,
                     dl = AppendBounded(szDesc, sizeof(szDesc), dl, "節氣：%s %02d:%02d\n",
                                   (*CHjieqi)[termcnt], hr, min);
             }
+            }	/* end of the shared daily-event builder */
             /* Drop the trailing newline: keeps the last fold clean */
             if (dl > 0 && szDesc[dl - 1] == '\n')
                 szDesc[--dl] = 0;
@@ -2571,7 +2607,11 @@ void PrintICalendar(short int year, short int month, short int day,
             cal_date(jdcnt + 1.0, &ny, &nm, &nd, &nhr);
 
             printf("BEGIN:VEVENT\r\n");
-            printf("UID:ccal-%04d%02d%02d@chinesebay.com\r\n", year, m, dcnt);
+            if (bJieQiOnly)
+                printf("UID:ccal-jieqi-%04d%02d%02d-%s@chinesebay.com\r\n",
+                       year, m, dcnt, jieqi[termcnt]);
+            else
+                printf("UID:ccal-%04d%02d%02d@chinesebay.com\r\n", year, m, dcnt);
             printf("DTSTAMP:%s\r\n", szStamp);
             printf("DTSTART;VALUE=DATE:%04d%02d%02d\r\n", year, m, dcnt);
             printf("DTEND;VALUE=DATE:%04d%02d%02d\r\n", ny, nm, nd);
@@ -2579,7 +2619,10 @@ void PrintICalendar(short int year, short int month, short int day,
             IcsLine(line);
             snprintf(line, sizeof(line), "DESCRIPTION:%s", szEsc);
             IcsLine(line);
-            printf("CATEGORIES:農曆\r\n");
+            if (bJieQiOnly)
+                printf("CATEGORIES:節氣\r\n");
+            else
+                printf("CATEGORIES:農曆\r\n");
             printf("TRANSP:TRANSPARENT\r\n");
             printf("X-MICROSOFT-CDO-ALLDAYEVENT:TRUE\r\n");
             printf("SEQUENCE:0\r\n");
@@ -2814,6 +2857,8 @@ int main(int argc, char** argv)
         printf("\t-j:\tGenerates list of JieQis.\n");
         printf("\t-l:\tGenerates list of Dates.\n");
         printf("\t-i:\tGenerates iCalendar (.ics) output for import into Outlook, Google Calendar etc.\n");
+        printf("\t-i -j:\tSame, but one all-day event per 節氣: 24 events for the year\n"
+               "\t\t(without -c the SUMMARY/DESCRIPTION carry the 節氣 only).\n");
         printf("\t-g:\tGenerates simplified Chinese output.\n");
         printf("\t-b:\tGenerates traditional Chinese output.\n");
         printf("\t-u:\tUses UTF-8 rather than GB or Big5 for Chinese output.\n");
@@ -2868,14 +2913,15 @@ int main(int argc, char** argv)
 		return 0;
 	}
 
-    if (fmode == FUNC_ICAL)
+    if (fmode == FUNC_ICAL || fmode == FUNC_JIEQI_ICAL)
     {
 		//	lc260825 -	iCalendar (.ics) output: always UTF-8, -b selects traditional
         if (nEncoding == 'b')
             SetU8Characters(false);
         nEncoding = 'u';
         PrintICalendar(year, month, day, vterms, lastnew, lastmon, vmoons, vmonth,
-                       nextnew, bSingle, bJianChu, vtermhours);
+                       nextnew, bSingle, bJianChu, vtermhours,
+                       fmode == FUNC_JIEQI_ICAL);
         return 0;
     }
 

@@ -180,6 +180,29 @@ ccal -i 2026 > chinese-calendar-2026.ics
 to import.  As with other modes, giving a
 .I month
 operand limits the output to that month.
+.sp
+Giving
+.B \-j
+as well limits the output to the 24 節氣 of the year: the same calendar
+with one all-day event per solar term instead of 365 daily ones.  The
+event title is the term and its time (e.g.
+.IR "立春 04:01" )
+and the description is the term, its time and the 節氣月 it opens (e.g.
+.IR "節氣：寒露 14:29 （九月節 戌月）" ).
+With
+.B \-c
+the 24 events are exactly the ordinary daily events of those days
+(same title and description, 建除/吉凶/歲破/四離四絕/三娘煞/神煞 included),
+except that their UID carries a
+.I jieqi
+marker (ccal-jieqi-YYYYMMDD-<term>@chinesebay.com) and their
+.I CATEGORIES
+is 節氣.  Either flag on its own is unchanged.  E.g.
+.RS
+.nf
+ccal -i -j 2026 > jieqi-2026.ics
+.fi
+.RE
 .SH OPERANDS
 The following operands are supported:
 .TP 8
